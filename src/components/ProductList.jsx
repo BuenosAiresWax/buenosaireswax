@@ -3,27 +3,25 @@ import { CartContext } from "../context/CartContext";
 import ProductItem from "./ProductItem";
 import ProductSkeleton from "./ProductSkeleton";
 import Filters from "./Filters";
+import Notificacion from "./Notificacion";
+import { useNotificacion } from "../hooks/useNotificacion";
 
 const ProductList = ({ productos, loading, refetchProductos }) => {
+    const { cartItems } = useContext(CartContext);
     const [filtroTexto, setFiltroTexto] = useState("");
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
-
-    const { cartItems } = useContext(CartContext);
-    const [mostrarCarritoVacio, setMostrarCarritoVacio] = useState(false);
+    const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
 
     useEffect(() => {
         if (cartItems.length === 0) {
-            setMostrarCarritoVacio(true);
-            const timeout = setTimeout(() => setMostrarCarritoVacio(false), 3000);
-            return () => clearTimeout(timeout);
+            mostrarMensaje("Carrito vacío");
         }
-    }, [cartItems]);
+    }, [cartItems, mostrarMensaje]);
 
     const productosFiltrados = productos.filter((producto) => {
         const coincideTexto = producto.titulo.toLowerCase().includes(filtroTexto.toLowerCase());
         const coincideCategoria =
             categoriaSeleccionada === "" || producto.categoria === categoriaSeleccionada;
-
         return coincideTexto && coincideCategoria;
     });
 
@@ -44,11 +42,7 @@ const ProductList = ({ productos, loading, refetchProductos }) => {
                 setCategoriaSeleccionada={setCategoriaSeleccionada}
             />
 
-            {mostrarCarritoVacio && (
-                <div className="stock-aviso" style={{ marginBottom: "16px" }}>
-                    Carrito vacío
-                </div>
-            )}
+            <Notificacion mensaje={mensaje} visible={visible} />
 
             <div className="product-list">
                 {productosFiltrados.length === 0 ? (
@@ -64,6 +58,7 @@ const ProductList = ({ productos, loading, refetchProductos }) => {
                             key={producto.id}
                             producto={producto}
                             refetchProductos={refetchProductos}
+                            mostrarMensaje={mostrarMensaje}
                         />
                     ))
                 )}

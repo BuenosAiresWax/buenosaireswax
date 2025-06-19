@@ -7,7 +7,7 @@ import { CartContext } from "./context/CartContext";
 
 import "./styles/styles.css";
 import logo from '../assets/img/logoConNombre.png';
-import logoFooter from '../assets/img/eStockFavicon.png';
+import logoFooter from '../assets/logo/B-negro.png';
 
 // Importar íconos locales
 import carritoVacio from '../assets/icons/carrito-vacio.svg';
@@ -73,7 +73,11 @@ function App() {
         </div>
       </div>
 
-      <h1>Lista de Productos</h1>
+      <h1 className="tituloPrincipal">Buenos Aires Wax</h1>
+      
+      <h2 className="tituloSecundario">Online Vinyl Record Store</h2>
+
+
       <ProductList
         productos={productos}
         loading={loading}

@@ -1,10 +1,8 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 
-function ProductItem({ producto }) {
+function ProductItem({ producto, mostrarMensaje }) {
     const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
-
-    const [mensajeStock, setMensajeStock] = useState("");
 
     const reservados = producto.reservados ?? 0;
     const stockReal = producto.cantidad - reservados;
@@ -14,26 +12,20 @@ function ProductItem({ producto }) {
 
     const handleAdd = () => {
         if (cantidadEnCarrito >= stockReal) {
-            setMensajeStock("Límite stock disponible");
-            setTimeout(() => setMensajeStock(""), 3000);
+            mostrarMensaje("Límite stock disponible");
             return;
         }
         addToCart(producto);
+        mostrarMensaje("Producto añadido al carrito");
     };
 
     const handleRemove = () => {
         removeFromCart(producto.id);
+        mostrarMensaje("Producto eliminado del carrito");
     };
 
     return (
         <div className="product-item">
-            {/* Mensaje de stock agotado */}
-            {mensajeStock && (
-                <div className="stock-aviso">
-                    {mensajeStock}
-                </div>
-            )}
-
             <div className="image">
                 <img src={producto.imagen} alt={producto.titulo} />
             </div>

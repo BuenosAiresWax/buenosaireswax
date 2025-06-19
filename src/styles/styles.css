@@ -1,7 +1,53 @@
+@font-face {
+    font-family: 'Audiowide';
+    src: url('/assets/fonts/Audiowide-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
     font-family: sans-serif;
     margin: 0;
     padding: 1rem;
+    position: relative;
+}
+
+/* Imagen flotante decorativa */
+body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../../assets/logo/logo-junto-negro.png");
+    background-size: 120px;
+    background-repeat: repeat;
+    background-position: center;
+    z-index: 999;
+    pointer-events: none;
+    filter: brightness(100);
+    opacity: 0.03;
+    z-index: 10;
+}
+
+.tituloPrincipal {
+    display: inline-block;
+    font-family: var(--title-font), sans-serif;
+    font-size: 2.8rem;
+    margin: 0;
+    margin-top: 2rem;
+    padding: 0;
+    line-height: 1;
+    border-bottom: 2px solid #b5b2b2;
+}
+
+.tituloSecundario {
+    font-family: var(--title-font), sans-serif;
+    font-size: 1.5rem;
+    margin: 0;
+    margin-bottom: 3rem;
+    padding: 0;
 }
 
 /* tarjeta mensaje sin stock */
@@ -99,6 +145,7 @@ body {
     background-color: #222;
     border-radius: 50%;
     padding: 2px 6px;
+    font-family: var(--title-font), sans-serif;
     font-size: 12px;
     font-weight: bold;
     color: #fff;
@@ -152,42 +199,37 @@ body {
     height: 220px;
 }
 
-/* stock aviso */
-.stock-aviso {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -100%);
-    background-color: #363535;
-    font-size: 1rem;
-    font-family: 'Courier New', Courier, monospace;
-    color: rgb(228, 228, 228);
-    padding: 12px 24px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    animation: slideDownUp 3s ease-in-out;
-    z-index: 1000;
+.product-item {
+    position: relative;
+    overflow: hidden;
 }
 
-@keyframes slideDownUp {
+/* Capa de brillo muy suave */
+.product-item::before {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: -60%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at center,
+            rgba(255, 255, 255, 0.08) 0%,
+            rgba(255, 255, 255, 0.015) 40%,
+            rgba(255, 255, 255, 0) 70%);
+    transform: rotate(-20deg);
+    animation: glossSweep 10s infinite ease-in-out;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Movimiento sutil y elegante */
+@keyframes glossSweep {
     0% {
-        transform: translate(-50%, -100%);
-        opacity: 0;
-    }
-
-    10% {
-        transform: translate(-50%, 20px);
-        opacity: 1;
-    }
-
-    90% {
-        transform: translate(-50%, 20px);
-        opacity: 1;
+        transform: translateX(-120%) rotate(-15deg);
     }
 
     100% {
-        transform: translate(-50%, -100%);
-        opacity: 0;
+        transform: translateX(120%) rotate(-15deg);
     }
 }
 
@@ -203,6 +245,7 @@ body {
 }
 
 .product-item .info {
+    position: relative;
     display: flex;
     flex-flow: column;
     justify-content: space-around;
@@ -212,6 +255,24 @@ body {
     min-width: 200px;
     overflow: hidden;
 }
+
+/* Imagen flotante decorativa */
+.product-item .info::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 500px;
+    height: auto;
+    background-image: url("../../assets/logo/B-negro.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    transform: rotate(-8deg);
+    z-index: 999;
+    pointer-events: none;
+}
+
 
 .product-item .info .productTitle {
     font-size: 1.2rem;
@@ -227,7 +288,7 @@ body {
 
 .product-item .info .price {
     font-size: 1.2rem;
-    font-family: Verdana, sans-serif;
+    font-family: var(--title-font), sans-serif;
     font-weight: 700;
     margin: 0;
 }
@@ -445,8 +506,56 @@ body {
     opacity: 0.1;
 }
 
+/* stock aviso */
+.stock-aviso {
+    position: fixed;
+    top: 2%;
+    left: 50%;
+    transform: translatex(-50%);
+    color: rgb(228, 228, 228);
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    font-family: var(--title-font), sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    background-color: #ffcccc00;
+    text-align: center;
+    opacity: 0;
+    animation: aparecerDesaparecer 1s ease-out forwards;
+}
+
+@keyframes aparecerDesaparecer {
+    0% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+}
+
+
 /* estilos mobile */
 @media (max-width: 768px) {
+
+    body::after {
+        width: 250px;
+        transform: rotate(-6deg);
+    }
+
+    .stock-aviso {
+        font-size: 1rem;
+    }
 
     .filters {
         flex-flow: row;
