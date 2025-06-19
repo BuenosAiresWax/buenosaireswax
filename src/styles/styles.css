@@ -30,6 +30,7 @@ body::after {
     filter: brightness(100);
     opacity: 0.03;
     z-index: 10;
+    overflow: hiden;
 }
 
 .tituloPrincipal {
@@ -556,6 +557,9 @@ body::after {
         width: 500px;
         opacity: 0.02;
     }
+        display: none;
+}
+
 
     .stock-aviso {
         font-size: 1rem;
