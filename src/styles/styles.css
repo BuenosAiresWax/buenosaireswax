@@ -454,7 +454,7 @@ body::after {
     border-radius: 8px;
     min-width: 25%;
     width: 30%;
-    height: 70%;
+    height: 80%;
     position: relative;
     transform: scale(0.95);
     opacity: 0;
@@ -510,7 +510,7 @@ body::after {
     text-align: center;
 }
 
-.modalText:nth-of-type(3){
+.modalText:nth-of-type(3) {
     margin-top: 3rem;
 }
 
@@ -607,17 +607,17 @@ body::after {
     font-size: 1rem;
 }
 
-.comprobante h3{
+.comprobante h3 {
     width: 100%;
     font-size: 1.2rem;
     font-family: var(--title-font), sans-serif;
 }
 
-.comprobante p{
+.comprobante p {
     margin: 0 2rem;
 }
 
-.comprobante h4{
+.comprobante h4 {
     width: 100%;
 }
 
@@ -838,6 +838,7 @@ body::after {
 
     .modal {
         width: auto;
+        height: 70%;
         padding: 1rem 2rem;
     }
 
