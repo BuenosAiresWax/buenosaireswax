@@ -14,6 +14,7 @@ import carritoVacio from '../assets/icons/carrito-vacio.svg';
 import carritoLleno from '../assets/icons/carrito-lleno.svg';
 
 import CartPopupButton from "./components/CartPopupButton";  // Importar nuevo botón
+import LoaderOverlay from "./components/LoaderOverlay";
 
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
 
   return (
     <div className="app-container">
+      <LoaderOverlay visible={loading} />
       {/* Header */}
       <div className="headerContainer">
         <img src={logo} alt="eStock" className="logo" />
@@ -74,7 +76,7 @@ function App() {
       </div>
 
       <h1 className="tituloPrincipal">Buenos Aires Wax</h1>
-      
+
       <h2 className="tituloSecundario">Online Vinyl Record Store</h2>
 
 
@@ -90,7 +92,7 @@ function App() {
 
       {/* Botón flotante para abrir carrito */}
       <CartPopupButton onOpen={() => setMostrarModal(true)} />
-        
+
       {mostrarModal && (
         <PurchaseModal
           onClose={() => setMostrarModal(false)}
