@@ -10,7 +10,6 @@ body {
     margin: 0;
     padding: 1rem;
     position: relative;
-    
     overflow-x: hidden;
 }
 
@@ -558,8 +557,6 @@ body::after {
         width: 500px;
         opacity: 0.02;
     }
-
-
 
     .stock-aviso {
         font-size: 1rem;
