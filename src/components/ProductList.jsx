@@ -20,10 +20,15 @@ const ProductList = () => {
         const unsubscribe = onSnapshot(
             collection(db, "productos"),
             (snapshot) => {
-                const productosActualizados = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
+                const productosActualizados = snapshot.docs.map((doc) => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        titulo: data.titulo || "Sin título",
+                        categoria: data.categoria || "",
+                        ...data,
+                    };
+                });
                 setProductos(productosActualizados);
                 setLoading(false);
             },
@@ -43,16 +48,21 @@ const ProductList = () => {
     }, [cartItems, mostrarMensaje]);
 
     const productosFiltrados = productos.filter((producto) => {
-        const coincideTexto = producto.titulo.toLowerCase().includes(filtroTexto.toLowerCase());
+        const coincideTexto = (producto.titulo || "")
+            .toLowerCase()
+            .includes(filtroTexto.toLowerCase());
         const coincideCategoria =
-            categoriaSeleccionada === "" || producto.categoria === categoriaSeleccionada;
+            categoriaSeleccionada === "" ||
+            (producto.categoria || "") === categoriaSeleccionada;
         return coincideTexto && coincideCategoria;
     });
 
     if (loading) {
         return (
             <div className="product-list">
-                {[1, 2, 3].map((_, i) => <ProductSkeleton key={i} />)}
+                {[1, 2, 3].map((_, i) => (
+                    <ProductSkeleton key={i} />
+                ))}
             </div>
         );
     }
@@ -73,7 +83,7 @@ const ProductList = () => {
                     <div className="product-item no-results">
                         <div className="info">
                             <h2>Ups!</h2>
-                            <p>Seguinos en redes para enterarte cuando haya stock disponible</p>
+                            <p>Seguinos en redes y no te pierdas nuestros drops.</p>
                         </div>
                     </div>
                 ) : (

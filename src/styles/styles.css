@@ -62,6 +62,7 @@ body::after {
     border-radius: 8px;
     text-align: center;
     color: #fff;
+    font-family: var(--title-font);
 }
 
 
