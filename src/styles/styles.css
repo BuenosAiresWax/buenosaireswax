@@ -10,6 +10,7 @@ body {
     margin: 0;
     padding: 1rem;
     position: relative;
+    
 }
 
 /* Imagen flotante decorativa */
@@ -29,6 +30,7 @@ body::after {
     filter: brightness(100);
     opacity: 0.03;
     z-index: 10;
+    overflow: hiden;
 }
 
 .tituloPrincipal {
@@ -551,7 +553,15 @@ body::after {
     body::after {
         width: 250px;
         transform: rotate(-6deg);
-    }
+    width: 100%;
+    height: 100%;
+    background-image: url("../../assets/logo/logo-junto-negro.png");
+    background-size: 250px;
+    opacity: 0.01;
+    z-index: 10;
+    overflow: hiden;
+}
+
 
     .stock-aviso {
         font-size: 1rem;
