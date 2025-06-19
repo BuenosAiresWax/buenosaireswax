@@ -10,6 +10,7 @@ body {
     margin: 0;
     padding: 1rem;
     position: relative;
+    overflow-x: hidden;
 }
 
 /* Imagen flotante decorativa */
@@ -531,13 +532,16 @@ body::after {
         opacity: 0;
         transform: translateY(-5px);
     }
+
     10% {
         opacity: 1;
         transform: translateY(0);
     }
+
     90% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
         transform: translateY(-5px);
@@ -549,8 +553,8 @@ body::after {
 @media (max-width: 768px) {
 
     body::after {
-        width: 250px;
-        transform: rotate(-6deg);
+        width: 500px;
+        opacity: 0.02;
     }
 
     .stock-aviso {
@@ -573,6 +577,10 @@ body::after {
         flex-direction: column;
         height: auto;
         /* 🔹 Permitimos altura flexible en mobile */
+    }
+
+    .product-item::before {
+        display: none;
     }
 
     .product-item .image,
