@@ -452,11 +452,14 @@ body::after {
     padding: 2rem;
     margin: 1rem 1rem;
     border-radius: 8px;
-    width: 50%;
+    min-width: 25%;
+    width: 30%;
+    height: 70%;
     position: relative;
     transform: scale(0.95);
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
+    overflow-y: auto;
 }
 
 .fade-in {
@@ -475,7 +478,7 @@ body::after {
     right: 10px;
     border: none;
     background: none;
-    font-size: 1.2rem;
+    font-size: 2rem;
     cursor: pointer;
 }
 
@@ -487,7 +490,7 @@ body::after {
 }
 
 .modalTitle {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-family: Verdana, sans-serif;
     font-weight: 700;
 }
@@ -500,10 +503,15 @@ body::after {
 
 .modalText {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.8rem;
+    font-size: 1rem;
     letter-spacing: 1px;
     line-height: 1.2;
     margin-bottom: 1rem;
+    text-align: center;
+}
+
+.modalText:nth-of-type(3){
+    margin-top: 3rem;
 }
 
 .modal-content form {
@@ -525,9 +533,9 @@ body::after {
     flex-flow: row;
     align-items: center;
     justify-content: space-between;
-    width: 80%;
+    width: 85%;
     background-color: transparent;
-    padding: 5px 1rem;
+    padding: 1rem 1rem;
     font-family: var(--title-font);
 
 }
@@ -580,6 +588,67 @@ body::after {
     text-align: center;
     margin: 1rem 0;
     font-size: 1.2rem;
+}
+
+/* checkout modal */
+.comprobante {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+    background: #2c2c2c;
+    padding: 1rem;
+    border-radius: 10px;
+    color: #fff;
+    text-align: left;
+    margin-top: 1rem;
+    backdrop-filter: blur(6px);
+    text-align: center;
+    font-size: 1rem;
+}
+
+.comprobante h3{
+    width: 100%;
+    font-size: 1.2rem;
+    font-family: var(--title-font), sans-serif;
+}
+
+.comprobante p{
+    margin: 0 2rem;
+}
+
+.comprobante h4{
+    width: 100%;
+}
+
+.comprobante ul {
+    padding-left: 1rem;
+}
+
+.btn-whatsapp {
+    display: inline-block;
+    margin-top: 1rem;
+    background: #25d366;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-whatsapp:hover {
+    background: #1ebe57;
+}
+
+.form input {
+    display: block;
+    margin-bottom: 0.75rem;
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
 }
 
 /* footer */
@@ -768,7 +837,8 @@ body::after {
     }
 
     .modal {
-        width: 300px;
+        width: auto;
+        padding: 1rem 2rem;
     }
 
     .categoria span {

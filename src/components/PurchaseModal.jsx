@@ -1,3 +1,4 @@
+// PurchaseModal con la lógica movida al botón de WhatsApp, respetando tus clases CSS y estructura
 import { useEffect, useRef, useState, useContext } from "react";
 import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
@@ -9,25 +10,27 @@ function PurchaseModal({ onClose }) {
     const [nombre, setNombre] = useState("");
     const [telefono, setTelefono] = useState("");
     const [correo, setCorreo] = useState("");
+    const [direccion, setDireccion] = useState("");
+    const [ciudad, setCiudad] = useState("");
+    const [codigoPostal, setCodigoPostal] = useState("");
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [productosAgotados, setProductosAgotados] = useState([]);
+    const [pedidoId, setPedidoId] = useState("");
+    const [fechaPedido, setFechaPedido] = useState("");
+    const [pedidoEnviado, setPedidoEnviado] = useState(false);
 
     const { cartItems, clearCart, removeFromCart } = useContext(CartContext);
-
-    const total = cartItems.reduce(
-        (acc, item) => acc + item.precio * item.cantidad,
-        0
-    );
+    const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
     useEffect(() => {
         setTimeout(() => setVisible(true), 10);
+        checkStockAgotado();
     }, []);
 
-    const normalizarNombre = (nombre) =>
-        nombre.trim().toLowerCase().replace(/\s+/g, "-");
+    const normalizarNombre = (nombre) => nombre.trim().toLowerCase().replace(/\s+/g, "-");
 
-    // Verifica si hay productos con stockDisponible 0 o menor a cantidad pedida
     const checkStockAgotado = async () => {
         const agotados = [];
         for (const item of cartItems) {
@@ -36,29 +39,22 @@ function PurchaseModal({ onClose }) {
             if (snap.exists()) {
                 const { cantidad = 0, reservados = 0 } = snap.data();
                 const stockDisponible = cantidad - reservados;
-                // Si stockDisponible es 0 o menor que cantidad pedida => está agotado o insuficiente
                 if (stockDisponible <= 0 || stockDisponible < item.cantidad) {
                     agotados.push(item.id);
                 }
             } else {
-                // Producto no existe => también lo consideramos agotado
                 agotados.push(item.id);
             }
         }
         setProductosAgotados(agotados);
     };
 
-    useEffect(() => {
-        checkStockAgotado();
-    }, [cartItems]);
-
     const eliminarProductosAgotados = () => {
-        productosAgotados.forEach(id => removeFromCart(id));
+        productosAgotados.forEach((id) => removeFromCart(id));
         setProductosAgotados([]);
         setError(null);
     };
 
-    // Validación final al enviar pedido (también con lógica correcta)
     const validarStock = async () => {
         for (const item of cartItems) {
             const ref = doc(db, "productos", normalizarNombre(item.titulo));
@@ -66,13 +62,10 @@ function PurchaseModal({ onClose }) {
             if (!snap.exists()) {
                 return `El producto "${item.titulo}" ya no existe.`;
             }
-
             const { cantidad = 0, reservados = 0 } = snap.data();
             const stockDisponible = cantidad - reservados;
-
-            // Stock disponible debe ser mayor o igual a la cantidad solicitada
             if (stockDisponible < item.cantidad) {
-                return `El producto "${item.titulo}" no tiene suficiente stock.\nDisponible: ${stockDisponible}, Solicitado: ${item.cantidad}`;
+                return `El producto "${item.titulo}" no tiene suficiente stock. Disponible: ${stockDisponible}, Solicitado: ${item.cantidad}`;
             }
         }
         return null;
@@ -81,9 +74,7 @@ function PurchaseModal({ onClose }) {
     const reservarProductos = async () => {
         for (const item of cartItems) {
             const ref = doc(db, "productos", normalizarNombre(item.titulo));
-            await updateDoc(ref, {
-                reservados: increment(item.cantidad)
-            });
+            await updateDoc(ref, { reservados: increment(item.cantidad) });
         }
     };
 
@@ -92,17 +83,19 @@ function PurchaseModal({ onClose }) {
             cliente: nombre,
             telefono,
             correo,
-            productos: cartItems.map(p => ({
+            direccion,
+            ciudad,
+            codigoPostal,
+            productos: cartItems.map((p) => ({
                 titulo: p.titulo,
                 categoria: p.categoria,
                 cantidad: p.cantidad,
                 precioUnitario: p.precio,
-                subtotal: p.precio * p.cantidad
+                subtotal: p.precio * p.cantidad,
             })),
             total,
-            fecha
+            fecha,
         };
-
         await setDoc(doc(db, "pedidos", docId), pedido);
     };
 
@@ -120,13 +113,10 @@ function PurchaseModal({ onClose }) {
 
     const handleClose = () => {
         setVisible(false);
-        setTimeout(() => {
-            onClose();
-        }, 200);
+        setTimeout(() => onClose(), 200);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const enviarPedidoYRedirigirWsp = async () => {
         setLoading(true);
         setError(null);
 
@@ -136,13 +126,19 @@ function PurchaseModal({ onClose }) {
             return;
         }
 
+        if (!direccion.trim() || !ciudad.trim() || !codigoPostal.trim()) {
+            setError("Por favor, completá todos los datos de envío.");
+            setLoading(false);
+            return;
+        }
+
         const docId = generarDocId(nombre);
-        const fecha = new Intl.DateTimeFormat('es-AR', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
+        const fecha = new Intl.DateTimeFormat("es-AR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
         }).format(new Date());
 
         try {
@@ -155,10 +151,33 @@ function PurchaseModal({ onClose }) {
 
             await guardarPedido(docId, fecha);
             await reservarProductos();
-
             clearCart();
-            alert("Nos comunicaremos a la brevedad. ¡Gracias por tu compra!");
-            handleClose();
+
+            setPedidoEnviado(true);
+            setPedidoId(docId);
+            setFechaPedido(fecha);
+            setLoading(false);
+
+            const mensajeWhatsApp = `
+                ¡Hola BAWAX! Realicé una pedido en la tienda.
+                🧾 ID del Pedido: ${docId}
+                📌 Fecha: ${fecha}
+                👤 Nombre: ${nombre}
+                📧 Email: ${correo}
+                📱 Teléfono: ${telefono}
+                --------------------------
+                🏠 Dirección de envío: ${direccion}, ${ciudad} (${codigoPostal})
+                --------------------------
+                🛒 Productos:
+                ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
+                💰 Total: $${total}
+
+                👉 Adjunto el comprobante de pago para continuar con la confirmación del pedido.
+                --------------------------
+                `.trim();
+
+            const url = `https://wa.me/541130504515?text=${encodeURIComponent(mensajeWhatsApp)}`;
+            window.open(url, "_blank");
         } catch (err) {
             console.error("Error al enviar pedido:", err);
             setError("Hubo un error al enviar el pedido. Intente nuevamente.");
@@ -167,11 +186,7 @@ function PurchaseModal({ onClose }) {
     };
 
     return (
-        <div
-            className={`modal-backdrop ${visible ? "visible" : ""}`}
-            ref={backdropRef}
-            onClick={handleClickOutside}
-        >
+        <div className={`modal-backdrop ${visible ? "visible" : ""}`} ref={backdropRef} onClick={handleClickOutside}>
             <div className={`modal ${visible ? "fade-in" : "fade-out"}`}>
                 <button className="close" onClick={handleClose}>×</button>
                 <div className="modal-content">
@@ -179,37 +194,21 @@ function PurchaseModal({ onClose }) {
                     <p className="modalText">Verificá los productos antes de confirmar:</p>
 
                     <ul className="modal-product-list">
-                        {cartItems.map((item) => {
-                            const estaAgotado = productosAgotados.includes(item.id);
-                            return (
-                                <li
-                                    key={item.id}
-                                    className={`modal-product-item ${estaAgotado ? "agotado" : ""}`}
-                                >
-                                    <div>
-                                        <strong>{item.titulo}</strong> <br />
-                                        {item.cantidad} x ${item.precio} = <strong>${item.precio * item.cantidad}</strong>
-                                    </div>
-
-                                    <button
-                                        onClick={() => removeFromCart(item.id)}
-                                        className="delete-btn"
-                                        title="Quitar del carrito"
-                                    >
-                                        ×
-                                    </button>
-                                </li>
-                            );
-                        })}
+                        {cartItems.map((item) => (
+                            <li key={item.id} className={`modal-product-item ${productosAgotados.includes(item.id) ? "agotado" : ""}`}>
+                                <div>
+                                    <strong>{item.titulo}</strong> <br />
+                                    {item.cantidad} x ${item.precio} = <strong>${item.precio * item.cantidad}</strong>
+                                </div>
+                                <button onClick={() => removeFromCart(item.id)} className="delete-btn" title="Quitar del carrito">×</button>
+                            </li>
+                        ))}
                     </ul>
 
                     {productosAgotados.length > 0 && (
                         <>
-                            <p className="productoAgotadoMensaje">
-                                Debido a la alta demanda, algunos productos están agotados. Puedes eliminarlos rápidamente para continuar con tu compra sin inconvenientes.</p>
-                            <button onClick={eliminarProductosAgotados} className="btn-eliminar-agotados">
-                                Eliminar productos agotados
-                            </button>
+                            <p className="productoAgotadoMensaje">Debido a la alta demanda, algunos productos están agotados. Puedes eliminarlos rápidamente para continuar con tu compra sin inconvenientes.</p>
+                            <button onClick={eliminarProductosAgotados} className="btn-eliminar-agotados">Eliminar productos agotados</button>
                         </>
                     )}
 
@@ -217,36 +216,23 @@ function PurchaseModal({ onClose }) {
                         <strong>Total:</strong> ${total}
                     </div>
 
-                    <form onSubmit={handleSubmit} className="form">
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={nombre}
-                            onChange={(e) => setNombre(e.target.value)}
-                            required
-                            disabled={loading}
-                        />
-                        <input
-                            type="tel"
-                            placeholder="Teléfono"
-                            value={telefono}
-                            onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
-                            required
-                            disabled={loading}
-                        />
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={correo}
-                            onChange={(e) => setCorreo(e.target.value)}
-                            required
-                            disabled={loading}
-                        />
+                    <p className="modalText">Al completar y enviar este formulario, usted confirma su intención de realizar la compra. Nos contactaremos a la brevedad</p>
+
+                    <p className="modalText">Formulario de Compra:</p>
+
+                    <form className="form" onSubmit={(e) => { e.preventDefault(); enviarPedidoYRedirigirWsp(); }}>
+                        <input type="text" placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required disabled={loading} />
+                        <input type="tel" placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))} required disabled={loading} />
+                        <input type="email" placeholder="Email" value={correo} onChange={(e) => setCorreo(e.target.value)} required disabled={loading} />
+                        <input type="text" placeholder="Dirección de envío" value={direccion} onChange={(e) => setDireccion(e.target.value)} required disabled={loading} />
+                        <input type="text" placeholder="Ciudad" value={ciudad} onChange={(e) => setCiudad(e.target.value)} required disabled={loading} />
+                        <input type="text" placeholder="Código Postal" value={codigoPostal} onChange={(e) => setCodigoPostal(e.target.value)} required disabled={loading} />
                         {error && <p className="form-error">{error}</p>}
                         <button type="submit" disabled={loading || productosAgotados.length > 0}>
-                            {loading ? "Enviando..." : (productosAgotados.length > 0 ? "Revisá tus productos" : "Confirmar pedido")}
+                            {loading ? "Enviando..." : "Enviar pedido por WhatsApp"}
                         </button>
                     </form>
+                    <p className="modalText">Al hacer clic, se generará un mensaje con los detalles de su pedido en WhatsApp. Por favor, envíelo manualmente para que podamos proceder con la gestión de su compra.</p>
                 </div>
             </div>
         </div>
