@@ -5,12 +5,36 @@ import ProductSkeleton from "./ProductSkeleton";
 import Filters from "./Filters";
 import Notificacion from "./Notificacion";
 import { useNotificacion } from "../hooks/useNotificacion";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase/config";
 
-const ProductList = ({ productos, loading, refetchProductos }) => {
+const ProductList = () => {
     const { cartItems } = useContext(CartContext);
+    const [productos, setProductos] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filtroTexto, setFiltroTexto] = useState("");
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
     const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db, "productos"),
+            (snapshot) => {
+                const productosActualizados = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setProductos(productosActualizados);
+                setLoading(false);
+            },
+            (error) => {
+                console.error("Error al obtener productos:", error);
+                setLoading(false);
+            }
+        );
+
+        return () => unsubscribe(); // limpieza
+    }, []);
 
     useEffect(() => {
         if (cartItems.length === 0) {
@@ -57,7 +81,6 @@ const ProductList = ({ productos, loading, refetchProductos }) => {
                         <ProductItem
                             key={producto.id}
                             producto={producto}
-                            refetchProductos={refetchProductos}
                             mostrarMensaje={mostrarMensaje}
                         />
                     ))

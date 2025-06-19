@@ -3,13 +3,15 @@ import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
 
-function PurchaseModal({ onClose, refetchProductos }) {
+function PurchaseModal({ onClose }) {
     const backdropRef = useRef(null);
     const [visible, setVisible] = useState(false);
     const [nombre, setNombre] = useState("");
     const [telefono, setTelefono] = useState("");
     const [correo, setCorreo] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [productosAgotados, setProductosAgotados] = useState([]);
 
     const { cartItems, clearCart, removeFromCart } = useContext(CartContext);
 
@@ -22,6 +24,94 @@ function PurchaseModal({ onClose, refetchProductos }) {
         setTimeout(() => setVisible(true), 10);
     }, []);
 
+    const normalizarNombre = (nombre) =>
+        nombre.trim().toLowerCase().replace(/\s+/g, "-");
+
+    // Verifica si hay productos con stockDisponible 0 o menor a cantidad pedida
+    const checkStockAgotado = async () => {
+        const agotados = [];
+        for (const item of cartItems) {
+            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            const snap = await getDoc(ref);
+            if (snap.exists()) {
+                const { cantidad = 0, reservados = 0 } = snap.data();
+                const stockDisponible = cantidad - reservados;
+                // Si stockDisponible es 0 o menor que cantidad pedida => está agotado o insuficiente
+                if (stockDisponible <= 0 || stockDisponible < item.cantidad) {
+                    agotados.push(item.id);
+                }
+            } else {
+                // Producto no existe => también lo consideramos agotado
+                agotados.push(item.id);
+            }
+        }
+        setProductosAgotados(agotados);
+    };
+
+    useEffect(() => {
+        checkStockAgotado();
+    }, [cartItems]);
+
+    const eliminarProductosAgotados = () => {
+        productosAgotados.forEach(id => removeFromCart(id));
+        setProductosAgotados([]);
+        setError(null);
+    };
+
+    // Validación final al enviar pedido (también con lógica correcta)
+    const validarStock = async () => {
+        for (const item of cartItems) {
+            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+                return `El producto "${item.titulo}" ya no existe.`;
+            }
+
+            const { cantidad = 0, reservados = 0 } = snap.data();
+            const stockDisponible = cantidad - reservados;
+
+            // Stock disponible debe ser mayor o igual a la cantidad solicitada
+            if (stockDisponible < item.cantidad) {
+                return `El producto "${item.titulo}" no tiene suficiente stock.\nDisponible: ${stockDisponible}, Solicitado: ${item.cantidad}`;
+            }
+        }
+        return null;
+    };
+
+    const reservarProductos = async () => {
+        for (const item of cartItems) {
+            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            await updateDoc(ref, {
+                reservados: increment(item.cantidad)
+            });
+        }
+    };
+
+    const guardarPedido = async (docId, fecha) => {
+        const pedido = {
+            cliente: nombre,
+            telefono,
+            correo,
+            productos: cartItems.map(p => ({
+                titulo: p.titulo,
+                categoria: p.categoria,
+                cantidad: p.cantidad,
+                precioUnitario: p.precio,
+                subtotal: p.precio * p.cantidad
+            })),
+            total,
+            fecha
+        };
+
+        await setDoc(doc(db, "pedidos", docId), pedido);
+    };
+
+    const generarDocId = (nombre) => {
+        const now = new Date();
+        const fechaId = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}${now.getMinutes()}`;
+        return `pedido-${normalizarNombre(nombre)}-${fechaId}`;
+    };
+
     const handleClickOutside = (e) => {
         if (e.target === backdropRef.current) {
             handleClose();
@@ -31,9 +121,6 @@ function PurchaseModal({ onClose, refetchProductos }) {
     const handleClose = () => {
         setVisible(false);
         setTimeout(() => {
-            if (typeof refetchProductos === "function") {
-                refetchProductos();
-            }
             onClose();
         }, 200);
     };
@@ -41,71 +128,40 @@ function PurchaseModal({ onClose, refetchProductos }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setError(null);
 
-        const now = new Date();
-        const fechaId = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}${now.getMinutes()}`;
+        if (productosAgotados.length > 0) {
+            setError("Revisá tus productos agotados antes de continuar.");
+            setLoading(false);
+            return;
+        }
+
+        const docId = generarDocId(nombre);
         const fecha = new Intl.DateTimeFormat('es-AR', {
             day: 'numeric',
             month: 'long',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
-        }).format(now);
-
-        const nombreNormalizado = nombre.trim().toLowerCase().replace(/\s+/g, "-");
-        const docId = `pedido-${nombreNormalizado}-${fechaId}`;
+        }).format(new Date());
 
         try {
-            for (const item of cartItems) {
-                const ref = doc(db, "productos", item.titulo.trim().toLowerCase().replace(/\s+/g, "-"));
-                const snap = await getDoc(ref);
-                if (!snap.exists()) {
-                    alert(`El producto ${item.titulo} ya no existe.`);
-                    handleClose();
-                    return;
-                }
-                const data = snap.data();
-                const cantidad = data.cantidad ?? 0;
-                const reservados = data.reservados ?? 0;
-                if (cantidad !== 0 && reservados >= cantidad) {
-                    alert(`El producto ${item.titulo} ya no está disponible.`);
-                    handleClose();
-                    return;
-                }
+            const errorStock = await validarStock();
+            if (errorStock) {
+                setError(errorStock);
+                setLoading(false);
+                return;
             }
 
-            await setDoc(doc(db, "pedidos", docId), {
-                cliente: nombre,
-                telefono,
-                correo,
-                productos: cartItems.map(p => ({
-                    titulo: p.titulo,
-                    categoria: p.categoria,
-                    cantidad: p.cantidad,
-                    precioUnitario: p.precio,
-                    subtotal: p.precio * p.cantidad
-                })),
-                total,
-                fecha
-            });
+            await guardarPedido(docId, fecha);
+            await reservarProductos();
 
-            for (const item of cartItems) {
-                const ref = doc(db, "productos", item.titulo.trim().toLowerCase().replace(/\s+/g, "-"));
-                await updateDoc(ref, {
-                    reservados: increment(item.cantidad)
-                });
-            }
-
-            alert("Nos comunicaremos a la brevedad. ¡Gracias por tu compra!");
             clearCart();
-            // Actualizo productos aquí justo después de limpiar carrito
-            if (typeof refetchProductos === "function") {
-                await refetchProductos();
-            }
+            alert("Nos comunicaremos a la brevedad. ¡Gracias por tu compra!");
             handleClose();
-        } catch (error) {
-            console.error("Error al enviar pedido:", error);
-            alert("Hubo un error al enviar el pedido.");
+        } catch (err) {
+            console.error("Error al enviar pedido:", err);
+            setError("Hubo un error al enviar el pedido. Intente nuevamente.");
             setLoading(false);
         }
     };
@@ -123,23 +179,39 @@ function PurchaseModal({ onClose, refetchProductos }) {
                     <p className="modalText">Verificá los productos antes de confirmar:</p>
 
                     <ul className="modal-product-list">
-                        {cartItems.map((item) => (
-                            <li key={item.id} className="modal-product-item">
-                                <div>
-                                    <strong>{item.titulo}</strong> ({item.categoria})<br />
-                                    {item.cantidad} x ${item.precio} = <strong>${item.precio * item.cantidad}</strong>
-                                </div>
-
-                                <button
-                                    onClick={() => removeFromCart(item.id)}
-                                    className="delete-btn"
-                                    title="Quitar del carrito"
+                        {cartItems.map((item) => {
+                            const estaAgotado = productosAgotados.includes(item.id);
+                            return (
+                                <li
+                                    key={item.id}
+                                    className={`modal-product-item ${estaAgotado ? "agotado" : ""}`}
                                 >
-                                    ×
-                                </button>
-                            </li>
-                        ))}
+                                    <div>
+                                        <strong>{item.titulo}</strong> <br />
+                                        {item.cantidad} x ${item.precio} = <strong>${item.precio * item.cantidad}</strong>
+                                    </div>
+
+                                    <button
+                                        onClick={() => removeFromCart(item.id)}
+                                        className="delete-btn"
+                                        title="Quitar del carrito"
+                                    >
+                                        ×
+                                    </button>
+                                </li>
+                            );
+                        })}
                     </ul>
+
+                    {productosAgotados.length > 0 && (
+                        <>
+                            <p className="productoAgotadoMensaje">
+                                Debido a la alta demanda, algunos productos están agotados. Puedes eliminarlos rápidamente para continuar con tu compra sin inconvenientes.</p>
+                            <button onClick={eliminarProductosAgotados} className="btn-eliminar-agotados">
+                                Eliminar productos agotados
+                            </button>
+                        </>
+                    )}
 
                     <div className="totalContainer">
                         <strong>Total:</strong> ${total}
@@ -170,8 +242,9 @@ function PurchaseModal({ onClose, refetchProductos }) {
                             required
                             disabled={loading}
                         />
-                        <button type="submit" disabled={loading}>
-                            {loading ? "Enviando..." : "Confirmar pedido"}
+                        {error && <p className="form-error">{error}</p>}
+                        <button type="submit" disabled={loading || productosAgotados.length > 0}>
+                            {loading ? "Enviando..." : (productosAgotados.length > 0 ? "Revisá tus productos" : "Confirmar pedido")}
                         </button>
                     </form>
                 </div>
