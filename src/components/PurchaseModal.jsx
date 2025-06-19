@@ -1,4 +1,3 @@
-// PurchaseModal con la lógica movida al botón de WhatsApp, respetando tus clases CSS y estructura
 import { useEffect, useRef, useState, useContext } from "react";
 import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
@@ -11,6 +10,7 @@ function PurchaseModal({ onClose }) {
     const [telefono, setTelefono] = useState("");
     const [correo, setCorreo] = useState("");
     const [direccion, setDireccion] = useState("");
+    const [departamento, setDepartamento] = useState(""); // NUEVO CAMPO
     const [ciudad, setCiudad] = useState("");
     const [codigoPostal, setCodigoPostal] = useState("");
 
@@ -84,6 +84,7 @@ function PurchaseModal({ onClose }) {
             telefono,
             correo,
             direccion,
+            departamento, // Guardamos departamento también
             ciudad,
             codigoPostal,
             productos: cartItems.map((p) => ({
@@ -158,6 +159,7 @@ function PurchaseModal({ onClose }) {
             setFechaPedido(fecha);
             setLoading(false);
 
+            // Mensaje WhatsApp con departamento opcional incluido
             const mensajeWhatsApp = `
                 ¡Hola BAWAX! Realicé una pedido en la tienda.
                 🧾 ID del Pedido: ${docId}
@@ -166,7 +168,7 @@ function PurchaseModal({ onClose }) {
                 📧 Email: ${correo}
                 📱 Teléfono: ${telefono}
                 --------------------------
-                🏠 Dirección de envío: ${direccion}, ${ciudad} (${codigoPostal})
+                🏠 Dirección de envío: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})
                 --------------------------
                 🛒 Productos:
                 ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
@@ -191,7 +193,7 @@ function PurchaseModal({ onClose }) {
                 <button className="close" onClick={handleClose}>×</button>
                 <div className="modal-content">
                     <h2 className="modalTitle">Resumen del pedido</h2>
-                    <p className="modalText">Verificá los productos antes de confirmar:</p>
+                    <p className="modalText">Verificá los productos antes de confirmar</p>
 
                     <ul className="modal-product-list">
                         {cartItems.map((item) => (
@@ -218,21 +220,28 @@ function PurchaseModal({ onClose }) {
 
                     <p className="modalText">Al completar y enviar este formulario, usted confirma su intención de realizar la compra. Nos contactaremos a la brevedad</p>
 
-                    <p className="modalText">Formulario de Compra:</p>
+                    <p className="modalText">Formulario de Compra</p>
 
                     <form className="form" onSubmit={(e) => { e.preventDefault(); enviarPedidoYRedirigirWsp(); }}>
                         <input type="text" placeholder="Nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required disabled={loading} />
                         <input type="tel" placeholder="Teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))} required disabled={loading} />
                         <input type="email" placeholder="Email" value={correo} onChange={(e) => setCorreo(e.target.value)} required disabled={loading} />
                         <input type="text" placeholder="Dirección de envío" value={direccion} onChange={(e) => setDireccion(e.target.value)} required disabled={loading} />
+                        <input
+                            type="text"
+                            placeholder="Piso y Departamento (opcional)"
+                            value={departamento}
+                            onChange={(e) => setDepartamento(e.target.value)}
+                            disabled={loading}
+                        />
                         <input type="text" placeholder="Ciudad" value={ciudad} onChange={(e) => setCiudad(e.target.value)} required disabled={loading} />
                         <input type="text" placeholder="Código Postal" value={codigoPostal} onChange={(e) => setCodigoPostal(e.target.value)} required disabled={loading} />
                         {error && <p className="form-error">{error}</p>}
-                        <button type="submit" disabled={loading || productosAgotados.length > 0}>
+                        <p className="modalText">Su pedido sera armado y aparecera listo para ser enviado por WhatsApp. Adjuntar comprobante de pago.</p>
+                        <button className="btn-whatsapp" type="submit" disabled={loading || productosAgotados.length > 0}>
                             {loading ? "Enviando..." : "Enviar pedido por WhatsApp"}
                         </button>
                     </form>
-                    <p className="modalText">Al hacer clic, se generará un mensaje con los detalles de su pedido en WhatsApp. Por favor, envíelo manualmente para que podamos proceder con la gestión de su compra.</p>
                 </div>
             </div>
         </div>
