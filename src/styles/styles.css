@@ -200,6 +200,7 @@ body::after {
     overflow: hidden;
     color: rgb(230, 230, 230);
     height: 220px;
+    margin: 1rem 0;
 }
 
 .product-item {
@@ -327,13 +328,25 @@ body::after {
 
 /* Categoría arriba */
 .product-item .categoria {
-    background-color: #333;
+    width: 100%;
     color: white;
     padding: 0.3rem 0.6rem;
+    margin: 0 1rem;
     border-radius: 4px;
     font-size: 0.8rem;
     text-transform: capitalize;
     align-self: flex-end;
+}
+
+.categoria span {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0.5rem 1rem;
+    padding: 0.5rem 0.2rem;
+    background-color: #333;
+    font-family: var(--title-font);
 }
 
 /* Botón centrado */
@@ -344,7 +357,7 @@ body::after {
     border: none;
     cursor: pointer;
     transition: .4s;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--title-font), Courier;
     font-size: 1rem;
 }
 
@@ -356,7 +369,8 @@ body::after {
 
 /* Stock abajo */
 .product-item .stock {
-    font-size: 0.8rem;
+    font-family: var(--title-font), Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 1rem;
     color: #ccc;
     align-self: flex-end;
 }
@@ -539,7 +553,6 @@ body::after {
     background-color: rgb(231, 6, 6);
 }
 
-
 .delete-btn {
     border: none;
     color: rgb(167, 167, 167);
@@ -582,7 +595,7 @@ body::after {
     top: 2%;
     left: 50%;
     transform: translatex(-50%);
-    color: rgb(228, 228, 228);
+    color: rgb(236, 234, 234);
     padding: 12px 24px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -590,7 +603,7 @@ body::after {
     font-family: var(--title-font), sans-serif;
     font-size: 1rem;
     font-weight: 400;
-    background-color: #ffcccc00;
+    background-color: #2c2c2c;
     text-align: center;
     opacity: 0;
     animation: aparecerDesaparecer 1s ease-out forwards;
@@ -625,13 +638,52 @@ body::after {
         background-image: url("../../assets/logo/B-negro.png");
     }
 
+    .tituloPrincipal {
+        font-size: 2rem;
+        margin: 0;
+        margin-top: 2rem;
+        padding: 0;
+        line-height: 1;
+        border-bottom: 2px solid #b5b2b2;
+    }
+
+    .tituloSecundario {
+        font-family: var(--title-font), sans-serif;
+        font-size: 1.1rem;
+    }
+
     .stock-aviso {
         font-size: 1rem;
+        top: 2%;
+        left: 0;
+        opacity: 0;
+        animation: aparecerDesaparecerMobile 1.5s ease-out forwards;
+    }
+
+    @keyframes aparecerDesaparecerMobile {
+        0% {
+            opacity: 0;
+            transform: translateX(-5px);
+        }
+
+        10% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+            transform: translateX(-5px);
+        }
     }
 
     .filters {
         flex-flow: row;
-        margin-top: 3rem;
+        margin-top: 5rem;
     }
 
     .filters input {
@@ -658,7 +710,7 @@ body::after {
     }
 
     .product-item .cta-content {
-        flex-direction: column;
+        flex-direction: column-reverse;
         justify-content: space-between;
         align-items: center;
         height: auto;
@@ -670,8 +722,40 @@ body::after {
         align-self: auto;
     }
 
-    .button-row {
+    .categoria span:nth-last-of-type {
         margin-bottom: 2rem;
+    }
+
+    .button-row {
+        display: flex;
+        flex-flow: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .product-item .cta-content button {
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .product-item .cta-content button:first-of-type {
+        width: 100%;
+        background-color: transparent;
+        margin: 0;
+        padding: 0;
+        text-decoration: underline;
+    }
+
+    .product-item .cta-content button:last-of-type {
+        width: 0%;
+        font-size: 2.2rem;
+        background-color: transparent;
+        margin: 0;
+        padding: 0;
+    }
+
+    .removeBtn {
+        background-color: transparent;
     }
 
     .modal {

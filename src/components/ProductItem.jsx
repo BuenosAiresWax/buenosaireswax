@@ -48,7 +48,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
             <div className="info">
                 <h2
                     className="productTitle"
-                    style={stockDisponible <= 0 ? { textDecoration: "line-through"} : {}}
+                    style={stockDisponible <= 0 ? { textDecoration: "line-through" } : {}}
                 >
                     {producto.titulo}
                 </h2>
@@ -58,7 +58,10 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
             <div className="cta">
                 <div className="cta-content">
-                    <div className="categoria">{producto.categoria}</div>
+                    <div className="categoria">
+                        <span> {producto.autor}</span>
+                        <span>{producto.categoria}</span>
+                    </div>
 
                     <div className="button-row">
                         <button
@@ -68,7 +71,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                             disabled={stockDisponible <= 0}
                             title={stockDisponible <= 0 ? "Sin stock disponible" : ""}
                         >
-                            {stockDisponible <= 0 ? "AGOTADO" : "Comprar"}
+                            {stockDisponible <= 0 ? "AGOTADO" : "Agregar al carrito"}
                         </button>
                         <button
                             className="removeBtn"
