@@ -9,7 +9,7 @@ const LoaderOverlay = ({ visible }) => {
         if (visible) {
             setShouldRender(true);
         } else {
-            const timeout = setTimeout(() => setShouldRender(false), 500); // esperar la animación
+            const timeout = setTimeout(() => setShouldRender(false), 800); // esperar la animación
             return () => clearTimeout(timeout);
         }
     }, [visible]);
