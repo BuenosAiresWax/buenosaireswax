@@ -7,7 +7,7 @@ import { CartContext } from "./context/CartContext";
 
 import "./styles/styles.css";
 import logo from '../assets/img/logoConNombre.png';
-import logoFooter from '../assets/logo/B-negro.png';
+import logoFooter from '../assets/logo/logo-junto-negro.png';
 
 // Importar íconos locales
 import carritoVacio from '../assets/icons/carrito-vacio.svg';
