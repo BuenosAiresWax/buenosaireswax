@@ -841,7 +841,10 @@ body::after {
         /* 🔹 Permitimos altura flexible en mobile */
     }
 
-    .product-item .image,
+    .product-item .image {
+        width: 95%;
+    }
+
     .product-item .info,
     .product-item .cta {
         width: 100%;
@@ -898,16 +901,25 @@ body::after {
 
     .modal {
         width: auto;
-        height: 70%;
-        padding: 1rem 2rem;
+        height: 90%;
+        padding: 1rem 1rem;
+        margin: 1rem;
     }
 
-    .modalText{
+    .modal-content form {
+        width: 100%;
+    }
+
+    .modalText {
         font-size: 0.8rem;
     }
 
     .checkbox-confirmacion {
         font-size: 0.8rem;
+    }
+
+    .btn-whatsapp {
+        width: 100%;
     }
 
 }
