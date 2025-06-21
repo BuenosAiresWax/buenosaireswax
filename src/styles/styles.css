@@ -642,6 +642,7 @@ body::after {
     cursor: pointer;
     user-select: none;
     transition: .2s;
+    text-decoration: underline;
 }
 
 .checkbox-confirmacion label:hover {
@@ -899,6 +900,14 @@ body::after {
         width: auto;
         height: 70%;
         padding: 1rem 2rem;
+    }
+
+    .modalText{
+        font-size: 0.8rem;
+    }
+
+    .checkbox-confirmacion {
+        font-size: 0.8rem;
     }
 
 }
