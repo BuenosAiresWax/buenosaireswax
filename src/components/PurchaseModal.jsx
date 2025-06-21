@@ -20,6 +20,8 @@ function PurchaseModal({ onClose }) {
     const [pedidoId, setPedidoId] = useState("");
     const [fechaPedido, setFechaPedido] = useState("");
     const [pedidoEnviado, setPedidoEnviado] = useState(false);
+    const [confirmado, setConfirmado] = useState(false);
+
 
     const { cartItems, clearCart, removeFromCart } = useContext(CartContext);
     const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
@@ -150,6 +152,12 @@ function PurchaseModal({ onClose }) {
             return;
         }
 
+        if (!confirmado) {
+            setError("Debes confirmar que enviarás el comprobante antes de continuar.");
+            setLoading(false);
+            return;
+        }
+
         const docId = generarDocId(nombre);
         const fecha = new Intl.DateTimeFormat("es-AR", {
             day: "numeric",
@@ -178,22 +186,22 @@ function PurchaseModal({ onClose }) {
 
             // Mensaje WhatsApp con departamento opcional incluido
             const mensajeWhatsApp = `
-                ¡Hola BAWAX! Realicé una pedido en la tienda.
-                🧾 ID del Pedido: ${docId}
-                📌 Fecha: ${fecha}
-                👤 Nombre: ${nombre}
-                📧 Email: ${correo}
-                📱 Teléfono: ${telefono}
-                --------------------------
-                🏠 Dirección de envío: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})
-                --------------------------
-                🛒 Productos:
-                ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
-                💰 Total: $${total}
+            ¡Hola BAWAX! Realicé una pedido en la tienda.
+            🧾 ID del Pedido: ${docId}
+            📌 Fecha: ${fecha}
+            👤 Nombre: ${nombre}
+            📧 Email: ${correo}
+            📱 Teléfono: ${telefono}
+            --------------------------
+            🏠 Dirección de envío: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})
+            --------------------------
+            🛒 Productos:
+            ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
+            💰 Total: $${total}
 
-                👉 Adjunto el comprobante de pago para continuar con la confirmación del pedido.
-                --------------------------
-                `.trim();
+            👉 Adjunto el comprobante de pago para continuar con la confirmación del pedido.
+            --------------------------
+        `.trim();
 
             const url = `https://wa.me/541130504515?text=${encodeURIComponent(mensajeWhatsApp)}`;
             window.open(url, "_blank");
@@ -255,6 +263,16 @@ function PurchaseModal({ onClose }) {
                         <input type="text" placeholder="Código Postal" value={codigoPostal} onChange={(e) => setCodigoPostal(e.target.value)} required disabled={loading} />
                         {error && <p className="form-error">{error}</p>}
                         <p className="modalText">Su pedido sera armado y aparecera listo para ser enviado por WhatsApp. Adjuntar comprobante de pago.</p>
+                        <div className="checkbox-confirmacion">
+                            <input
+                                type="checkbox"
+                                id="confirmacion"
+                                checked={confirmado}
+                                onChange={() => setConfirmado(!confirmado)}
+                                disabled={loading}
+                            />
+                            <label htmlFor="confirmacion">Confirmo enviar comprobante generado</label>
+                        </div>
                         <button className="btn-whatsapp" type="submit" disabled={loading || productosAgotados.length > 0}>
                             {loading ? "Enviando..." : "Enviar pedido por WhatsApp"}
                         </button>
