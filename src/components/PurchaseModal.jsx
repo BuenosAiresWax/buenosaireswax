@@ -271,7 +271,7 @@ function PurchaseModal({ onClose }) {
                                 onChange={() => setConfirmado(!confirmado)}
                                 disabled={loading}
                             />
-                            <label htmlFor="confirmacion">Confirmo enviar comprobante generado</label>
+                            <label htmlFor="confirmacion">Confirmo enviar comprobante</label>
                         </div>
                         <button className="btn-whatsapp" type="submit" disabled={loading || productosAgotados.length > 0}>
                             {loading ? "Enviando..." : "Enviar pedido por WhatsApp"}
