@@ -41,7 +41,7 @@ body::after {
     margin-top: 2rem;
     padding: 0;
     line-height: 1;
-    border-bottom: 2px solid #b5b2b2;
+    border-bottom: 2px solid #fbfbfb;
 }
 
 .tituloSecundario {
@@ -299,6 +299,7 @@ body::after {
     font-size: 0.8rem;
     font-family: 'Courier New', Courier, monospace;
     margin: 0;
+    width: 90%;
 }
 
 .product-item .info .price {
@@ -306,6 +307,8 @@ body::after {
     font-family: var(--title-font), sans-serif;
     font-weight: 700;
     margin: 0;
+    margin-bottom: 0.5rem;
+    text-decoration: underline;
 }
 
 .button-row {
