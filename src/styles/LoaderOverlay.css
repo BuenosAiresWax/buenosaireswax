@@ -83,6 +83,12 @@
 
 /* estilos mobile */
 @media (max-width: 768px) {
+
+    .loader-overlay {
+        background: rgba(27, 27, 27, 0.606);
+        backdrop-filter: blur(10px);
+    }
+
     .loader-logo {
         width: 180px;
     }

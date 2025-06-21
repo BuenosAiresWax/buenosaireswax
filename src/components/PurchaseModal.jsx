@@ -49,9 +49,26 @@ function PurchaseModal({ onClose }) {
         setProductosAgotados(agotados);
     };
 
-    const eliminarProductosAgotados = () => {
-        productosAgotados.forEach((id) => removeFromCart(id));
-        setProductosAgotados([]);
+    const eliminarProductosAgotados = async () => {
+        const nuevosAgotados = [];
+
+        for (const item of cartItems) {
+            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            const snap = await getDoc(ref);
+            if (snap.exists()) {
+                const { cantidad = 0, reservados = 0 } = snap.data();
+                const stockDisponible = cantidad - reservados;
+                if (stockDisponible <= 0 || stockDisponible < item.cantidad) {
+                    nuevosAgotados.push(item.id);
+                }
+            } else {
+                nuevosAgotados.push(item.id);
+            }
+        }
+
+        // Eliminar del carrito solo los que realmente siguen agotados
+        nuevosAgotados.forEach((id) => removeFromCart(id));
+        setProductosAgotados(nuevosAgotados); // actualiza la lista con la más reciente
         setError(null);
     };
 
