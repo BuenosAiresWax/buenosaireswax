@@ -274,7 +274,7 @@ function PurchaseModal({ onClose }) {
                             <label htmlFor="confirmacion">Confirmo enviar comprobante</label>
                         </div>
                         <button className="btn-whatsapp" type="submit" disabled={loading || productosAgotados.length > 0}>
-                            {loading ? "Enviando..." : "Enviar pedido por WhatsApp"}
+                            {loading ? "Redireccion..." : "Enviar pedido por WhatsApp"}
                         </button>
                     </form>
                 </div>
