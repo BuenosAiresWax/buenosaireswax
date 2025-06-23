@@ -1,26 +1,12 @@
 function Filters({
     filtroTexto,
     setFiltroTexto,
-    filtroSeleccionado,
-    setFiltroSeleccionado,
+    categoriaSeleccionada,
+    setCategoriaSeleccionada,
     productos,
 }) {
-    // Extraer categorías únicas
-    const categorias = [
-        ...new Set(productos.map((p) => p.categoria).filter(Boolean)),
-    ];
-
-    // Extraer autores únicos
-    const autores = [
-        ...new Set(productos.map((p) => p.autor).filter(Boolean)),
-    ];
-
-    // Combinar todos en una lista
-    const opciones = [
-        { label: "Todos", value: "" },
-        ...categorias.map((cat) => ({ label: cat, value: cat })),
-        ...autores.map((autor) => ({ label: autor, value: autor })),
-    ];
+    const categorias = [...new Set(productos.map((p) => p.categoria).filter(Boolean))];
+    const autores = [...new Set(productos.map((p) => p.autor).filter(Boolean))];
 
     return (
         <div className="filters">
@@ -32,14 +18,26 @@ function Filters({
             />
 
             <select
-                value={filtroSeleccionado}
-                onChange={(e) => setFiltroSeleccionado(e.target.value)}
+                value={categoriaSeleccionada}
+                onChange={(e) => setCategoriaSeleccionada(e.target.value)}
             >
-                {opciones.map((op) => (
-                    <option key={op.value} value={op.value}>
-                        {op.label}
-                    </option>
-                ))}
+                <option value="">Todos</option>
+
+                <optgroup label="Categorías">
+                    {categorias.map((cat) => (
+                        <option key={cat} value={cat}>
+                            {cat}
+                        </option>
+                    ))}
+                </optgroup>
+
+                <optgroup label="Autores">
+                    {autores.map((autor) => (
+                        <option key={autor} value={autor}>
+                            {autor}
+                        </option>
+                    ))}
+                </optgroup>
             </select>
         </div>
     );

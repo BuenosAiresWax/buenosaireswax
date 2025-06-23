@@ -180,6 +180,13 @@ body::after {
     min-width: 200px;
 }
 
+/* Color para los grupos (label de optgroup) */
+.filters select optgroup {
+    font-weight: bold;
+    background-color: #514d4d;
+    color: #c5c5c5;
+}
+
 .filters select option {
     background-color: #333;
     color: #d1cece;
