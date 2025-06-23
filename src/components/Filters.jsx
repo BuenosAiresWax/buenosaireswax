@@ -1,10 +1,26 @@
 function Filters({
     filtroTexto,
     setFiltroTexto,
-    categoriaSeleccionada,
-    setCategoriaSeleccionada,
+    filtroSeleccionado,
+    setFiltroSeleccionado,
+    productos,
 }) {
-    const categorias = ["house", "techno"]; // 🔹 Podés agregar más acá
+    // Extraer categorías únicas
+    const categorias = [
+        ...new Set(productos.map((p) => p.categoria).filter(Boolean)),
+    ];
+
+    // Extraer autores únicos
+    const autores = [
+        ...new Set(productos.map((p) => p.autor).filter(Boolean)),
+    ];
+
+    // Combinar todos en una lista
+    const opciones = [
+        { label: "Todos", value: "" },
+        ...categorias.map((cat) => ({ label: cat, value: cat })),
+        ...autores.map((autor) => ({ label: autor, value: autor })),
+    ];
 
     return (
         <div className="filters">
@@ -16,13 +32,12 @@ function Filters({
             />
 
             <select
-                value={categoriaSeleccionada}
-                onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                value={filtroSeleccionado}
+                onChange={(e) => setFiltroSeleccionado(e.target.value)}
             >
-                <option value="">Todas las categorías</option>
-                {categorias.map((cat) => (
-                    <option key={cat} value={cat}>
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {opciones.map((op) => (
+                    <option key={op.value} value={op.value}>
+                        {op.label}
                     </option>
                 ))}
             </select>

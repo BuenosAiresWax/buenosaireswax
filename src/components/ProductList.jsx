@@ -13,6 +13,7 @@ const ProductList = () => {
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filtroTexto, setFiltroTexto] = useState("");
+    const [filtroSeleccionado, setFiltroSeleccionado] = useState("");
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
     const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
 
@@ -51,10 +52,13 @@ const ProductList = () => {
         const coincideTexto = (producto.titulo || "")
             .toLowerCase()
             .includes(filtroTexto.toLowerCase());
-        const coincideCategoria =
-            categoriaSeleccionada === "" ||
-            (producto.categoria || "") === categoriaSeleccionada;
-        return coincideTexto && coincideCategoria;
+
+        const coincideFiltro =
+            filtroSeleccionado === "" ||
+            producto.categoria === filtroSeleccionado ||
+            producto.autor === filtroSeleccionado;
+
+        return coincideTexto && coincideFiltro;
     });
 
     if (loading) {
@@ -72,8 +76,9 @@ const ProductList = () => {
             <Filters
                 filtroTexto={filtroTexto}
                 setFiltroTexto={setFiltroTexto}
-                categoriaSeleccionada={categoriaSeleccionada}
-                setCategoriaSeleccionada={setCategoriaSeleccionada}
+                filtroSeleccionado={filtroSeleccionado}
+                setFiltroSeleccionado={setFiltroSeleccionado}
+                productos={productos}
             />
 
             <Notificacion mensaje={mensaje} visible={visible} />
