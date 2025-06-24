@@ -660,6 +660,35 @@ body::after {
     transition: .2s;
 }
 
+.btn-whatsapp-succes {
+    font-family: var(--title-font);
+    background-color: #25d366;
+    color: rgb(255, 255, 255);
+    border: none;
+    padding: 0.7em 1.5em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 1em;
+    width: 70%;
+}
+
+.btn-copiar {
+    font-family: var(--title-font);
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 0.5em 1em;
+    margin: 0 0.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: auto;
+}
+
+.btn-copiar:hover {
+    background-color: #eaeaea;
+}
+
 /* checkout modal */
 .comprobante {
     display: flex;
