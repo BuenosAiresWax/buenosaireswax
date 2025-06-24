@@ -368,13 +368,6 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Piso y Departamento (opcional)"
-                                    value={departamento}
-                                    onChange={(e) => setDepartamento(e.target.value)}
-                                    disabled={loading}
-                                />
-                                <input
-                                    type="text"
                                     placeholder="Ciudad"
                                     value={ciudad}
                                     onChange={(e) => setCiudad(e.target.value)}
@@ -387,6 +380,13 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                     value={codigoPostal}
                                     onChange={(e) => setCodigoPostal(e.target.value)}
                                     required
+                                    disabled={loading}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Piso y Departamento (opcional)"
+                                    value={departamento}
+                                    onChange={(e) => setDepartamento(e.target.value)}
                                     disabled={loading}
                                 />
                                 {error && <p className="form-error">{error}</p>}

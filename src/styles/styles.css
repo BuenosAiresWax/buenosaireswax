@@ -550,19 +550,32 @@ body::after {
 
 .modal-content form {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    /* permite que los inputs salten a la siguiente línea */
+    gap: 1rem;
+    /* espacio entre columnas y filas */
+    justify-content: space-between;
     width: 100%;
 }
 
 .modal-content form input,
 .modal-content form button {
+    /* dos columnas con algo de espacio entre ellas */
     padding: 0.75rem;
     font-size: 1rem;
     border: none;
-    border-bottom: 2px solid rgb(102, 102, 102);
+    border-bottom: 2px solid rgb(187, 185, 185);
+    border-radius: 0;
+    box-sizing: border-box;
+}
+
+.modal-content form input{
+    width: 48%;
+    background-color: rgb(28, 27, 27);
+}
+
+.modal-content form button {
+    width: 108%;
 }
 
 .modal-product-item {
@@ -738,7 +751,7 @@ body::after {
     display: inline-block;
     margin-top: 1rem;
     background: #25d366;
-    color: white;
+    color: rgb(34, 34, 34);
     padding: 10px 20px;
     border-radius: 8px;
     text-decoration: none;
@@ -956,7 +969,7 @@ body::after {
     }
 
     .modal-content form {
-        width: 100%;
+        gap: 5px;
     }
 
     .modalText {
