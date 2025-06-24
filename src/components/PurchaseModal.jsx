@@ -392,7 +392,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 {error && <p className="form-error">{error}</p>}
 
                                 <p className="modalText">
-                                    Su pedido será armado y aparecerá listo para ser enviado por WhatsApp. Adjuntar comprobante de pago.
+                                    Su pedido será armado y aparecerá listo para ser enviado por WhatsApp.
                                 </p>
 
                                 <div className="checkbox-confirmacion">
