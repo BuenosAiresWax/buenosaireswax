@@ -76,8 +76,8 @@ const ProductList = () => {
             <Filters
                 filtroTexto={filtroTexto}
                 setFiltroTexto={setFiltroTexto}
-                filtroSeleccionado={filtroSeleccionado}
-                setFiltroSeleccionado={setFiltroSeleccionado}
+                categoriaSeleccionada={filtroSeleccionado}
+                setCategoriaSeleccionada={setFiltroSeleccionado}
                 productos={productos}
             />
 
