@@ -321,10 +321,6 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 <strong>Total:</strong> ${total}
                             </div>
 
-                            <p className="modalText">
-                                Al completar y enviar este formulario, usted confirma su intención de realizar la compra. Nos contactaremos a la brevedad
-                            </p>
-
                             <p className="modalText">Formulario de Compra</p>
 
                             <form
@@ -392,7 +388,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 {error && <p className="form-error">{error}</p>}
 
                                 <p className="modalText">
-                                    Su pedido será armado y aparecerá listo para ser enviado por WhatsApp.
+                                    Enviar mensaje generado por WhatsApp adjuntando comprobante de pago correspondiente.
                                 </p>
 
                                 <div className="checkbox-confirmacion">
@@ -403,7 +399,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                         onChange={() => setConfirmado(!confirmado)}
                                         disabled={loading}
                                     />
-                                    <label htmlFor="confirmacion">Confirmo enviar comprobante</label>
+                                    <label htmlFor="confirmacion">Enviare pedido y comprobante</label>
                                 </div>
 
                                 <button

@@ -37,17 +37,18 @@ body::after {
     display: inline-block;
     font-family: var(--title-font), sans-serif;
     font-size: 2.8rem;
-    margin: 0;
+    margin: 0 5%;
     margin-top: 2rem;
     padding: 0;
     line-height: 1;
     border-bottom: 2px solid #fbfbfb;
+    text-transform: uppercase;
 }
 
 .tituloSecundario {
     font-family: var(--title-font), sans-serif;
     font-size: 1.5rem;
-    margin: 0;
+    margin: 0 5%;
     margin-bottom: 3rem;
     padding: 0;
 }
@@ -64,7 +65,6 @@ body::after {
     color: #fff;
     font-family: var(--title-font);
 }
-
 
 /* productos de carga */
 .skeleton {
@@ -112,7 +112,7 @@ body::after {
 
 /* general */
 .app-container {
-    max-width: 1000px;
+    max-width: 1200px;
     min-height: 100svh;
     margin: 0 auto;
 }
@@ -167,6 +167,7 @@ body::after {
     gap: 1rem;
     margin-bottom: 1rem;
     flex-wrap: wrap;
+    padding: 0 5%;
 }
 
 .filters input,
@@ -195,88 +196,67 @@ body::after {
 /* lista de productos */
 .product-list {
     display: flex;
-    flex-direction: column;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
     gap: 1rem;
 
 }
 
 /* producto item */
 .product-item {
+    position: relative;
+    overflow: hidden;
     display: flex;
+    flex-flow: column;
     background: rgba(255, 255, 255, 0);
     /* Fondo translúcido más claro */
     border-radius: 12px;
-    overflow: hidden;
     color: rgb(230, 230, 230);
-    height: 220px;
-    margin: 1rem 0;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    width: 31%;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow:
         0 1px 2px rgba(255, 255, 255, 0.04),
         0 8px 32px rgba(0, 0, 0, 0.25);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Para que el brillo no sobresalga */
+    transition: .4s;
 }
 
-.product-item {
-    position: relative;
-    overflow: hidden;
-}
-
-/* Capa de brillo muy suave */
-.product-item::before {
-    content: "";
-    position: absolute;
-    top: -40%;
-    left: -60%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(ellipse at center,
-            rgba(255, 255, 255, 0.08) 0%,
-            rgba(255, 255, 255, 0.015) 40%,
-            rgba(255, 255, 255, 0) 70%);
-    transform: rotate(-20deg);
-    animation: glossSweep 6s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 2;
-}
-
-/* Movimiento sutil y elegante */
-@keyframes glossSweep {
-    0% {
-        transform: translateX(-120%) rotate(-15deg);
-    }
-
-    100% {
-        transform: translateX(120%) rotate(-15deg);
-    }
+.product-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.044), 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: .4s;
 }
 
 .product-item .image {
-    width: 25%;
-    min-width: 150px;
-    padding: 0.5rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    padding-bottom: 0.5rem;
 }
 
 .product-item .image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 4px 4px 0 0;
 }
 
 .product-item .info {
     position: relative;
     display: flex;
     flex-flow: column;
-    justify-content: space-around;
+    justify-content: center;
     height: 100%;
-    width: 50%;
+    width: auto;
     padding: 0 1rem;
     min-width: 200px;
     overflow: hidden;
 }
+
 
 /* Imagen flotante decorativa */
 .product-item .info::after {
@@ -295,27 +275,26 @@ body::after {
     pointer-events: none;
 }
 
-
 .product-item .info .productTitle {
     font-size: 1.2rem;
-    font-family: Verdana, sans-serif;
+    font-family: var(--text-font), Courier, monospace;
     font-weight: 700;
+    margin: 0;
 }
 
 .product-item .info .description {
     font-size: 0.8rem;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--text-font), Courier, monospace;
+    color: #999696;
     margin: 0;
     width: 90%;
 }
 
 .product-item .info .price {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     font-family: var(--title-font), sans-serif;
     font-weight: 700;
-    margin: 0;
-    margin-bottom: 0.5rem;
-    text-decoration: underline;
+    margin: 0.5rem 0 1rem;
 }
 
 .button-row {
@@ -327,11 +306,12 @@ body::after {
 
 /* producto item parte derecha */
 .product-item .cta {
-    width: 25%;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    padding-top: 0;
     min-width: 150px;
     box-sizing: border-box;
 }
@@ -341,7 +321,7 @@ body::after {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     height: 100%;
     width: 100%;
     box-sizing: border-box;
@@ -349,33 +329,39 @@ body::after {
 
 /* Categoría arriba */
 .product-item .categoria {
-    width: max-content;
+    position: absolute;
+    top: 0.4rem;
+    right: 0;
+    width: auto;
+    display: flex;
+    align-items: end;
+    justify-content: center;
     color: white;
-    padding: 0.3rem 0;
     margin: 0;
-    border-radius: 4px;
     font-size: 0.8rem;
     text-transform: capitalize;
     align-self: flex-end;
 }
 
 .categoria span {
+    font-family: var(--text-font), Courier, monospace;
     display: inline-block;
-    margin: 0.6rem 0.5rem;
-    padding: 0.5rem 1.5rem;
-    background: rgba(255, 255, 255, 0);
+    margin: 0 5px;
+    padding: 0.2rem 1rem;
+    background: #00000082;
     color: #d2d2d2;
-    border-radius: 100px;
+    border-radius: 8px;
     border: 1.5px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.077);
     cursor: default;
 }
 
 /* Botón centrado */
 .product-item .cta-content button {
     padding: 0.5rem 0.5rem;
+    margin: 0.5rem 0;
     width: max-content;
     background: transparent;
     color: rgb(226, 226, 226);
@@ -403,13 +389,12 @@ body::after {
 /* Stock abajo */
 .product-item .stock {
     font-family: var(--title-font), Verdana, Geneva, Tahoma, sans-serif;
-    font-size: 1rem;
-    color: #ccc;
-    align-self: flex-end;
+    font-size: 0.8rem;
+    color: #999696;
 }
 
 .stock span {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--text-font), Courier, monospace;
     font-weight: 400;
     font-size: 0.75rem;
     color: #ccc;
@@ -569,7 +554,7 @@ body::after {
     box-sizing: border-box;
 }
 
-.modal-content form input{
+.modal-content form input {
     width: 48%;
     background-color: rgb(28, 27, 27);
 }
@@ -677,7 +662,7 @@ body::after {
 .btn-whatsapp-succes {
     font-family: var(--title-font);
     background-color: #25d366;
-    color: rgb(255, 255, 255);
+    color: rgb(55, 25, 25);
     border: none;
     padding: 0.7em 1.5em;
     border-radius: 5px;
@@ -691,8 +676,7 @@ body::after {
     background-color: #f1f1f1;
     border: 1px solid #ccc;
     color: #333;
-    padding: 0.5em 1em;
-    margin: 0 0.5rem;
+    padding: 0.5rem 1em;
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.2s;
@@ -833,6 +817,10 @@ body::after {
 /* estilos mobile */
 @media (max-width: 768px) {
 
+    body {
+        padding: 0.5rem;
+    }
+
     body::after {
         opacity: 0.02;
         background-image: url("../../assets/logo/B-negro.png");
@@ -843,7 +831,7 @@ body::after {
     }
 
     .tituloPrincipal {
-        font-size: 2rem;
+        font-size: 1.6rem;
         margin: 0;
         margin-top: 2rem;
         padding: 0;
@@ -854,6 +842,7 @@ body::after {
     .tituloSecundario {
         font-family: var(--title-font), sans-serif;
         font-size: 1.1rem;
+        margin: 0;
     }
 
     .stock-aviso {
@@ -888,6 +877,7 @@ body::after {
     .filters {
         flex-flow: row;
         margin-top: 5rem;
+        padding: 0 2%;
     }
 
     .filters input {
@@ -898,31 +888,15 @@ body::after {
     }
 
     .product-item {
-        flex-direction: column;
-        height: auto;
-        /* 🔹 Permitimos altura flexible en mobile */
-    }
-
-    .product-item .image {
-        width: 95%;
-    }
-
-    .product-item .info,
-    .product-item .cta {
         width: 100%;
+        height: auto;
     }
 
     .product-item .cta-content {
-        flex-direction: column-reverse;
         justify-content: space-between;
         align-items: center;
         height: auto;
         gap: 1rem;
-    }
-
-    .product-item .categoria,
-    .product-item .stock {
-        align-self: auto;
     }
 
     .categoria span:nth-last-of-type {
@@ -966,6 +940,16 @@ body::after {
         height: 90%;
         padding: 1rem 1rem;
         margin: 1rem;
+    }
+
+    .modal-product-item {
+        padding: 0.5rem 0;
+        width: 90%;
+    }
+
+    .modal-product-list {
+        margin: 0;
+        padding: 0;
     }
 
     .modal-content form {
