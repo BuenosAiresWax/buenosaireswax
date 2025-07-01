@@ -235,6 +235,7 @@ body::after {
     align-items: center;
     justify-content: center;
     width: auto;
+    min-height: 280px;
     padding-bottom: 0.5rem;
 }
 
