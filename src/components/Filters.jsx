@@ -23,7 +23,7 @@ function Filters({
             >
                 <option value="">Todos</option>
 
-                <optgroup label="Categorías">
+                <optgroup label="Género">
                     {categorias.map((cat) => (
                         <option key={cat} value={cat}>
                             {cat}
@@ -31,7 +31,7 @@ function Filters({
                     ))}
                 </optgroup>
 
-                <optgroup label="Autores">
+                <optgroup label="Artistas">
                     {autores.map((autor) => (
                         <option key={autor} value={autor}>
                             {autor}
