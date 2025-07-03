@@ -10,7 +10,7 @@ function PurchaseModal({ onClose }) {
     const [telefono, setTelefono] = useState("");
     const [correo, setCorreo] = useState("");
     const [direccion, setDireccion] = useState("");
-    const [departamento, setDepartamento] = useState(""); // NUEVO CAMPO
+    const [departamento, setDepartamento] = useState("");
     const [ciudad, setCiudad] = useState("");
     const [codigoPostal, setCodigoPostal] = useState("");
 
@@ -22,6 +22,7 @@ function PurchaseModal({ onClose }) {
     const [pedidoEnviado, setPedidoEnviado] = useState(false);
     const [confirmado, setConfirmado] = useState(false);
     const [mensajeWsp, setMensajeWsp] = useState("");
+    const [ultimoTotal, setUltimoTotal] = useState(0);
 
     const { cartItems, clearCart, removeFromCart } = useContext(CartContext);
     const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
@@ -29,7 +30,11 @@ function PurchaseModal({ onClose }) {
     useEffect(() => {
         setTimeout(() => setVisible(true), 10);
         checkStockAgotado();
-    }, []);
+        const totalGuardado = localStorage.getItem("ultimoTotalPedido");
+        if (totalGuardado) {
+            setUltimoTotal(Number(totalGuardado));
+        }
+    }, [pedidoEnviado]);
 
     const normalizarNombre = (nombre) => nombre.trim().toLowerCase().replace(/\s+/g, "-");
 
@@ -77,13 +82,11 @@ function PurchaseModal({ onClose }) {
         for (const item of cartItems) {
             const ref = doc(db, "productos", normalizarNombre(item.titulo));
             const snap = await getDoc(ref);
-            if (!snap.exists()) {
-                return `El producto "${item.titulo}" ya no existe.`;
-            }
+            if (!snap.exists()) return `El producto "${item.titulo}" ya no existe.`;
             const { cantidad = 0, reservados = 0 } = snap.data();
             const stockDisponible = cantidad - reservados;
             if (stockDisponible < item.cantidad) {
-                return `El producto "${item.titulo}" no tiene suficiente stock. Disponible: ${stockDisponible}, Solicitado: ${item.cantidad}`;
+                return `El producto "${item.titulo}" no tiene suficiente stock.`;
             }
         }
         return null;
@@ -134,7 +137,6 @@ function PurchaseModal({ onClose }) {
         setVisible(false);
         setTimeout(() => {
             onClose();
-            // Limpiar campos y estados
             setNombre("");
             setTelefono("");
             setCorreo("");
@@ -150,6 +152,8 @@ function PurchaseModal({ onClose }) {
             setConfirmado(false);
             setMensajeWsp("");
             setLoading(false);
+            setUltimoTotal(0);
+            localStorage.removeItem("ultimoTotalPedido");
         }, 200);
     };
 
@@ -158,8 +162,7 @@ function PurchaseModal({ onClose }) {
             await navigator.clipboard.writeText(mensajeWsp);
             alert("Mensaje copiado al portapapeles ✅");
         } catch (err) {
-            console.error("Error al copiar:", err);
-            alert("No se pudo copiar el mensaje. Intentalo manualmente.");
+            alert("No se pudo copiar el mensaje.");
         }
     };
 
@@ -180,7 +183,7 @@ function PurchaseModal({ onClose }) {
         }
 
         if (!confirmado) {
-            setError("Debes confirmar que enviarás el comprobante antes de continuar.");
+            setError("Debes confirmar que enviarás el comprobante.");
             setLoading(false);
             return;
         }
@@ -204,80 +207,63 @@ function PurchaseModal({ onClose }) {
 
             await guardarPedido(docId, fecha);
             await reservarProductos();
+            localStorage.setItem("ultimoTotalPedido", total.toString());
             clearCart();
 
             const mensajeWhatsApp = `
-¡Hola BAWAX! Realicé una pedido en la tienda.
+¡Hola BAWAX! Realicé un pedido.
 🧾 ID del Pedido: ${docId}
 📌 Fecha: ${fecha}
 👤 Nombre: ${nombre}
 📧 Email: ${correo}
 📱 Teléfono: ${telefono}
---------------------------
-🏠 Dirección de envío: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})
---------------------------
+🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})
 🛒 Productos:
 ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
 💰 Total: $${total}
-
-👉 Adjunto el comprobante de pago para continuar con la confirmación del pedido.
---------------------------
-      `.trim();
+👉 Adjunto el comprobante de pago.
+            `.trim();
 
             setPedidoEnviado(true);
             setPedidoId(docId);
             setFechaPedido(fecha);
             setMensajeWsp(mensajeWhatsApp);
+            setUltimoTotal(total);
             setLoading(false);
-
-            const url = `https://wa.me/541130504515?text=${encodeURIComponent(mensajeWhatsApp)}`;
-            window.open(url, "_blank");
         } catch (err) {
-            console.error("Error al enviar pedido:", err);
-            setError("Hubo un error al enviar el pedido. Intente nuevamente.");
+            setError("Hubo un error al enviar el pedido.");
             setLoading(false);
         }
     };
 
+    const obtenerLinkDePagoLibre = () => "https://link.mercadopago.com.ar/buenosaireswax";
+
     return (
-        <div
-            className={`modal-backdrop ${visible ? "visible" : ""}`}
-            ref={backdropRef}
-            onClick={handleClickOutside}
-        >
+        <div className={`modal-backdrop ${visible ? "visible" : ""}`} ref={backdropRef} onClick={handleClickOutside}>
             <div className={`modal ${visible ? "fade-in" : "fade-out"}`}>
                 <div className="modal-content">
-                    <button className="close" onClick={handleClose}>
-                        ×
-                    </button>
+                    <button className="close" onClick={handleClose}>×</button>
 
                     {pedidoEnviado ? (
                         <>
-                            <h2 className="modalTitle">✅ Pedido armado con éxito</h2>
-                            <p className="modalText">
-                                🧾 Tu número de pedido es: <strong>{pedidoId}</strong>
-                            </p>
-                            <p className="modalText">
-                                <strong>adjuntá el comprobante de pago por WhatsApppara que
-                                    podamos confirmar tu pedido.</strong>
-                            </p>
-                            <button
-                                className="btn-whatsapp-succes"
-                                onClick={() => {
-                                    const url = `https://wa.me/541130504515?text=${encodeURIComponent(
-                                        mensajeWsp
-                                    )}`;
-                                    window.open(url, "_blank");
-                                }}
-                            >
-                                Reenviar mensaje por WhatsApp
+                            <h2 className="modalTitle">✅ Orden generada correctamente</h2>
+                            <p className="modalText">🧾 Número de orden:<br /><strong>{pedidoId}</strong></p>
+                            <p className="modalText"><strong>Total del pedido:</strong><br /> ${ultimoTotal}</p>
+                            <p className="modalText"><strong>Realizá el pago para continuar</strong></p>
+
+                            <a href={obtenerLinkDePagoLibre()} target="_blank" rel="noopener noreferrer" className="btn-pago">
+                                💳 Pagar con Mercado Pago
+                            </a>
+
+                            <button className="btn-whatsapp-succes" onClick={() => window.open(`https://wa.me/541130504515?text=${encodeURIComponent(mensajeWsp)}`, "_blank")}>
+                                📲 Enviar pedido por WhatsApp
                             </button>
 
                             <button className="btn-copiar" onClick={copiarMensajeAlPortapapeles}>
-                                📋 Copiar mensaje
+                                📋 Copiar orden de compra
                             </button>
 
-                            <p className="modalText">Buenos Aires Wax .</p>
+                            <p className="modalText">Buenos Aires Wax</p>
                         </>
                     ) : (
                         <>
@@ -288,8 +274,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 {cartItems.map((item) => (
                                     <li
                                         key={item.id}
-                                        className={`modal-product-item ${productosAgotados.includes(item.id) ? "agotado" : ""
-                                            }`}
+                                        className={`modal-product-item ${productosAgotados.includes(item.id) ? "agotado" : ""}`}
                                     >
                                         <div>
                                             <strong>{item.titulo}</strong> <br />
@@ -309,7 +294,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             {productosAgotados.length > 0 && (
                                 <>
                                     <p className="productoAgotadoMensaje">
-                                        Debido a la alta demanda, algunos productos están agotados. Puedes eliminarlos rápidamente para continuar con tu compra sin inconvenientes.
+                                        Algunos productos están agotados. Podés eliminarlos para continuar.
                                     </p>
                                     <button onClick={eliminarProductosAgotados} className="btn-eliminar-agotados">
                                         Eliminar productos agotados
@@ -385,10 +370,11 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                     onChange={(e) => setDepartamento(e.target.value)}
                                     disabled={loading}
                                 />
+
                                 {error && <p className="form-error">{error}</p>}
 
                                 <p className="modalText">
-                                    Enviar mensaje generado por WhatsApp adjuntando comprobante de pago correspondiente.
+                                    Su pedido será armado y aparecerá listo para ser enviado por WhatsApp.
                                 </p>
 
                                 <div className="checkbox-confirmacion">
@@ -399,7 +385,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                         onChange={() => setConfirmado(!confirmado)}
                                         disabled={loading}
                                     />
-                                    <label htmlFor="confirmacion">Enviare pedido y comprobante</label>
+                                    <label htmlFor="confirmacion">Confirmo enviar comprobante</label>
                                 </div>
 
                                 <button
@@ -407,7 +393,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                     type="submit"
                                     disabled={loading || productosAgotados.length > 0}
                                 >
-                                    {loading ? "Redireccion..." : "Enviar pedido por WhatsApp"}
+                                    {loading ? "Procesando..." : "Crear orden"}
                                 </button>
                             </form>
                         </>

@@ -667,6 +667,23 @@ body::after {
     transition: .2s;
 }
 
+.btn-pago {
+    display: block;
+    background-color: #009ee3;
+    font-family: var(--title-font);
+    color: rgb(55, 25, 25);
+    border: none;
+    padding: 0.7em 1.5em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 1rem 0;
+    width: 88%;
+}
+
+.btn-pago:hover {
+    background-color: #007bbd;
+}
+
 .btn-whatsapp-succes {
     font-family: var(--title-font);
     background-color: #25d366;
