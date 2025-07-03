@@ -669,6 +669,7 @@ body::after {
 
 .btn-pago {
     display: block;
+    text-align: center;
     background-color: #009ee3;
     font-family: var(--title-font);
     color: rgb(55, 25, 25);
