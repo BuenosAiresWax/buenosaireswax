@@ -53,7 +53,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                     {producto.titulo}
                 </h2>
                 <p className="price">${producto.precio}</p>
-                <p className="description">{producto.descripcion}</p>
+                <h3 className="description">{producto.descripcion}</h3>
             </div>
 
             <div className="cta">
