@@ -23,6 +23,8 @@ function PurchaseModal({ onClose }) {
     const [confirmado, setConfirmado] = useState(false);
     const [mensajeWsp, setMensajeWsp] = useState("");
     const [ultimoTotal, setUltimoTotal] = useState(0);
+    const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+    const [animateCloseConfirm, setAnimateCloseConfirm] = useState(false);
 
     const { cartItems, clearCart, removeFromCart } = useContext(CartContext);
     const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
@@ -31,12 +33,11 @@ function PurchaseModal({ onClose }) {
         setTimeout(() => setVisible(true), 10);
         checkStockAgotado();
         const totalGuardado = localStorage.getItem("ultimoTotalPedido");
-        if (totalGuardado) {
-            setUltimoTotal(Number(totalGuardado));
-        }
+        if (totalGuardado) setUltimoTotal(Number(totalGuardado));
     }, [pedidoEnviado]);
 
-    const normalizarNombre = (nombre) => nombre.trim().toLowerCase().replace(/\s+/g, "-");
+    const normalizarNombre = (nombre) =>
+        nombre.trim().toLowerCase().replace(/\s+/g, "-");
 
     const checkStockAgotado = async () => {
         const agotados = [];
@@ -58,7 +59,6 @@ function PurchaseModal({ onClose }) {
 
     const eliminarProductosAgotados = async () => {
         const nuevosAgotados = [];
-
         for (const item of cartItems) {
             const ref = doc(db, "productos", normalizarNombre(item.titulo));
             const snap = await getDoc(ref);
@@ -72,7 +72,6 @@ function PurchaseModal({ onClose }) {
                 nuevosAgotados.push(item.id);
             }
         }
-
         nuevosAgotados.forEach((id) => removeFromCart(id));
         setProductosAgotados(nuevosAgotados);
         setError(null);
@@ -133,7 +132,40 @@ function PurchaseModal({ onClose }) {
         }
     };
 
+    const cerrarModal = () => {
+        setVisible(false);
+        setTimeout(() => {
+            onClose();
+            setNombre("");
+            setTelefono("");
+            setCorreo("");
+            setDireccion("");
+            setDepartamento("");
+            setCiudad("");
+            setCodigoPostal("");
+            setError(null);
+            setProductosAgotados([]);
+            setPedidoId("");
+            setFechaPedido("");
+            setPedidoEnviado(false);
+            setConfirmado(false);
+            setMensajeWsp("");
+            setLoading(false);
+            setUltimoTotal(0);
+            localStorage.removeItem("ultimoTotalPedido");
+        }, 200);
+    };
+
     const handleClose = () => {
+        if (pedidoEnviado) {
+            setShowCloseConfirm(true); // solo si ya se generó el pedido
+            return;
+        }
+
+        cerrarModalDefinitivo();
+    };
+
+    const cerrarModalDefinitivo = () => {
         setVisible(false);
         setTimeout(() => {
             onClose();
@@ -161,7 +193,7 @@ function PurchaseModal({ onClose }) {
         try {
             await navigator.clipboard.writeText(mensajeWsp);
             alert("Mensaje copiado al portapapeles ✅");
-        } catch (err) {
+        } catch {
             alert("No se pudo copiar el mensaje.");
         }
     };
@@ -243,37 +275,42 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
             <div className={`modal ${visible ? "fade-in" : "fade-out"}`}>
                 <div className="modal-content">
                     <button className="close" onClick={handleClose}>×</button>
-
                     {pedidoEnviado ? (
                         <>
-                            <h2 className="modalTitle">✅ Orden generada correctamente</h2>
+                            <h2 className="modalTitle">✅ Pedido generado correctamente</h2>
+                            <p className="modalText">Segui los 2 pasos para finalizar tu compra de manera rapida</p>
                             <p className="modalText">🧾 Número de orden:<br /><strong>{pedidoId}</strong></p>
                             <p className="modalText"><strong>Total del pedido:</strong><br /> <span className="totalCheckout">${ultimoTotal}</span></p>
 
-                            {/* Texto 1: encima del botón de pago */}
+                            {/* Texto 1 */}
                             <div className="info-box">
-                                <span>1</span> Ingresa el monto de tu orden, completa el pago y descarga el comprobante.
+                                <span>1</span> Ingresa el monto de tu orden, completá el pago y descarga el comprobante.
                             </div>
 
                             <a href={obtenerLinkDePagoLibre()} target="_blank" rel="noopener noreferrer" className="btn-pago">
                                 💳 Pagar con Mercado Pago
                             </a>
 
-                            {/* Texto 2: encima del botón de WhatsApp */}
+                            {/* Texto 2 */}
                             <div className="info-box">
-                                <span>2</span> Enviar el pedido generado y el comprobante de pago.
+                                <span>2</span> Regresa y enviá el pedido generado y el comprobante de pago descargado.
                             </div>
 
-                            <button className="btn-whatsapp-succes" onClick={() => window.open(`https://wa.me/541130504515?text=${encodeURIComponent(mensajeWsp)}`, "_blank")}>
+                            <button
+                                className="btn-whatsapp-succes"
+                                onClick={() =>
+                                    window.open(`https://wa.me/541130504515?text=${encodeURIComponent(mensajeWsp)}`, "_blank")
+                                }
+                            >
                                 📲 Enviar pedido por WhatsApp
                             </button>
 
-                            {/* Texto 3: final */}
+                            {/* Texto final */}
                             <div className="info-box">
-                                Listo! Nos contactaremos para mantenerte al tanto de todo.
+                                ¡Listo! Nos contactaremos para mantenerte al tanto de todo.
                             </div>
 
-                            <p className="modalText copiarPortapapeles">Podes copiar y guardar tu pedido en el portapapeles</p>
+                            <p className="modalText copiarPortapapeles">Podés copiar y guardar tu pedido en el portapapeles</p>
 
                             <button className="btn-copiar" onClick={copiarMensajeAlPortapapeles}>
                                 📋 Copiar
@@ -414,6 +451,25 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             </form>
                         </>
                     )}
+
+                    {showCloseConfirm && (
+                        <div className={`confirm-overlay fade-in`}>
+                            <div className="confirm-box">
+                                <h3>Tu pedido fue generado.</h3>
+                                <p>Recuerda completar los pasos anteriores para finalizar tu compra</p>
+                                <p>
+                                    ⚠️ <span>
+                                        Al cerrar esta ventana no verás más los datos de pedido.
+                                    </span>⚠️
+                                </p>
+                                <div className="confirm-actions">
+                                    <button className="btn-cancelar" onClick={() => setShowCloseConfirm(false)}>Cancelar</button>
+                                    <button className="btn-confirmar" onClick={cerrarModalDefinitivo}>Sí, cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>
