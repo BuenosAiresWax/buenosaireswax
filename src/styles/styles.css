@@ -521,6 +521,7 @@ body::after {
     font-size: 1.5rem;
     font-family: Verdana, sans-serif;
     font-weight: 700;
+    margin-bottom: 3rem;
 }
 
 .modalPrice {
@@ -694,6 +695,7 @@ body::after {
     padding: 0.7em 1.5em;
     border-radius: 5px;
     cursor: pointer;
+    text-decoration: underline;
     width: 100%;
 }
 
@@ -762,7 +764,7 @@ body::after {
 }
 
 .info-box {
-    margin: 1rem 0;
+    margin: 2rem 0;
     font-weight: 400;
     font-family: var(--title-font), Verdana;
     font-size: 0.8rem;
@@ -770,7 +772,11 @@ body::after {
 
 .info-box span {
     text-decoration: underline;
-    font-size: 1.2rem;
+    font-size: 4rem;
+}
+
+.modalText:last-of-type {
+    margin-top: 4rem;
 }
 
 .btn-whatsapp {
@@ -991,7 +997,7 @@ body::after {
         margin: 1rem;
     }
 
-    .modalTitle{
+    .modalTitle {
         margin-bottom: 3rem;
     }
 
@@ -1013,7 +1019,7 @@ body::after {
         font-size: 0.8rem;
     }
 
-    .modalText:last-of-type{
+    .modalText:last-of-type {
         margin-top: 4rem;
     }
 
@@ -1026,7 +1032,7 @@ body::after {
     }
 
 
-    .info-box span{
+    .info-box span {
         font-size: 2.4rem;
     }
 
@@ -1034,7 +1040,7 @@ body::after {
         width: 100%;
     }
 
-    .btn-pago{
+    .btn-pago {
         width: 85%;
         font-size: 0.8rem;
     }
