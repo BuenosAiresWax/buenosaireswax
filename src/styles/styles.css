@@ -487,6 +487,7 @@ body::after {
     opacity: 0;
     transition: opacity 0.2s ease, transform 0.2s ease;
     overflow-y: auto;
+
 }
 
 .fade-in {
@@ -693,24 +694,22 @@ body::after {
     padding: 0.7em 1.5em;
     border-radius: 5px;
     cursor: pointer;
-    margin: 1rem 0;
     width: 100%;
 }
 
 .btn-copiar {
     font-family: var(--title-font);
-    background-color: #f1f1f1;
-    border: 1px solid #ccc;
-    color: #333;
+    background-color: #f1f1f108;
+    border: none;
+    border-bottom: 1px solid #cccccc69;
+    color: #9e9d9d;
     padding: 0.5rem 1em;
-    border-radius: 5px;
     cursor: pointer;
     transition: background 0.2s;
-    width: 100%;
 }
 
 .btn-copiar:hover {
-    background-color: #eaeaea;
+    background-color: #313131;
 }
 
 .form-error {
@@ -757,6 +756,23 @@ body::after {
     padding-left: 1rem;
 }
 
+.totalCheckout{
+    font-size: 2rem;
+    text-decoration: underline;
+}
+
+.info-box {
+    margin: 1rem 0;
+    font-weight: 400;
+    font-family: var(--title-font), Verdana;
+    font-size: 0.8rem;
+}
+
+.info-box span{
+    text-decoration: underline;
+    font-size: 1.2rem;
+}
+
 .btn-whatsapp {
     display: inline-block;
     margin-top: 1rem;
@@ -781,6 +797,13 @@ body::after {
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 1rem;
+}
+
+.copiarPortapapeles{
+    font-size: 0.8rem;
+    text-align: start;
+    display: inline;
+    margin-right: 0.5rem;
 }
 
 /* footer */

@@ -248,19 +248,35 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                         <>
                             <h2 className="modalTitle">✅ Orden generada correctamente</h2>
                             <p className="modalText">🧾 Número de orden:<br /><strong>{pedidoId}</strong></p>
-                            <p className="modalText"><strong>Total del pedido:</strong><br /> ${ultimoTotal}</p>
-                            <p className="modalText"><strong>Realizá el pago para continuar</strong></p>
+                            <p className="modalText"><strong>Total del pedido:</strong><br /> <span className="totalCheckout">${ultimoTotal}</span></p>
+
+                            {/* Texto 1: encima del botón de pago */}
+                            <div className="info-box">
+                                <span>1</span> Ingresa el monto de tu orden, completa el pago y descarga el comprobante.
+                            </div>
 
                             <a href={obtenerLinkDePagoLibre()} target="_blank" rel="noopener noreferrer" className="btn-pago">
                                 💳 Pagar con Mercado Pago
                             </a>
 
+                            {/* Texto 2: encima del botón de WhatsApp */}
+                            <div className="info-box">
+                                <span>2</span> Enviar el pedido generado y el comprobante de pago.
+                            </div>
+
                             <button className="btn-whatsapp-succes" onClick={() => window.open(`https://wa.me/541130504515?text=${encodeURIComponent(mensajeWsp)}`, "_blank")}>
                                 📲 Enviar pedido por WhatsApp
                             </button>
 
+                            {/* Texto 3: final */}
+                            <div className="info-box">
+                                Listo! Nos contactaremos para mantenerte al tanto de todo.
+                            </div>
+
+                            <p className="modalText copiarPortapapeles">Podes copiar y guardar tu pedido en el portapapeles</p>
+
                             <button className="btn-copiar" onClick={copiarMensajeAlPortapapeles}>
-                                📋 Copiar orden de compra
+                                📋 Copiar
                             </button>
 
                             <p className="modalText">Buenos Aires Wax</p>
