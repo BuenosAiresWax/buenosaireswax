@@ -409,7 +409,6 @@ body::after {
 }
 
 /* boton eliminar prodcutos */
-
 .product-item.fade-in {
     animation: fadeIn 0.3s forwards;
 }
@@ -1138,7 +1137,6 @@ body::after {
         margin: 3rem 0;
     }
 
-
     .info-box span {
         font-size: 2.4rem;
     }
@@ -1166,5 +1164,4 @@ body::after {
         font-size: 0.8rem;
         width: 100%;
     }
-
 }
