@@ -459,7 +459,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 <p>Recuerda completar los pasos anteriores para finalizar tu compra</p>
                                 <p>
                                     ⚠️ <span>
-                                        Al cerrar esta ventana no verás más los datos de pedido.
+                                        Al cerrar esta ventana no verás más los datos de pedido y pago.
                                     </span>⚠️
                                 </p>
                                 <div className="confirm-actions">
