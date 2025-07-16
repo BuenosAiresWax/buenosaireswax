@@ -25,6 +25,8 @@ function PurchaseModal({ onClose }) {
     const [ultimoTotal, setUltimoTotal] = useState(0);
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
     const [animateCloseConfirm, setAnimateCloseConfirm] = useState(false);
+    const modalContentRef = useRef(null);
+    const modalRef = useRef(null);
 
     const { cartItems, clearCart, removeFromCart } = useContext(CartContext);
     const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
@@ -270,10 +272,38 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
 
     const obtenerLinkDePagoLibre = () => "https://link.mercadopago.com.ar/buenosaireswax";
 
+    useEffect(() => {
+        if (showCloseConfirm) {
+            // Scroll al inicio del modal
+            if (modalContentRef.current) {
+                modalContentRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+
+            // Bloquear scroll global y del modal
+            document.body.style.overflow = "hidden";
+            if (modalRef.current) {
+                modalRef.current.style.overflow = "hidden";
+            }
+        } else {
+            // Restaurar scroll global y del modal
+            document.body.style.overflow = "";
+            if (modalRef.current) {
+                modalRef.current.style.overflow = "auto";
+            }
+        }
+
+        return () => {
+            document.body.style.overflow = "";
+            if (modalRef.current) {
+                modalRef.current.style.overflow = "auto";
+            }
+        };
+    }, [showCloseConfirm]);
+
     return (
         <div className={`modal-backdrop ${visible ? "visible" : ""}`} ref={backdropRef} onClick={handleClickOutside}>
-            <div className={`modal ${visible ? "fade-in" : "fade-out"}`}>
-                <div className="modal-content">
+            <div className={`modal ${visible ? "fade-in" : "fade-out"}`} ref={modalRef}>
+                <div className="modal-content" ref={modalContentRef}>
                     <button className="close" onClick={handleClose}>×</button>
                     {pedidoEnviado ? (
                         <>
