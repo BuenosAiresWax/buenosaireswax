@@ -6,7 +6,7 @@ import PurchaseModal from "./components/PurchaseModal";
 import { CartContext } from "./context/CartContext";
 
 import "./styles/styles.css";
-import logo from '../assets/img/logoConNombre.png';
+import logo from '../assets/img/eStockFavicon.png';
 import logoFooter from '../assets/logo/logo-junto-negro.png';
 
 // Importar íconos locales
