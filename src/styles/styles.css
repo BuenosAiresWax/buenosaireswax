@@ -401,7 +401,7 @@ body::after {
     right: 0;
     width: auto;
     display: flex;
-    align-items: end;
+    align-items: flex-start;
     justify-content: center;
     color: white;
     margin: 0;
