@@ -54,7 +54,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 </h2>
                 <p className="price">${producto.precio}</p>
                 <h3 className="description">{producto.descripcion}</h3>
-                <p className="sello">Made by: {producto.sello}</p>
+                <p className="sello">Made by: {producto.sello}  - {producto.estilo}</p>
                 <p className="textoEscucha">🔊 Escucha: <a className="enlaceEscucha" href={producto.escucha} target="_blank" rel="noopener noreferrer">{producto.titulo}</a></p>
             </div>
 
