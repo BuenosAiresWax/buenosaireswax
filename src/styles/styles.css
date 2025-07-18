@@ -412,6 +412,9 @@ body::after {
 
 .categoria span {
     font-family: var(--text-font), Courier, monospace;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    line-height: 2;
     display: inline-block;
     margin: 0 5px;
     padding: 0.2rem 1rem;
@@ -620,6 +623,31 @@ body::after {
     justify-content: space-between;
     width: 100%;
 }
+
+.metodo-entrega-label {
+    width: 100%;
+    margin-top: 1rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    line-height: 2;
+}
+
+.metodo-entrega-label select {
+    border: none;
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    color: #7c7a7a;
+}
+
+.metodo-entrega-label select:focus {
+    background-color: #222;
+    color: #fff;
+}
+
 
 .modal-content form input,
 .modal-content form button {

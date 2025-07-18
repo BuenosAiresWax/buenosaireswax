@@ -25,6 +25,8 @@ function PurchaseModal({ onClose }) {
     const [ultimoTotal, setUltimoTotal] = useState(0);
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
     const [animateCloseConfirm, setAnimateCloseConfirm] = useState(false);
+    const [metodoEntrega, setMetodoEntrega] = useState("");
+
     const modalContentRef = useRef(null);
     const modalRef = useRef(null);
 
@@ -105,10 +107,11 @@ function PurchaseModal({ onClose }) {
             cliente: nombre,
             telefono,
             correo,
-            direccion,
+            direccion: metodoEntrega.includes("Retiro") ? "" : direccion,
             departamento,
             ciudad,
             codigoPostal,
+            metodoEntrega, // << nuevo campo agregado
             productos: cartItems.map((p) => ({
                 titulo: p.titulo,
                 categoria: p.categoria,
@@ -204,14 +207,16 @@ function PurchaseModal({ onClose }) {
         setLoading(true);
         setError(null);
 
-        if (productosAgotados.length > 0) {
-            setError("Revisá tus productos agotados antes de continuar.");
+        if (!metodoEntrega) {
+            setError("Seleccioná un método de entrega.");
             setLoading(false);
             return;
         }
 
-        if (!direccion.trim() || !ciudad.trim() || !codigoPostal.trim()) {
-            setError("Por favor, completá todos los datos de envío.");
+        const esRetiro = metodoEntrega.includes("Retiro");
+
+        if (!esRetiro && (!direccion.trim() || !ciudad.trim() || !codigoPostal.trim())) {
+            setError("Completá los datos de envío.");
             setLoading(false);
             return;
         }
@@ -251,12 +256,13 @@ function PurchaseModal({ onClose }) {
 👤 Nombre: ${nombre}
 📧 Email: ${correo}
 📱 Teléfono: ${telefono}
-🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})
+📦 Método de entrega: ${metodoEntrega}
+${!esRetiro ? `🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})` : ""}
 🛒 Productos:
 ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
 💰 Total: $${total}
 👉 Adjunto el comprobante de pago.
-            `.trim();
+        `.trim();
 
             setPedidoEnviado(true);
             setPedidoId(docId);
@@ -422,37 +428,57 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                     required
                                     disabled={loading}
                                 />
-                                <input
-                                    type="text"
-                                    placeholder="Dirección de envío"
-                                    value={direccion}
-                                    onChange={(e) => setDireccion(e.target.value)}
-                                    required
-                                    disabled={loading}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Ciudad"
-                                    value={ciudad}
-                                    onChange={(e) => setCiudad(e.target.value)}
-                                    required
-                                    disabled={loading}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Código Postal"
-                                    value={codigoPostal}
-                                    onChange={(e) => setCodigoPostal(e.target.value)}
-                                    required
-                                    disabled={loading}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Piso y Departamento (opcional)"
-                                    value={departamento}
-                                    onChange={(e) => setDepartamento(e.target.value)}
-                                    disabled={loading}
-                                />
+
+                                <label className="metodo-entrega-label">
+                                    Método de entrega:
+                                    <select
+                                        value={metodoEntrega}
+                                        onChange={(e) => setMetodoEntrega(e.target.value)}
+                                        required
+                                        disabled={loading}
+                                    >
+                                        <option value="" disabled>Seleccioná una opción</option>
+                                        <option value="Retiro por Microcentro">Retiro por Microcentro</option>
+                                        <option value="Retiro por Chacarita">Retiro por Chacarita</option>
+                                        <option value="Envío a domicilio (Andreani)">Envío a domicilio (Andreani)</option>
+                                    </select>
+                                </label>
+
+                                {!metodoEntrega.includes("Retiro") && (
+                                    <>
+                                        <input
+                                            type="text"
+                                            placeholder="Dirección de envío"
+                                            value={direccion}
+                                            onChange={(e) => setDireccion(e.target.value)}
+                                            required
+                                            disabled={loading}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Ciudad"
+                                            value={ciudad}
+                                            onChange={(e) => setCiudad(e.target.value)}
+                                            required
+                                            disabled={loading}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Código Postal"
+                                            value={codigoPostal}
+                                            onChange={(e) => setCodigoPostal(e.target.value)}
+                                            required
+                                            disabled={loading}
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Piso y Departamento (opcional)"
+                                            value={departamento}
+                                            onChange={(e) => setDepartamento(e.target.value)}
+                                            disabled={loading}
+                                        />
+                                    </>
+                                )}
 
                                 {error && <p className="form-error">{error}</p>}
 
