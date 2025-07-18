@@ -167,37 +167,79 @@ body::after {
     border-radius: 999px;
 }
 
-/* filtros */
-.filters {
+.filters-container {
     display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
     flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
     padding: 0 5%;
-}
-
-.filters input,
-.filters select {
-    padding: 0.75rem;
-    font-size: 1rem;
-    border: none;
-    border-bottom: 2px solid rgb(99, 99, 99);
     background-color: transparent;
-    color: rgb(129, 129, 129);
-    min-width: 200px;
 }
 
-/* Color para los grupos (label de optgroup) */
-.filters select optgroup {
-    font-weight: bold;
-    background-color: #514d4d;
-    color: #c5c5c5;
+.filters-container input,
+.filters-container select {
+    border: none;
+    background-color: transparent;
+    margin: 0;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    font-family: var(--title-font), sans-serif;
+    color: #a1a1a1;
 }
 
-.filters select option {
-    background-color: #333;
-    color: #d1cece;
+.filters-container select:focus {
+    background-color: #222;
+    color: #d2d2d2;
+}
+
+.filters-item {
+    flex: 1 1 45%;
+    min-width: 150px;
+    padding: 0.5rem;
+}
+
+.filters-clear-btn {
+    font-family: var(--title-font), sans-serif;
+    font-size: 0.8rem;
+    background: transparent;
+    border: none;
+    color: #a1a1a1;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: .2s;
+}
+
+.filters-clear-btn:hover {
+    background-color: #f0f0f008;
+    transition: .2s;
+}
+
+.full {
+    flex: 1 1 100%;
+}
+
+@media (min-width: 768px) {
+    .filters-container {
+        flex-wrap: nowrap;
+    }
+
+    .filters-item,
+    .filters-clear-btn {
+        flex: 1;
+        min-width: unset;
+    }
+
+    .filters-clear-btn {
+        max-width: 150px;
+        margin-left: auto;
+    }
+
+    .full {
+        flex: 1;
+    }
 }
 
 /* lista de productos */
@@ -305,19 +347,19 @@ body::after {
     width: 90%;
 }
 
-.product-item .info .sello{
+.product-item .info .sello {
     color: #999696;
     font-size: 0.8rem;
     margin: 0.5rem 0 0;
     padding: 0;
 }
 
-.product-item .info .textoEscucha{
+.product-item .info .textoEscucha {
     color: #999696;
     font-size: 0.8rem;
 }
 
-.product-item .info .enlaceEscucha{
+.product-item .info .enlaceEscucha {
     color: #999696;
     font-size: 0.8rem;
 }
@@ -1050,17 +1092,15 @@ body::after {
         }
     }
 
-    .filters {
-        flex-flow: row;
-        margin-top: 5rem;
-        padding: 0 2%;
+    .filters-container {
+        margin-top: 2rem;
+        padding: 0;
     }
 
-    .filters input {
-        min-width: auto;
-        width: 100%;
-        padding: 0.75rem;
-        font-size: 1rem;
+
+    .filters-clear-btn {
+        margin-top: 0.5rem;
+        text-align: start;
     }
 
     .product-item {

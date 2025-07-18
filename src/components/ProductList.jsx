@@ -18,7 +18,10 @@ const ProductList = () => {
     const [loading, setLoading] = useState(true);
     const [limit, setLimit] = useState(BATCH_SIZE);
     const [filtroTexto, setFiltroTexto] = useState("");
-    const [filtroSeleccionado, setFiltroSeleccionado] = useState("");
+    const [generoSeleccionado, setGeneroSeleccionado] = useState("");
+    const [estiloSeleccionado, setEstiloSeleccionado] = useState("");
+    const [selloSeleccionado, setSelloSeleccionado] = useState("");
+    const [autorSeleccionado, setAutorSeleccionado] = useState("");
     const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
 
     const sentinelRef = useRef();
@@ -48,13 +51,22 @@ const ProductList = () => {
             const coincideTexto = (producto.titulo || "")
                 .toLowerCase()
                 .includes(filtroTexto.toLowerCase());
-            const coincideFiltro =
-                filtroSeleccionado === "" ||
-                producto.categoria === filtroSeleccionado ||
-                producto.autor === filtroSeleccionado;
-            return coincideTexto && coincideFiltro;
+
+            const coincideGenero = !generoSeleccionado || producto.genero === generoSeleccionado;
+            const coincideEstilo = !estiloSeleccionado || producto.estilo === estiloSeleccionado;
+            const coincideSello = !selloSeleccionado || producto.sello === selloSeleccionado;
+            const coincideAutor = !autorSeleccionado || producto.autor === autorSeleccionado;
+
+            return coincideTexto && coincideGenero && coincideEstilo && coincideSello && coincideAutor;
         });
-    }, [productos, filtroTexto, filtroSeleccionado]);
+    }, [
+        productos,
+        filtroTexto,
+        generoSeleccionado,
+        estiloSeleccionado,
+        selloSeleccionado,
+        autorSeleccionado
+    ]);
 
     const productosLimitados = productosFiltrados.slice(0, limit);
 
@@ -100,8 +112,14 @@ const ProductList = () => {
             <Filters
                 filtroTexto={filtroTexto}
                 setFiltroTexto={setFiltroTexto}
-                categoriaSeleccionada={filtroSeleccionado}
-                setCategoriaSeleccionada={setFiltroSeleccionado}
+                generoSeleccionado={generoSeleccionado}
+                setGeneroSeleccionado={setGeneroSeleccionado}
+                estiloSeleccionado={estiloSeleccionado}
+                setEstiloSeleccionado={setEstiloSeleccionado}
+                selloSeleccionado={selloSeleccionado}
+                setSelloSeleccionado={setSelloSeleccionado}
+                autorSeleccionado={autorSeleccionado}
+                setAutorSeleccionado={setAutorSeleccionado}
                 productos={productos}
             />
 
