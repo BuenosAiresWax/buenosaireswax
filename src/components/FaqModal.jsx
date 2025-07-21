@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import "../styles/Footer.css"; // css en footer
+import "../styles/Footer.css"; // tus estilos externos
 
 const preguntas = [
     {
@@ -26,18 +26,37 @@ const preguntas = [
 ];
 
 function FaqModal({ onClose }) {
-    const [abierto, setAbierto] = useState(null);
+    const [modalRoot, setModalRoot] = useState(null);
 
+    useEffect(() => {
+        let root = document.getElementById("modal-root");
+
+        if (!root) {
+            root = document.createElement("div");
+            root.id = "modal-root";
+            document.body.appendChild(root);
+        }
+
+        setModalRoot(root);
+
+        document.body.classList.add("modal-abierto");
+
+        return () => {
+            document.body.classList.remove("modal-abierto");
+
+            // Solo removemos el nodo si fue creado por este efecto
+            if (root && root.parentNode === document.body && root.id === "modal-root") {
+                document.body.removeChild(root);
+            }
+        };
+    }, []);
+
+    const [abierto, setAbierto] = useState(null);
     const toggle = (i) => {
         setAbierto(abierto === i ? null : i);
     };
 
-    useEffect(() => {
-        document.body.classList.add("modal-abierto");
-        return () => {
-            document.body.classList.remove("modal-abierto");
-        };
-    }, []);
+    if (!modalRoot) return null;
 
     return createPortal(
         <div
@@ -74,7 +93,7 @@ function FaqModal({ onClose }) {
                 </div>
             </div>
         </div>,
-        document.getElementById("modal-root")
+        modalRoot
     );
 }
 
