@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import "../styles/Footer.css"; // css en footer
 
 const preguntas = [
@@ -31,7 +32,6 @@ function FaqModal({ onClose }) {
         setAbierto(abierto === i ? null : i);
     };
 
-    // Bloquea el scroll al abrir
     useEffect(() => {
         document.body.classList.add("modal-abierto");
         return () => {
@@ -39,7 +39,7 @@ function FaqModal({ onClose }) {
         };
     }, []);
 
-    return (
+    return createPortal(
         <div
             className="faq-backdrop"
             onClick={(e) => {
@@ -73,7 +73,8 @@ function FaqModal({ onClose }) {
                     ))}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.getElementById("modal-root")
     );
 }
 

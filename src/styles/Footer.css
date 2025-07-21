@@ -36,7 +36,7 @@ body.modal-abierto {
 
 .faq-modal {
     font-family: var(--title-font);
-    background: rgba(255, 255, 255, 0.089);
+    background: rgba(33, 33, 33, 0.872);
     padding: 1rem;
     margin: 1rem;
     max-width: 600px;
@@ -92,4 +92,28 @@ body.modal-abierto {
 .faq-answer p {
     margin: 0.5rem 0 1rem;
     font-size: 0.95rem;
+}
+
+/*item*/
+.faq-button {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background-color: #00000030; /* Fondo oscuro */
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+}
+
+.faq-button:hover {
+    background-color: #333;
 }

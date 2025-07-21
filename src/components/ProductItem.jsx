@@ -2,10 +2,12 @@ import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
+import FaqModal from "./FaqModal";
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
     const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
     const [producto, setProducto] = useState(productoProp); // estado local en tiempo real
+    const [mostrarFaq, setMostrarFaq] = useState(false);
 
     useEffect(() => {
         const ref = doc(db, "productos", productoProp.id);
@@ -96,7 +98,19 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                     </div>
                 </div>
             </div>
-        </div >
+
+            {/* Botón flotante de FAQ */}
+            <div
+                className="faq-button"
+                onClick={() => setMostrarFaq(true)}
+                title="Preguntas frecuentes"
+            >
+                i
+            </div>
+
+            {/* Modal de FAQ */}
+            {mostrarFaq && <FaqModal onClose={() => setMostrarFaq(false)} />}
+        </div>
     );
 }
 
