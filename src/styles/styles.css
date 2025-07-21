@@ -648,7 +648,6 @@ body::after {
     color: #fff;
 }
 
-
 .modal-content form input,
 .modal-content form button {
     /* dos columnas con algo de espacio entre ellas */
@@ -665,8 +664,12 @@ body::after {
     background-color: rgb(28, 27, 27);
 }
 
+.modal-content>form>input:nth-of-type(-n+3) {
+    width: 100%;
+}
+
 .modal-content form button {
-    width: 108%;
+    width: 100%;
 }
 
 .modal-product-item {
