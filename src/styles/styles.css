@@ -405,6 +405,7 @@ body::after {
     justify-content: center;
     color: white;
     margin: 0;
+    margin-right: 0.2rem;
     font-size: 0.8rem;
     text-transform: capitalize;
     align-self: flex-end;
@@ -416,8 +417,8 @@ body::after {
     letter-spacing: 1px;
     line-height: 2;
     display: inline-block;
-    margin: 0 5px;
-    padding: 0.2rem 1rem;
+    margin: 0 2px;
+    padding: 0.2rem 0.8rem;
     background: #00000082;
     color: #d2d2d2;
     border-radius: 8px;

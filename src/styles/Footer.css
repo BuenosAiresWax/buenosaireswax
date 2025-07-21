@@ -1,7 +1,9 @@
 .footer {
     padding: 1rem;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    color: rgb(208, 208, 208);
+    font-family: var(--title-font);
 }
 
 body.modal-abierto {
@@ -11,12 +13,26 @@ body.modal-abierto {
 .faq-link {
     background: none;
     border: none;
-    color: #9b9b9b;
+    color: rgb(208, 208, 208);
     text-decoration: underline;
     cursor: pointer;
     margin-top: 0.5rem;
     text-align: start;
     width: 100%;
+    font-size: 0.8rem;
+    font-family: var(--title-font), sans-serif;
+}
+
+footer p{
+    text-align: start;
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
+    font-family: var(--title-font), sans-serif;
+}
+
+footer p:first-of-type{
+    font-size: 0.8rem;
+    margin-top: 2rem;
 }
 
 .faq-backdrop {
@@ -78,6 +94,7 @@ body.modal-abierto {
     cursor: pointer;
     margin-top: 0.5rem;
     transition: color 0.2s;
+    background-color: rgba(255, 255, 255, 0.11);
 }
 
 .faq-question.abierta {
@@ -99,7 +116,8 @@ body.modal-abierto {
     position: absolute;
     bottom: 0.5rem;
     right: 0.5rem;
-    background-color: #00000030; /* Fondo oscuro */
+    background-color: #00000030;
+    /* Fondo oscuro */
     color: white;
     width: 32px;
     height: 32px;

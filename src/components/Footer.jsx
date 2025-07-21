@@ -7,11 +7,14 @@ function Footer() {
 
     return (
         <footer className="footer">
-            <p>&copy; {new Date().getFullYear()} Buenos Aires Wax</p>
             <button onClick={() => setMostrarFAQ(true)} className="faq-link">
                 Preguntas frecuentes
             </button>
+            <p>Contacto:</p>
+            <p>buenosaireswax@gmail.com</p>
+            <p>+541130504515</p>
             {mostrarFAQ && <FaqModal onClose={() => setMostrarFAQ(false)} />}
+            <span>&copy; {new Date().getFullYear()}</span>
         </footer>
     );
 }
