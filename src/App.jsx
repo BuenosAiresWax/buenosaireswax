@@ -1,20 +1,19 @@
 import { useEffect, useState, useContext } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase/config";
+import { CartContext } from "./context/CartContext";
 import ProductList from "./components/ProductList";
 import PurchaseModal from "./components/PurchaseModal";
-import { CartContext } from "./context/CartContext";
-
-import "./styles/styles.css";
-import logo from '../assets/img/eStockFavicon.png';
-import logoFooter from '../assets/logo/logo-junto-negro.png';
-
-// Importar íconos locales
-import carritoVacio from '../assets/icons/carrito-vacio.svg';
-import carritoLleno from '../assets/icons/carrito-lleno.svg';
-
 import CartPopupButton from "./components/CartPopupButton";  // Importar nuevo botón
 import LoaderOverlay from "./components/LoaderOverlay";
+
+import "./styles/styles.css";
+
+import logo from '../assets/img/eStockFavicon.png';
+import logoFooter from '../assets/logo/logo-junto-negro.png';
+import carritoVacio from '../assets/icons/carrito-vacio.svg';
+import carritoLleno from '../assets/icons/carrito-lleno.svg';
+import Footer from "./components/Footer";
 
 
 function App() {
@@ -99,6 +98,8 @@ function App() {
           refetchProductos={fetchProductos}
         />
       )}
+
+      <Footer />
     </div>
   );
 }

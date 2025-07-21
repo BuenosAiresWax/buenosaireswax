@@ -437,14 +437,15 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                         required
                                         disabled={loading}
                                     >
-                                        <option value="" disabled>Seleccioná una opción</option>
+                                        <option value="" disabled>Seleccioná un medio de entrega</option>
                                         <option value="Retiro por Microcentro">Retiro por Microcentro</option>
                                         <option value="Retiro por Chacarita">Retiro por Chacarita</option>
                                         <option value="Envío a domicilio (Andreani)">Envío a domicilio (Andreani)</option>
                                     </select>
                                 </label>
 
-                                {!metodoEntrega.includes("Retiro") && (
+                                {metodoEntrega === "Envío a domicilio (Andreani)" && (
+
                                     <>
                                         <input
                                             type="text"
