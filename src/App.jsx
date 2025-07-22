@@ -6,6 +6,7 @@ import ProductList from "./components/ProductList";
 import PurchaseModal from "./components/PurchaseModal";
 import CartPopupButton from "./components/CartPopupButton";  // Importar nuevo botón
 import LoaderOverlay from "./components/LoaderOverlay";
+import Footer from "./components/Footer";
 
 import "./styles/styles.css";
 
@@ -13,7 +14,6 @@ import logo from '../assets/img/eStockFavicon.png';
 import logoFooter from '../assets/logo/logo-junto-negro.png';
 import carritoVacio from '../assets/icons/carrito-vacio.svg';
 import carritoLleno from '../assets/icons/carrito-lleno.svg';
-import Footer from "./components/Footer";
 
 
 function App() {
