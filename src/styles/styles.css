@@ -246,7 +246,7 @@ body::after {
 .product-list {
     display: flex;
     flex-flow: row wrap;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     gap: 1rem;
 
@@ -300,7 +300,6 @@ body::after {
     display: flex;
     flex-flow: column;
     justify-content: center;
-    height: 100%;
     width: auto;
     padding: 0 1rem;
     min-width: 200px;

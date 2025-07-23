@@ -99,6 +99,7 @@ footer p:first-of-type{
 
 .faq-question.abierta {
     color: rgb(255, 255, 255);
+    background: transparent;
 }
 
 .faq-answer {
