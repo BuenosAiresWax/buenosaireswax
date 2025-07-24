@@ -23,14 +23,23 @@ body.modal-abierto {
     font-family: var(--title-font), sans-serif;
 }
 
-footer p{
+footer p {
     text-align: start;
     padding: 0 0.5rem;
     font-size: 0.8rem;
     font-family: var(--title-font), sans-serif;
 }
 
-footer p:first-of-type{
+.footerBtnWsp {
+    display: block;
+    text-align: start;
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
+    font-family: var(--title-font), sans-serif;
+    color: rgb(208, 208, 208);
+}
+
+footer p:first-of-type {
     font-size: 0.8rem;
     margin-top: 2rem;
 }

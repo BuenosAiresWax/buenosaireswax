@@ -12,7 +12,9 @@ function Footer() {
             </button>
             <p>Contacto:</p>
             <p>buenosaireswax@gmail.com</p>
-            <p>+541130504515</p>
+            <a className="footerBtnWsp" href="https://wa.me/5491112345678?text=Hola%20BAWAX!%20" target="_blank">
+                Ayuda
+            </a>
             {mostrarFAQ && <FaqModal onClose={() => setMostrarFAQ(false)} />}
             <span>&copy; {new Date().getFullYear()}</span>
         </footer>
