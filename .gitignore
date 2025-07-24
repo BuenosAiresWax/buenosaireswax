@@ -1,4 +1,5 @@
 firebaseUploader/
+.env
 
 # Logs
 logs
