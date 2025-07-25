@@ -4,9 +4,14 @@ import "../styles/Footer.css"; // tus estilos externos
 
 const preguntas = [
     {
+        pregunta: "¿Dónde puedo hacer una consulta?",
+        respuesta:
+            "Escribinos a buenosaireswax@gmail.com o por WhatsApp al +54 9 11 1234 5678.",
+    },
+    {
         pregunta: "¿Cuáles son los medios de pago?",
         respuesta:
-            "Aceptamos pagos con Mercado Pago, tarjeta de débito/crédito y transferencias bancarias.",
+            "Aceptamos pagos con Mercado Pago a traves tarjeta de débito/crédito, transferencias bancarias y mas.",
     },
     {
         pregunta: "¿Cómo funcionan los envíos?",
@@ -17,6 +22,11 @@ const preguntas = [
         pregunta: "¿Cómo puedo comprar?",
         respuesta:
             "Agregás productos al carrito, completás tus datos y generás el pedido. Luego nos enviás el comprobante por WhatsApp.",
+    },
+    {
+        pregunta: "Realicé una compra pero olvidé enviar el comprobante, ¿qué hago?",
+        respuesta:
+            "No te preocupes. Podés enviarnos el comprobante por WhatsApp al +54 1150050556 para poder avanzar con el pedido.",
     },
     {
         pregunta: "¿Cuánto tarda en llegar mi pedido?",
