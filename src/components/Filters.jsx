@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import "../styles/styles.css"; // Asegurate de tener este archivo o usar CSS-in-JS si preferís
+import "../styles/styles.css";
+import searchIcon from "../../assets/icons/lupa.png";
 
 function Filters({
     filtroTexto,
@@ -29,13 +30,16 @@ function Filters({
 
     return (
         <div className="filters-container">
-            <input
-                type="text"
-                placeholder="Buscar por título..."
-                value={filtroTexto}
-                onChange={(e) => setFiltroTexto(e.target.value)}
-                className="filters-item full"
-            />
+            <div className="search-input-container filters-item full">
+                <img src={searchIcon} alt="Buscar" className="search-icon" />
+                <input
+                    type="text"
+                    placeholder="Buscar por título..."
+                    value={filtroTexto}
+                    onChange={(e) => setFiltroTexto(e.target.value)}
+                    className="search-input"
+                />
+            </div>
 
             <select value={selloSeleccionado} onChange={(e) => setSelloSeleccionado(e.target.value)} className="filters-item">
                 <option value="">Sellos</option>
