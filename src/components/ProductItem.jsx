@@ -3,10 +3,11 @@ import { CartContext } from "../context/CartContext";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import FaqModal from "./FaqModal";
+import '../styles/ProductItem.css'
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
     const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
-    const [producto, setProducto] = useState(productoProp); // estado local en tiempo real
+    const [producto, setProducto] = useState(productoProp);
     const [mostrarFaq, setMostrarFaq] = useState(false);
 
     useEffect(() => {
@@ -16,7 +17,6 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 setProducto(docSnap.data());
             }
         });
-
         return () => unsubscribe();
     }, [productoProp.id]);
 
@@ -42,64 +42,57 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     };
 
     return (
-        <div className="product-item">
+        <div className="product-card">
             <div className="image">
                 <img src={producto.imagen} alt={producto.titulo} />
+                {producto.escucha && (
+                    <a
+                        href={producto.escucha}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="play-button"
+                        title="Escuchar"
+                    >
+                        ▶
+                    </a>
+                )}
             </div>
 
             <div className="info">
-                <h2
-                    className="productTitle"
-                    style={stockDisponible <= 0 ? { textDecoration: "line-through" } : {}}
-                >
-                    {producto.titulo}
-                </h2>
+                <div className="itemTitleContainer">
+                    <h2
+                        style={
+                            stockDisponible <= 0
+                                ? { textDecoration: "line-through", color: "#888" }
+                                : {}
+                        }
+                    >
+                        {producto.titulo}
+                    </h2>
+                    <button
+                        className="add-button"
+                        onClick={handleAdd}
+                        title="Agregar al carrito"
+                        disabled={stockDisponible <= 0}
+                    >
+                        {stockDisponible <= 0 ? "×" : "+"}
+                    </button>
+                </div>
                 <p className="price">${producto.precio}</p>
-                <h3 className="description">{producto.descripcion}</h3>
-                <p className="sello">Made by: {producto.sello}  - {producto.estilo}</p>
-                <p className="textoEscucha">🔊 Escucha: <a className="enlaceEscucha" href={producto.escucha} target="_blank" rel="noopener noreferrer">{producto.titulo}</a></p>
-            </div>
+                <p className="description">{producto.descripcion} - {producto.estilo}</p>
+                <p className="sello">
+                    Made by: {producto.sello}
+                </p>
 
-            <div className="cta">
-                <div className="cta-content">
-                    <div className="categoria">
-                        <span> {producto.autor}</span>
-                        <span>{producto.genero}</span>
-                        <span>{producto.categoria}</span>
-                    </div>
-
-                    <div className="button-row">
-                        <button
-                            className={`reservarBtn ${stockDisponible <= 0 ? "agotado" : ""}`}
-                            style={stockDisponible <= 0 ? { color: "rgb(255 0 0)" } : {}}
-                            onClick={handleAdd}
-                            disabled={stockDisponible <= 0}
-                            title={stockDisponible <= 0 ? "Sin stock disponible" : ""}
-                        >
-                            {stockDisponible <= 0 ? "AGOTADO" : "Agregar al carrito"}
-                        </button>
-                        <button
-                            className="removeBtn"
-                            onClick={handleRemove}
-                            title="Quitar del carrito"
-                            style={stockDisponible <= 0 ? { color: "#b20000" } : {}}
-                        >
-                            ×
-                        </button>
-                    </div>
-
-                    <div className="stock" style={stockDisponible <= 0 ? { color: "red", padding: "4px", borderRadius: "4px" } : {}}>
-                        Stock: {stockDisponible}
-                        {cantidadEnCarrito > 0 && (
-                            <span style={{ marginLeft: "10px", fontWeight: "bold" }}>
-                                (En carrito: {cantidadEnCarrito})
-                            </span>
-                        )}
-                    </div>
+                <div className="stock">
+                    Stock: {stockDisponible}
+                    {cantidadEnCarrito > 0 && (
+                        <span> (En carrito: {cantidadEnCarrito})</span>
+                    )}
                 </div>
             </div>
 
-            {/* Botón flotante de FAQ */}
+            {/* Botón flotante FAQ */}
             <div
                 className="faq-button"
                 onClick={() => setMostrarFaq(true)}
@@ -108,7 +101,6 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 i
             </div>
 
-            {/* Modal de FAQ */}
             {mostrarFaq && <FaqModal onClose={() => setMostrarFaq(false)} />}
         </div>
     );

@@ -1,8 +1,14 @@
 @font-face {
-    font-family: 'Audiowide';
-    src: url('/assets/fonts/Audiowide-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
+    src: url(../../assets/fonts/DMMono-Light.ttf);
+    font-family: "DM Mono";
+    font-weight: 300;
+    font-style: Light;
+    font-size: 17.97px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+
 }
 
 body {
@@ -13,56 +19,16 @@ body {
     overflow-x: hidden;
 }
 
-/* Imagen flotante decorativa */
-body::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("../../assets/logo/logo-junto-negro.png");
-    background-size: 120px;
-    background-repeat: repeat;
-    background-position: center;
-    z-index: 999;
-    pointer-events: none;
-    filter: brightness(100);
-    opacity: 0.03;
-    z-index: -10;
-    overflow: hidden;
-}
-
-.tituloPrincipal {
-    display: inline-block;
-    font-family: var(--title-font), sans-serif;
-    font-size: 2.8rem;
-    margin: 0 5%;
-    margin-top: 2rem;
-    padding: 0;
-    line-height: 1;
-    border-bottom: 2px solid #fbfbfb;
-    text-transform: uppercase;
-}
-
-.tituloSecundario {
-    font-family: var(--title-font), sans-serif;
-    font-size: 1.5rem;
-    margin: 0 5%;
-    margin-bottom: 3rem;
-    padding: 0;
-}
-
 /* tarjeta mensaje sin stock */
 .product-item.no-results {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 2rem;
-    background: #2c2c2c;
+    background: var(--color-fondo);
     border-radius: 8px;
     text-align: center;
-    color: #fff;
+    color: var(--color-letra);
     font-family: var(--title-font);
 }
 
@@ -82,7 +48,7 @@ body::after {
 .skeleton-box {
     width: 100%;
     height: 200px;
-    background: #444;
+    background: var(--color-fondo);
 }
 
 .skeleton-line {
@@ -119,8 +85,7 @@ body::after {
 
 /* general */
 .app-container {
-    max-width: 1200px;
-    min-height: 100svh;
+    max-width: 100%;
     margin: 0 auto;
 }
 
@@ -128,14 +93,27 @@ body::after {
 .headerContainer {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     padding: 0 5%;
-    background-color: #f5f5f500;
+    background-color: var(--color-fondo);
+}
+
+.rightNav {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.contactoNav {
+    text-decoration: none;
+    color: var(--color-letra);
+    margin-right: 3rem;
 }
 
 .logo {
-    height: 100px;
-    border-radius: 100%;
+    width: auto;
+    filter: brightness(10);
 }
 
 .cartIcon {
@@ -153,13 +131,13 @@ body::after {
     position: absolute;
     top: -6px;
     right: 0px;
-    background-color: #222;
+    background-color: var(--color-fondo);
     border-radius: 50%;
     padding: 2px 6px;
     font-family: var(--title-font), sans-serif;
     font-size: 12px;
     font-weight: bold;
-    color: #fff;
+    color: var(--color-letra);
     min-width: 20px;
     text-align: center;
     user-select: none;
@@ -174,8 +152,13 @@ body::after {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 1rem;
-    padding: 0 5%;
+    padding: 1rem 0;
+    margin: 0 8%;
+    margin-bottom: 3rem;
     background-color: transparent;
+    border-top: 0.5px solid var(--color-letra);
+    border-bottom: 0.5px solid var(--color-letra);
+    opacity: 0.5;
 }
 
 .filters-container input,
@@ -184,14 +167,18 @@ body::after {
     background-color: transparent;
     margin: 0;
     padding: 0.5rem;
-    font-size: 0.8rem;
-    font-family: var(--title-font), sans-serif;
-    color: #a1a1a1;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+
 }
 
 .filters-container select:focus {
-    background-color: #222;
-    color: #d2d2d2;
+    background-color: var(--color-fondo);
+    color: var(--color-letra);
 }
 
 .filters-item {
@@ -202,10 +189,15 @@ body::after {
 
 .filters-clear-btn {
     font-family: var(--title-font), sans-serif;
-    font-size: 0.8rem;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
     background: transparent;
     border: none;
-    color: #a1a1a1;
+    color: var(--color-letra);
     padding: 0.5rem 1rem;
     cursor: pointer;
     align-self: flex-start;
@@ -239,267 +231,6 @@ body::after {
 
     .full {
         flex: 1;
-    }
-}
-
-/* lista de productos */
-.product-list {
-    display: flex;
-    flex-flow: row wrap;
-    align-items: stretch;
-    justify-content: center;
-    gap: 1rem;
-
-}
-
-/* producto item */
-.product-item {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-flow: column;
-    background: rgba(255, 255, 255, 0);
-    /* Fondo translúcido más claro */
-    border-radius: 12px;
-    color: rgb(230, 230, 230);
-    width: 31%;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-        0 1px 2px rgba(255, 255, 255, 0.04),
-        0 8px 32px rgba(0, 0, 0, 0.25);
-    /* Para que el brillo no sobresalga */
-    transition: .4s;
-}
-
-.product-item:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.044), 0 2px 6px rgba(0, 0, 0, 0.06);
-    transition: .4s;
-}
-
-.product-item .image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    min-height: 280px;
-    padding-bottom: 0.5rem;
-}
-
-.product-item .image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px 4px 0 0;
-}
-
-.product-item .info {
-    position: relative;
-    display: flex;
-    flex-flow: column;
-    justify-content: center;
-    width: auto;
-    padding: 0 1rem;
-    min-width: 200px;
-    overflow: hidden;
-}
-
-
-/* Imagen flotante decorativa */
-.product-item .info::after {
-    content: "";
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 500px;
-    height: auto;
-    background-image: url("../../assets/logo/B-negro.png");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: bottom right;
-    transform: rotate(-8deg);
-    z-index: 999;
-    pointer-events: none;
-}
-
-.product-item .info .productTitle {
-    font-size: 1.2rem;
-    font-family: var(--text-font), Courier, monospace;
-    font-weight: 700;
-    margin: 0;
-}
-
-.product-item .info .price {
-    font-size: 1.4rem;
-    font-family: var(--title-font), sans-serif;
-    font-weight: 700;
-    margin: 0.5rem 0 1rem;
-}
-
-.product-item .info .description {
-    font-size: 0.8rem;
-    font-family: var(--text-font), Courier, monospace;
-    color: #999696;
-    margin: 0;
-    width: 90%;
-}
-
-.product-item .info .sello {
-    color: #999696;
-    font-size: 0.8rem;
-    margin: 0.5rem 0 0;
-    padding: 0;
-}
-
-.product-item .info .textoEscucha {
-    color: #999696;
-    font-size: 0.8rem;
-}
-
-.product-item .info .enlaceEscucha {
-    color: #999696;
-    font-size: 0.8rem;
-}
-
-.button-row {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-}
-
-/* producto item parte derecha */
-.product-item .cta {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    padding-top: 0;
-    min-width: 150px;
-    box-sizing: border-box;
-}
-
-/* Nuevo contenedor interno */
-.product-item .cta-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Categoría arriba */
-.product-item .categoria {
-    position: absolute;
-    top: 0.4rem;
-    right: 0;
-    width: auto;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    color: white;
-    margin: 0;
-    margin-right: 0.2rem;
-    font-size: 0.8rem;
-    text-transform: capitalize;
-    align-self: flex-end;
-}
-
-.categoria span {
-    font-family: var(--text-font), Courier, monospace;
-    font-size: 0.6rem;
-    letter-spacing: 1px;
-    line-height: 2;
-    display: inline-block;
-    margin: 0 2px;
-    padding: 0.2rem 0.8rem;
-    background: #00000082;
-    color: #d2d2d2;
-    border-radius: 8px;
-    border: 1.5px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.077);
-    cursor: default;
-}
-
-/* Botón centrado */
-.product-item .cta-content button {
-    padding: 0.5rem 0.5rem;
-    margin: 0.5rem 0;
-    width: max-content;
-    background: transparent;
-    color: rgb(226, 226, 226);
-    border: none;
-    cursor: pointer;
-    transition: .4s;
-    font-family: var(--title-font), Courier;
-    font-size: 1.1rem;
-}
-
-.product-item .cta-content button:first-of-type {
-    text-decoration: underline;
-}
-
-.product-item .cta-content button:last-of-type {
-    font-size: 1.8rem;
-}
-
-/* Botón centrado */
-.product-item .cta-content button:hover {
-    background: #4747473a;
-    transition: .4s;
-}
-
-/* Stock abajo */
-.product-item .stock {
-    font-family: var(--title-font), Verdana, Geneva, Tahoma, sans-serif;
-    font-size: 0.8rem;
-    color: #999696;
-}
-
-.stock span {
-    font-family: var(--text-font), Courier, monospace;
-    font-weight: 400;
-    font-size: 0.75rem;
-    color: #ccc;
-}
-
-/* boton eliminar prodcutos */
-.product-item.fade-in {
-    animation: fadeIn 0.3s forwards;
-}
-
-.product-item.fade-out {
-    animation: fadeOut 0.3s forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    to {
-        opacity: 0;
-        transform: translateY(10px);
     }
 }
 
@@ -1073,25 +804,6 @@ body::after {
     body::after {
         opacity: 0.02;
         background-image: url("../../assets/logo/B-negro.png");
-    }
-
-    .logo {
-        height: 75px;
-    }
-
-    .tituloPrincipal {
-        font-size: 1.6rem;
-        margin: 0;
-        margin-top: 2rem;
-        padding: 0;
-        line-height: 1;
-        border-bottom: 2px solid #b5b2b2;
-    }
-
-    .tituloSecundario {
-        font-family: var(--title-font), sans-serif;
-        font-size: 1.1rem;
-        margin: 0;
     }
 
     .stock-aviso {

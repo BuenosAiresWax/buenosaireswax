@@ -9,6 +9,8 @@ import Filters from "./Filters";
 import Notificacion from "./Notificacion";
 import Spinner from "./Spinner";
 
+import '../styles/ProductList.css'
+
 const BATCH_SIZE = 15;
 const MIN_LOADING_TIME = 800; // ms mínimo para mostrar spinner
 

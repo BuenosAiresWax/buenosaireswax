@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase/config";
 import { CartContext } from "./context/CartContext";
+import Hero from "./components/Hero";
 import ProductList from "./components/ProductList";
 import PurchaseModal from "./components/PurchaseModal";
 import CartPopupButton from "./components/CartPopupButton";  // Importar nuevo botón
@@ -10,7 +11,7 @@ import Footer from "./components/Footer";
 
 import "./styles/styles.css";
 
-import logo from '../assets/img/eStockFavicon.png';
+import logo from '../assets/logo/header-logo.png';
 import logoFooter from '../assets/logo/logo-junto-negro.png';
 import carritoVacio from '../assets/icons/carrito-vacio.svg';
 import carritoLleno from '../assets/icons/carrito-lleno.svg';
@@ -55,28 +56,29 @@ function App() {
       <div className="headerContainer">
         <img src={logo} alt="eStock" className="logo" />
 
-        <div
-          className="cartIcon"
-          onClick={() => {
-            if (totalCantidad > 0) {
-              setMostrarModal(true);
-            }
-          }}
-          style={{ cursor: totalCantidad > 0 ? 'pointer' : 'default' }}
-          title={totalCantidad > 0 ? 'Ver carrito' : 'Carrito vacío'}
-        >
-          <img
-            src={totalCantidad > 0 ? carritoLleno : carritoVacio}
-            alt="Carrito"
-            className="cartSVG"
-          />
-          <span className="cartCount">{totalCantidad}</span>
+        <div className="rightNav">
+          <a className="contactoNav" href="#">Contacto</a>
+          <div
+            className="cartIcon"
+            onClick={() => {
+              if (totalCantidad > 0) {
+                setMostrarModal(true);
+              }
+            }}
+            style={{ cursor: totalCantidad > 0 ? 'pointer' : 'default' }}
+            title={totalCantidad > 0 ? 'Ver carrito' : 'Carrito vacío'}
+          >
+            <img
+              src={totalCantidad > 0 ? carritoLleno : carritoVacio}
+              alt="Carrito"
+              className="cartSVG"
+            />
+            <span className="cartCount">{totalCantidad}</span>
+          </div>
         </div>
       </div>
 
-      <h1 className="tituloPrincipal">Buenos Aires Wax</h1>
-
-      <h2 className="tituloSecundario">Online Vinyl Record Store</h2>
+      <Hero />
 
 
       <ProductList
