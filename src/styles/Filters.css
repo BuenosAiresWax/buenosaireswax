@@ -1,0 +1,117 @@
+.filters-container {
+    display: flex;
+    flex-flow: column;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    margin: 0 8% 3rem;
+    padding: 1rem 0;
+    border-top: 0.5px solid var(--color-letra);
+    border-bottom: 0.5px solid var(--color-letra);
+    opacity: 0.5;
+}
+
+
+.filters-item {
+    min-width: 120px;
+    padding: 0.5rem;
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: var(--color-letra);
+    font-weight: 300;
+}
+
+.filters-group {
+    display: flex;
+    flex-wrap: wrap;
+    flex-flow: row;
+    width: 100%;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.filters-container select:focus {
+    background-color: var(--color-fondo);
+    color: var(--color-letra);
+}
+
+.search-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 60%;
+}
+
+.search-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 0.5rem;
+    opacity: 0.7;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 16px;
+    font-weight: 300;
+    background: transparent;
+    border: none;
+    color: var(--color-letra);
+    text-transform: uppercase;
+}
+
+.filters-clear-btn {
+    border: none;
+    font-size: 16px;
+    font-weight: 300;
+    background: transparent;
+    border: none;
+    color: var(--color-letra);
+    text-transform: uppercase;
+}
+
+@media (max-width: 767px) {
+
+    .filters-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 0 3rem;
+    }
+
+    .filters-group {
+        width: 100%;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.5rem;
+        margin-left: 0;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-letra) transparent;
+    }
+
+    .filters-group::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .filters-group::-webkit-scrollbar-thumb {
+        background-color: var(--color-letra);
+        border-radius: 4px;
+    }
+
+    .search-input-container {
+        width: 100%;
+    }
+
+    .search-input-container {
+        min-width: 200px;
+        flex: 1 1 200px;
+        max-width: 300px;
+    }
+
+    .filters-item {
+        flex: 0 0 auto;
+    }
+}

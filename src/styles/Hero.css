@@ -46,3 +46,14 @@
     vertical-align: middle;
 
 }
+
+@media (max-width: 767px) {
+    .hero {
+        background-image: url("../../assets/hero/hero-desktop.png");
+        width: 100%;
+        height: 120px;
+        margin: 3rem auto;
+        background-size: cover;
+
+    }
+}

@@ -24,10 +24,8 @@
 .footer-description {
     font-family: var(--text-font);
     font-weight: 300;
-    font-style: Light;
-    font-size: 11.02px;
+    font-size: 13px;
     line-height: 130%;
-    letter-spacing: 0%;
     vertical-align: middle;
 
 }
