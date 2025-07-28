@@ -24,7 +24,7 @@ const preguntas = [
             "Agregás productos al carrito, completás tus datos y generás el pedido. Luego nos enviás el comprobante por WhatsApp.",
     },
     {
-        pregunta: "Realicé una compra pero olvidé enviar el comprobante, ¿qué hago?",
+        pregunta: "¿Qué hago si realice un pedido y no pude enviar el comprobante?",
         respuesta:
             "No te preocupes. Podés enviarnos el comprobante por WhatsApp al +54 1150050556 para poder avanzar con el pedido.",
     },

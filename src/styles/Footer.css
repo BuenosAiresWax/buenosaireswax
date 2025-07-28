@@ -1,47 +1,105 @@
 .footer {
-    padding: 1rem;
-    text-align: center;
-    font-size: 0.8rem;
-    color: rgb(208, 208, 208);
-    font-family: var(--title-font);
+    background-color: var(--color-fondo);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 2rem 5%;
+    font-family: var(--title-font, 'Courier New', Courier, monospace);
+    flex-wrap: wrap;
+    margin-top: 3rem;
 }
 
-body.modal-abierto {
-    overflow: hidden;
+.footer-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.footer-logo {
+    height: 32px;
+}
+
+.footer-description {
+    font-family: var(--text-font);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 11.02px;
+    line-height: 130%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+
+}
+
+.footer-instagram {
+    width: 40px;
+    height: 40px;
+    margin-top: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.footer-instagram:hover {
+    transform: scale(1.1);
+}
+
+.footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.footer-right a {
+    text-decoration: none;
+    color: var(--color-letra);
+    margin-top: 0.5rem;
+}
+
+.footer-right p:last-of-type {
+    font-family: var(--text-font);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 13px;
+    line-height: 130%;
+    letter-spacing: 0%;
+    text-align: right;
+    vertical-align: middle;
+
 }
 
 .faq-link {
     background: none;
     border: none;
-    color: rgb(208, 208, 208);
-    text-decoration: underline;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
     cursor: pointer;
-    margin-top: 0.5rem;
-    text-align: start;
-    width: 100%;
-    font-size: 0.8rem;
-    font-family: var(--title-font), sans-serif;
+    font-family: Helvetica;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
 }
 
-footer p {
-    text-align: start;
-    padding: 0 0.5rem;
-    font-size: 0.8rem;
-    font-family: var(--title-font), sans-serif;
+.contact-link {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: Helvetica;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
 }
 
-.footerBtnWsp {
-    display: block;
-    text-align: start;
-    padding: 0 0.5rem;
-    font-size: 0.8rem;
-    font-family: var(--title-font), sans-serif;
-    color: rgb(208, 208, 208);
-}
-
-footer p:first-of-type {
-    font-size: 0.8rem;
-    margin-top: 2rem;
+.email {
+    font-size: 0.75rem;
 }
 
 .faq-backdrop {
@@ -61,6 +119,13 @@ footer p:first-of-type {
 
 .faq-modal {
     font-family: var(--title-font);
+    font-family: Helvetica;
+    font-weight: 300;
+    font-style: Light;
+    font-size: 22.09px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
     background: rgba(33, 33, 33, 0.872);
     padding: 1rem;
     margin: 1rem;
@@ -98,8 +163,13 @@ footer p:first-of-type {
     text-align: left;
     padding: 1rem;
     border: none;
-    font-weight: bold;
-    font-family: var(--title-font);
+    font-family: var(--text-font);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 17px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
     cursor: pointer;
     margin-top: 0.5rem;
     transition: color 0.2s;
@@ -118,29 +188,27 @@ footer p:first-of-type {
 
 .faq-answer p {
     margin: 0.5rem 0 1rem;
-    font-size: 0.95rem;
+    font-family: var(--text-font);
+    font-weight: 300;
+    font-style: Light;
+    font-size: 13px;
+    letter-spacing: 0%;
+    vertical-align: middle;
 }
 
-/*item*/
-.faq-button {
-    position: absolute;
-    bottom: 0.5rem;
-    right: 0.5rem;
-    background-color: #00000030;
-    /* Fondo oscuro */
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    font-size: 18px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
 
-.faq-button:hover {
-    background-color: #333;
+
+/* Responsive */
+@media (max-width: 600px) {
+    .footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-left,
+    .footer-right {
+        align-items: center;
+        text-align: center;
+    }
 }

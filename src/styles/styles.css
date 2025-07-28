@@ -96,6 +96,7 @@ body {
     align-items: center;
     padding: 0 5%;
     background-color: var(--color-fondo);
+    margin-top: 1rem;
 }
 
 .rightNav {
@@ -109,6 +110,15 @@ body {
     text-decoration: none;
     color: var(--color-letra);
     margin-right: 3rem;
+    font-family: Helvetica;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+    text-transform: uppercase;
+
 }
 
 .logo {
@@ -123,8 +133,8 @@ body {
 }
 
 .cartSVG {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
 }
 
 .cartCount {

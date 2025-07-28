@@ -12,7 +12,6 @@ import Footer from "./components/Footer";
 import "./styles/styles.css";
 
 import logo from '../assets/logo/header-logo.png';
-import logoFooter from '../assets/logo/logo-junto-negro.png';
 import carritoVacio from '../assets/icons/carrito-vacio.svg';
 import carritoLleno from '../assets/icons/carrito-lleno.svg';
 
@@ -86,10 +85,6 @@ function App() {
         loading={loading}
         refetchProductos={fetchProductos}
       />
-
-      <div className="footerContainer">
-        <img src={logoFooter} alt="" />
-      </div>
 
       {/* Botón flotante para abrir carrito */}
       <CartPopupButton onOpen={() => setMostrarModal(true)} />
