@@ -60,7 +60,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
             <div className="info">
                 <div className="itemTitleContainer">
-                    <h2
+                    <h3
                         style={
                             stockDisponible <= 0
                                 ? { textDecoration: "line-through", color: "#888" }
@@ -68,7 +68,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                         }
                     >
                         {producto.titulo}
-                    </h2>
+                    </h3>
                     <button
                         className="add-button"
                         onClick={handleAdd}
@@ -80,9 +80,9 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 </div>
                 <p className="price">${producto.precio}</p>
                 <p className="description">{producto.descripcion} - {producto.estilo}</p>
-                <p className="sello">
+                <h4 className="sello">
                     Made by: {producto.sello}
-                </p>
+                </h4>
 
                 <div className="stock">
                     Stock: {stockDisponible}
