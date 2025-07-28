@@ -1,0 +1,580 @@
+/* modal de compra */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s ease, opacity 0.2s ease;
+    z-index: 100;
+}
+
+.modal-backdrop.visible {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 1;
+}
+
+.modal {
+    background: rgba(33, 33, 33, 0.872);
+    /* fondo translúcido */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    /* borde difuso */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* compatibilidad Safari */
+    box-shadow:
+        0 2px 4px rgba(255, 255, 255, 0.05),
+        0 8px 20px rgba(255, 255, 255, 0.08),
+        0 0 4px rgba(255, 255, 255, 0.03);
+
+    padding: 1.5rem;
+    border-radius: 8px;
+    min-width: 25%;
+    width: 40%;
+    height: 80%;
+    position: relative;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    overflow-y: auto;
+    z-index: 1000000;
+
+}
+
+.fade-in {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.fade-out {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.modal .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.modal-content img {
+    width: 100%;
+    border-radius: 0.2rem;
+    height: auto;
+    margin: 1rem 0;
+}
+
+.modalTitle {
+    font-size: 1.5rem;
+    font-family: Verdana, sans-serif;
+    font-weight: 700;
+}
+
+.modalPrice {
+    font-size: 1.2rem;
+    font-family: Verdana, sans-serif;
+    font-weight: 700;
+}
+
+.modalText {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.modalText:first-of-type {
+    width: 80%;
+    margin: 0 auto;
+    margin-bottom: 3rem;
+}
+
+.modalText:nth-of-type(2) {
+    text-align: start;
+}
+
+.modalText:nth-of-type(3) {
+    margin-top: 4rem;
+}
+
+.modal-content form {
+    display: flex;
+    flex-wrap: wrap;
+    /* permite que los inputs salten a la siguiente línea */
+    gap: 1rem;
+    /* espacio entre columnas y filas */
+    justify-content: space-between;
+    width: 100%;
+}
+
+.metodo-entrega-label {
+    width: 100%;
+    margin: 1rem 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    line-height: 2;
+}
+
+.metodo-entrega-label select {
+    border: none;
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    color: #7c7a7a;
+}
+
+.metodo-entrega-label select:focus {
+    background-color: #222;
+    color: #fff;
+}
+
+.modal-content form input,
+.modal-content form button {
+    /* dos columnas con algo de espacio entre ellas */
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: none;
+    border-bottom: 2px solid rgb(187, 185, 185);
+    border-radius: 0;
+    box-sizing: border-box;
+}
+
+.modal-content form input {
+    width: 48%;
+    background-color: rgb(28, 27, 27);
+}
+
+.modal-content>form>input:nth-of-type(-n+3) {
+    width: 100%;
+}
+
+.modal-content form button {
+    width: 100%;
+}
+
+.modal-product-item {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 85%;
+    background-color: transparent;
+    padding: 1rem 1rem;
+    font-family: var(--title-font);
+
+}
+
+.modal-product-item.agotado {
+    background-color: #ffcccc8b;
+    border: 1px solid red;
+}
+
+.productoAgotadoMensaje {
+    font-family: var(--title-font);
+    color: rgb(255, 24, 24);
+    font-size: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+.btn-eliminar-agotados {
+    font-family: var(--title-font);
+    background-color: rgb(238, 51, 51);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    transition: .3s;
+}
+
+.btn-eliminar-agotados:hover {
+    background-color: rgb(231, 6, 6);
+}
+
+.delete-btn {
+    border: none;
+    color: rgb(167, 167, 167);
+    background-color: transparent;
+    font-size: 1.8rem;
+    transition: .5s;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    color: rgb(231, 231, 231);
+    transition: .5s;
+}
+
+.totalContainer {
+    text-align: center;
+    margin: 1rem 0;
+    font-size: 1.2rem;
+}
+
+.checkbox-confirmacion {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+    font-size: 1rem;
+    color: #cecccc;
+    font-family: var(--title-font), sans-serif;
+    /* o el color de texto que estés usando */
+}
+
+.checkbox-confirmacion input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    accent-color: #00bb2d;
+    margin: 1rem 1rem;
+    /* color verde WhatsApp o el que prefieras */
+}
+
+.checkbox-confirmacion label {
+    cursor: pointer;
+    user-select: none;
+    transition: .2s;
+    text-decoration: underline;
+}
+
+.checkbox-confirmacion label:hover {
+    color: #fff;
+    transition: .2s;
+}
+
+.btn-pago {
+    display: block;
+    text-align: center;
+    background-color: #009ee3;
+    font-family: var(--title-font);
+    font-size: 1rem;
+    color: rgb(55, 25, 25);
+    border: none;
+    padding: 0.7em 1.5em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 1rem 0;
+    width: 88%;
+}
+
+.btn-pago:hover {
+    background-color: #007bbd;
+}
+
+.btn-whatsapp-succes {
+    font-family: var(--title-font);
+    font-size: 1rem;
+    background-color: #25d366;
+    color: rgb(55, 25, 25);
+    border: none;
+    padding: 0.7em 1.5em;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: underline;
+    width: 100%;
+}
+
+.btn-copiar {
+    font-family: var(--title-font);
+    background-color: #f1f1f108;
+    border: none;
+    border-bottom: 1px solid #cccccc69;
+    color: #9e9d9d;
+    padding: 0.5rem 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-copiar:hover {
+    background-color: #313131;
+}
+
+.form-error {
+    font-family: var(--title-font);
+    background-color: #2d2b2b;
+    color: rgb(253, 17, 17);
+    width: 100%;
+    padding: 1rem 1rem;
+    text-align: center;
+}
+
+/* checkout modal */
+.comprobante {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+    background: #2c2c2c;
+    padding: 1rem;
+    border-radius: 10px;
+    color: #fff;
+    text-align: left;
+    margin-top: 1rem;
+    backdrop-filter: blur(6px);
+    text-align: center;
+    font-size: 1rem;
+}
+
+.comprobante h3 {
+    width: 100%;
+    font-size: 1.2rem;
+    font-family: var(--title-font), sans-serif;
+}
+
+.comprobante p {
+    margin: 0 2rem;
+}
+
+.comprobante h4 {
+    width: 100%;
+}
+
+.comprobante ul {
+    padding-left: 1rem;
+}
+
+.totalCheckout {
+    font-size: 2rem;
+    text-decoration: underline;
+}
+
+.info-box {
+    margin: 2rem 0;
+    font-weight: 400;
+    font-family: var(--title-font), Verdana;
+    font-size: 1rem;
+}
+
+.info-box span {
+    text-decoration: underline;
+    font-size: 4rem;
+}
+
+.modalText:last-of-type {
+    margin-top: 4rem;
+}
+
+.btn-whatsapp {
+    display: inline-block;
+    margin-top: 1rem;
+    background: #25d366;
+    color: rgb(25, 25, 25);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-whatsapp:hover {
+    background: #1ebe57;
+}
+
+.form input {
+    display: block;
+    margin-bottom: 0.75rem;
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+.copiarPortapapeles {
+    font-size: 0.8rem;
+    text-align: start;
+    display: inline;
+    margin-right: 0.5rem;
+}
+
+/* modal cerrar advertencia dentro del modal de carrito */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    height: 110%;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInConfirm 0.3s ease-out;
+    font-family: var(--title-font);
+}
+
+.confirm-box {
+    background: #1b1b1beb;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 400px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: scaleIn 0.3s ease-out;
+}
+
+.confirm-box h3 {
+    font-size: 1.5rem;
+}
+
+.confirm-box p {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    width: 80%;
+    margin: 1rem auto;
+}
+
+.confirm-box p:last-of-type {
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    gap: 1rem;
+}
+
+.btn-cancelar {
+    background: #ccc;
+    color: black;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-confirmar {
+    background: #e53935;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+@keyframes fadeInConfirm {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* estilos mobile */
+@media (max-width: 768px) {
+
+    .modal {
+        width: auto;
+        height: 90%;
+        padding: 1rem 1rem;
+        margin: 1rem;
+    }
+
+    .modalTitle {
+        margin-bottom: 3rem;
+    }
+
+    .modal-product-item {
+        padding: 0.5rem 0;
+        width: 90%;
+    }
+
+    .modal-product-list {
+        margin: 0;
+        padding: 0;
+    }
+
+    .modal-content form {
+        gap: 5px;
+    }
+
+    .modalText {
+        font-size: 0.8rem;
+    }
+
+    .modalText:first-of-type {
+        width: 100%;
+    }
+
+    .modalText:last-of-type {
+        margin-top: 4rem;
+    }
+
+    .checkbox-confirmacion {
+        font-size: 0.8rem;
+    }
+
+    .info-box {
+        margin: 3rem 0;
+    }
+
+    .info-box span {
+        font-size: 2.4rem;
+    }
+
+    .btn-whatsapp {
+        width: 100%;
+    }
+
+    .btn-pago {
+        width: 85%;
+        font-size: 0.8rem;
+    }
+
+    /* modal de confirmaion de cierre de carrito */
+    .confirm-box {
+        padding: 1rem;
+        max-width: 300px;
+    }
+
+    .confirm-box h3 {
+        font-size: 1.3rem;
+    }
+
+    .confirm-box p {
+        font-size: 0.8rem;
+        width: 100%;
+    }
+}

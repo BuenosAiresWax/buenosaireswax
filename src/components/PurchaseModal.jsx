@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
+import '../styles/PurchaseModal.css'
 
 function PurchaseModal({ onClose }) {
     const backdropRef = useRef(null);
