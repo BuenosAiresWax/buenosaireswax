@@ -274,7 +274,6 @@
     color: rgb(55, 25, 25);
     border: none;
     padding: 0.7em 1.5em;
-    border-radius: 5px;
     cursor: pointer;
     margin: 1rem 0;
     width: 88%;
@@ -293,10 +292,13 @@
     color: rgb(55, 25, 25);
     border: none;
     padding: 0.7em 1.5em;
-    border-radius: 5px;
     cursor: pointer;
-    text-decoration: underline;
     width: 100%;
+}
+
+
+.btn-whatsapp-succes:hover {
+    background: #1ebe57;
 }
 
 .btn-copiar {
@@ -349,22 +351,6 @@
     margin-top: 4rem;
 }
 
-
-.btn-whatsapp-succes {
-    font-family: var(--text-font);
-    display: inline-block;
-    margin-top: 1rem;
-    background: #25d366;
-    color: rgb(25, 25, 25);
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background 0.3s;
-}
-
-.btn-whatsapp:hover {
-    background: #1ebe57;
-}
 
 .form input {
     display: block;
