@@ -5,9 +5,10 @@ import { CartContext } from "./context/CartContext";
 import Hero from "./components/Hero";
 import ProductList from "./components/ProductList";
 import PurchaseModal from "./components/PurchaseModal";
-import CartPopupButton from "./components/CartPopupButton";  // Importar nuevo botón
+import CartPopupButton from "./components/CartPopupButton";
 import LoaderOverlay from "./components/LoaderOverlay";
 import Footer from "./components/Footer";
+import DropAccess from "./components/DropAccess";
 
 import "./styles/styles.css";
 
@@ -15,15 +16,20 @@ import logo from '../assets/logo/header-logo.png';
 import carritoVacio from '../assets/icons/carrito-vacio.svg';
 import carritoLleno from '../assets/icons/carrito-lleno.svg';
 
-
 function App() {
+  // Leer el valor guardado en localStorage para inicializar autenticado
+  const [autenticado, setAutenticado] = useState(() => {
+    return localStorage.getItem("autenticado") === "true";
+  });
+
   const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
 
   const { getTotalQuantity } = useContext(CartContext);
 
   const fetchProductos = async () => {
+    setLoading(true);
     try {
       const productosRef = collection(db, "productos");
       const snapshot = await getDocs(productosRef);
@@ -43,15 +49,23 @@ function App() {
   };
 
   useEffect(() => {
-    fetchProductos();
-  }, []);
+    if (autenticado) {
+      fetchProductos();
+    }
+  }, [autenticado]);
+
+  // Cuando el usuario se autentica guardamos en localStorage
+  const manejarAutenticacion = () => {
+    setAutenticado(true);
+    localStorage.setItem("autenticado", "true");
+  };
 
   const totalCantidad = getTotalQuantity();
 
   return (
     <div className="app-container">
-      <LoaderOverlay visible={loading} />
-      {/* Header */}
+      <LoaderOverlay visible={autenticado && loading} />
+
       <div className="headerContainer">
         <img src={logo} alt="eStock" className="logo" />
 
@@ -79,14 +93,19 @@ function App() {
 
       <Hero />
 
+      {!autenticado ? (
+        <DropAccess
+          fechaObjetivo="2025-08-02T20:00:00"
+          onAccesoPermitido={manejarAutenticacion}
+        />
+      ) : (
+        <ProductList
+          productos={productos}
+          loading={loading}
+          refetchProductos={fetchProductos}
+        />
+      )}
 
-      <ProductList
-        productos={productos}
-        loading={loading}
-        refetchProductos={fetchProductos}
-      />
-
-      {/* Botón flotante para abrir carrito */}
       <CartPopupButton onOpen={() => setMostrarModal(true)} />
 
       {mostrarModal && (
