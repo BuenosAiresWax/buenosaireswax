@@ -102,7 +102,7 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
                     {error && <p className="error">{error}</p>}
 
                     <button type="submit" className="btn-enviar-countdown">
-                        Enviar
+                        Acceder
                     </button>
                 </form>
             )}
