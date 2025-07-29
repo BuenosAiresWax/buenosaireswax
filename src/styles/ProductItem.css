@@ -59,9 +59,11 @@
     color: var(--color-letra);
     border: 1px solid var(--color-letra);
     border-radius: 50%;
-    font-size: 1.4rem;
-    width: 28px;
-    height: 28px;
+    font-family: var(--text-font);
+    font-size: 1.5rem;
+    font-weight: 300;
+    width: 30px;
+    height: 30px;
     text-align: center;
     line-height: 26px;
     cursor: pointer;

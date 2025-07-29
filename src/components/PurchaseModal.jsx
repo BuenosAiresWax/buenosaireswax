@@ -369,7 +369,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                             <img className="imagenCarrito" src={item.imagen} alt="" />
                                             <div>
                                                 <strong>{item.titulo}</strong> <br />
-                                                {item.cantidad} u = <strong>${item.precio * item.cantidad}</strong>
+                                                {item.cantidad}u  <strong>${item.precio * item.cantidad}</strong>
                                             </div>
                                         </div>
                                         <button

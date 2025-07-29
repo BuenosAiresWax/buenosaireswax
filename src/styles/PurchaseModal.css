@@ -519,12 +519,13 @@
 
     .modal-product-item {
         padding: 0.5rem 0;
-        width: 90%;
+        width: 100%;
     }
 
     .modal-product-list {
         margin: 0;
         padding: 0;
+        margin-bottom: 3rem;
     }
 
     .modal-content form {

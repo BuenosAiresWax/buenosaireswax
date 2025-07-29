@@ -144,3 +144,9 @@
     vertical-align: middle;
     color: var(--color-letra);
 }
+
+@media (max-width: 767px) {
+    .faq-modal {
+        font-size: 17px;
+    }
+}

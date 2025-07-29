@@ -114,13 +114,11 @@ body {
     margin-right: 3rem;
     font-family: Helvetica;
     font-weight: 700;
-    font-style: Bold;
     font-size: 16px;
     line-height: 100%;
-    letter-spacing: 0%;
+    letter-spacing: 0;
     vertical-align: middle;
     text-transform: uppercase;
-
 }
 
 .logo {
@@ -223,6 +221,8 @@ body {
 
     .contactoNav {
         margin-right: 1rem;
+        font-size: 12px;
+        display: none;
     }
 
     .stock-aviso {

@@ -2,7 +2,9 @@ import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
+
 import FaqModal from "./FaqModal";
+
 import '../styles/ProductItem.css'
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
