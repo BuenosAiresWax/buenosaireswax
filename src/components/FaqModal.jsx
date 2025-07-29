@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import "../styles/Footer.css"; // tus estilos externos
+import "../styles/FaqModal.css"; // tus estilos externos
 
 const preguntas = [
     {

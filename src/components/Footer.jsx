@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import FaqModal from "./FaqModal";
+
 import logo from "../../assets/logo/header-logo.png";
 import instagramIcon from "../../assets/icons/instagram.svg";
 
