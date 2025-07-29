@@ -68,14 +68,14 @@
     cursor: pointer;
 }
 
-.pedidoCarrito{
+.pedidoCarrito {
     display: flex;
     flex-flow: row;
     align-items: center;
     justify-content: center;
 }
 
-.imagenCarrito{
+.imagenCarrito {
     width: 100px;
     margin: 0 1rem;
 }
@@ -269,7 +269,7 @@
     display: block;
     text-align: center;
     background-color: #009ee3;
-    font-family: var(--title-font);
+    font-family: var(--text-font);
     font-size: 1rem;
     color: rgb(55, 25, 25);
     border: none;
@@ -278,14 +278,16 @@
     cursor: pointer;
     margin: 1rem 0;
     width: 88%;
+    text-decoration: none;
 }
 
 .btn-pago:hover {
     background-color: #007bbd;
 }
 
+
 .btn-whatsapp-succes {
-    font-family: var(--title-font);
+    font-family: var(--text-font);
     font-size: 1rem;
     background-color: #25d366;
     color: rgb(55, 25, 25);
@@ -322,53 +324,23 @@
 }
 
 /* checkout modal */
-.comprobante {
-    display: flex;
-    flex-flow: row wrap;
-    align-items: center;
-    justify-content: center;
-    background: #2c2c2c;
-    padding: 1rem;
-    border-radius: 10px;
-    color: #fff;
-    text-align: left;
-    margin-top: 1rem;
-    backdrop-filter: blur(6px);
-    text-align: center;
-    font-size: 1rem;
-}
-
-.comprobante h3 {
-    width: 100%;
-    font-size: 1.2rem;
-    font-family: var(--title-font), sans-serif;
-}
-
-.comprobante p {
-    margin: 0 2rem;
-}
-
-.comprobante h4 {
-    width: 100%;
-}
-
-.comprobante ul {
-    padding-left: 1rem;
-}
 
 .totalCheckout {
-    font-size: 2rem;
+    font-family: var(--text-font);
+    font-size: 2.2rem;
     text-decoration: underline;
 }
 
 .info-box {
     margin: 2rem 0;
     font-weight: 400;
-    font-family: var(--title-font), Verdana;
+    font-family: var(--text-font);
     font-size: 1rem;
+    line-height: 1;
 }
 
 .info-box span {
+    font-family: var(--text-font);
     text-decoration: underline;
     font-size: 4rem;
 }
@@ -377,7 +349,9 @@
     margin-top: 4rem;
 }
 
-.btn-whatsapp {
+
+.btn-whatsapp-succes {
+    font-family: var(--text-font);
     display: inline-block;
     margin-top: 1rem;
     background: #25d366;
@@ -385,7 +359,6 @@
     padding: 10px 20px;
     border-radius: 8px;
     text-decoration: none;
-    font-weight: bold;
     transition: background 0.3s;
 }
 
@@ -401,13 +374,6 @@
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 1rem;
-}
-
-.copiarPortapapeles {
-    font-size: 0.8rem;
-    text-align: start;
-    display: inline;
-    margin-right: 0.5rem;
 }
 
 /* modal cerrar advertencia dentro del modal de carrito */
@@ -427,6 +393,7 @@
 }
 
 .confirm-box {
+    font-family: var(--text-font);
     background: #1b1b1beb;
     border-radius: 12px;
     padding: 2rem;

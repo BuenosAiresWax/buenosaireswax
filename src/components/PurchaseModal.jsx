@@ -347,10 +347,8 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 ¡Listo! Nos contactaremos para mantenerte al tanto de todo.
                             </div>
 
-                            <p className="modalText copiarPortapapeles">Podés copiar y guardar tu pedido en el portapapeles</p>
-
                             <button className="btn-copiar" onClick={copiarMensajeAlPortapapeles}>
-                                📋 Copiar
+                                Copiar pedido 📋 
                             </button>
 
                             <p className="modalText">Buenos Aires Wax</p>
@@ -502,7 +500,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 </div>
 
                                 <button
-                                    className="btn-whatsapp"
+                                    className="btn-crear-orden"
                                     type="submit"
                                     disabled={loading || productosAgotados.length > 0}
                                 >
