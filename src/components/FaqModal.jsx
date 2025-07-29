@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import "../styles/FaqModal.css"; // tus estilos externos
+import "../styles/FaqModal.css";
 
 const preguntas = [
     {
@@ -11,7 +11,7 @@ const preguntas = [
     {
         pregunta: "¿Cuáles son los medios de pago?",
         respuesta:
-            "Aceptamos pagos con Mercado Pago a traves tarjeta de débito/crédito, transferencias bancarias y mas.",
+            "Aceptamos pagos con Mercado Pago a través de tarjeta de débito/crédito, transferencias bancarias y más.",
     },
     {
         pregunta: "¿Cómo funcionan los envíos?",
@@ -24,7 +24,7 @@ const preguntas = [
             "Agregás productos al carrito, completás tus datos y generás el pedido. Luego nos enviás el comprobante por WhatsApp.",
     },
     {
-        pregunta: "¿Qué hago si realice un pedido y no pude enviar el comprobante?",
+        pregunta: "¿Qué hago si realicé un pedido y no pude enviar el comprobante?",
         respuesta:
             "No te preocupes. Podés enviarnos el comprobante por WhatsApp al +54 1150050556 para poder avanzar con el pedido.",
     },
@@ -37,46 +37,47 @@ const preguntas = [
 
 function FaqModal({ onClose }) {
     const [modalRoot, setModalRoot] = useState(null);
+    const [abierto, setAbierto] = useState(null);
+    const [closing, setClosing] = useState(false);
 
     useEffect(() => {
         let root = document.getElementById("modal-root");
-
         if (!root) {
             root = document.createElement("div");
             root.id = "modal-root";
             document.body.appendChild(root);
         }
-
         setModalRoot(root);
 
         document.body.classList.add("modal-abierto");
 
         return () => {
             document.body.classList.remove("modal-abierto");
-
-            // Solo removemos el nodo si fue creado por este efecto
-            if (root && root.parentNode === document.body && root.id === "modal-root") {
-                document.body.removeChild(root);
-            }
         };
     }, []);
 
-    const [abierto, setAbierto] = useState(null);
     const toggle = (i) => {
         setAbierto(abierto === i ? null : i);
+    };
+
+    const handleClose = () => {
+        setClosing(true);
+        setTimeout(() => {
+            onClose();
+        }, 300); // coincide con la duración de la animación
     };
 
     if (!modalRoot) return null;
 
     return createPortal(
         <div
-            className="faq-backdrop"
+            className={`faq-backdrop ${closing ? "fade-out-backdrop" : "fade-in-backdrop"}`}
             onClick={(e) => {
-                if (e.target.classList.contains("faq-backdrop")) onClose();
+                if (e.target.classList.contains("faq-backdrop")) handleClose();
             }}
         >
-            <div className="faq-modal fade-in">
-                <button className="close-btn" onClick={onClose}>
+            <div className={`faq-modal ${closing ? "fade-out" : "fade-in"}`}>
+                <button className="close-btn" onClick={handleClose}>
                     ×
                 </button>
                 <h2>Preguntas Frecuentes</h2>
