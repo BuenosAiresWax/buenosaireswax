@@ -358,7 +358,6 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                     ) : (
                         <>
                             <h2 className="modalTitle">Resumen del pedido</h2>
-                            <p className="modalText">Verificá los productos antes de confirmar</p>
 
                             <ul className="modal-product-list">
                                 {cartItems.map((item) => (
@@ -366,9 +365,12 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                         key={item.id}
                                         className={`modal-product-item ${productosAgotados.includes(item.id) ? "agotado" : ""}`}
                                     >
-                                        <div>
-                                            <strong>{item.titulo}</strong> <br />
-                                            {item.cantidad} x ${item.precio} = <strong>${item.precio * item.cantidad}</strong>
+                                        <div className="pedidoCarrito">
+                                            <img className="imagenCarrito" src={item.imagen} alt="" />
+                                            <div>
+                                                <strong>{item.titulo}</strong> <br />
+                                                {item.cantidad} u = <strong>${item.precio * item.cantidad}</strong>
+                                            </div>
                                         </div>
                                         <button
                                             onClick={() => removeFromCart(item.id)}

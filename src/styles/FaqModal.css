@@ -22,7 +22,7 @@
     line-height: 100%;
     letter-spacing: 0%;
     vertical-align: middle;
-    background: rgba(33, 33, 33, 0.872);
+    background: var(--color-fondo);
     padding: 1rem;
     margin: 1rem;
     max-width: 600px;
