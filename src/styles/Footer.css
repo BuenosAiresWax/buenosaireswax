@@ -54,6 +54,10 @@
     margin-top: 0.5rem;
 }
 
+.footer-right a:hover {
+    text-decoration: underline;
+}
+
 .footer-right p:last-of-type {
     font-family: var(--text-font);
     font-weight: 300;
@@ -100,6 +104,14 @@
     font-size: 0.75rem;
 }
 
+.footerAutor {
+    font-size: 0.75rem;
+    font-family: var(--text-font);
+    opacity: 0.3;
+    margin-top: 1rem;
+    width: 100%;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .footer {
@@ -113,14 +125,19 @@
         text-align: center;
     }
 
-    .footer-right{
+    .footer-right {
         width: 100%;
         align-items: flex-start;
         padding-left: 3%;
         margin-top: 4rem;
     }
 
-    .faq-link{
+    .faq-link {
         padding: 0;
+    }
+
+    .footerAutor {
+        text-align: center;
+        margin-top: 2rem;
     }
 }

@@ -40,7 +40,11 @@ function Footer() {
                 >
                     CONTACTO
                 </a>
-                <p className="email">buenosaireswax@gmail.com</p>
+                <a className="email" href="https://mail.google.com/mail/?view=cm&fs=1&to=buenosaireswax@gmail.com&su=Consulta:&body=Hola%20Bawax,%20me%20gustaría%20hacer%20una%20consulta:%0A%0ANombre:%0ATeléfono:%0ADetalle%20de%20la%20consulta:" target="_blank" rel="noopener noreferrer">
+                    buenosaireswax@gmail.com
+                </a>
+
+                <span className="footerAutor">Developed by eStock</span>
             </div>
 
             {mostrarFAQ && <FaqModal onClose={() => setMostrarFAQ(false)} />}
