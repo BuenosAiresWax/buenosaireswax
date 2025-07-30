@@ -66,6 +66,7 @@
     background: none;
     font-size: 2rem;
     cursor: pointer;
+    color: var(--color-letra);
 }
 
 .pedidoCarrito {
@@ -136,6 +137,8 @@
     margin-top: 0.25rem;
     font-size: 1rem;
     color: #7c7a7a;
+    background-color: var(--color-fondo);
+    filter: brightness(90%);
 }
 
 .metodo-entrega-label select:focus {
@@ -187,22 +190,22 @@
 }
 
 .modal-product-item.agotado {
-    background-color: #ffcccc8b;
-    border: 1px solid red;
+    background-color: #db0b0b18;
+    border: 1px solid rgba(255, 0, 0, 0.463);
 }
 
 .productoAgotadoMensaje {
-    font-family: var(--title-font);
-    color: rgb(255, 24, 24);
+    font-family: var(--text-font);
+    color: rgb(215, 41, 41);
     font-size: 1rem;
     width: 100%;
     text-align: center;
 }
 
 .btn-eliminar-agotados {
-    font-family: var(--title-font);
-    background-color: rgb(238, 51, 51);
-    color: white;
+    font-family: var(--text-font);
+    background-color: rgba(238, 51, 51, 0.429);
+    color: var(--color-letra);
     border: none;
     padding: 8px 15px;
     margin-bottom: 1rem;
@@ -214,7 +217,7 @@
 }
 
 .btn-eliminar-agotados:hover {
-    background-color: rgb(231, 6, 6);
+    background-color: rgba(231, 6, 6, 0.532);
 }
 
 .delete-btn {
@@ -230,7 +233,6 @@
     color: rgb(231, 231, 231);
     transition: .5s;
 }
-
 
 .checkbox-confirmacion {
     display: flex;
@@ -263,6 +265,19 @@
 .checkbox-confirmacion label:hover {
     color: #fff;
     transition: .2s;
+}
+
+.btn-crear-orden {
+    background-color: var(--color-letra);
+    opacity: 0.6;
+    color: var(--color-fondo);
+    font-family: var(--text-font);
+    transition: .4s;
+}
+
+.btn-crear-orden:hover {
+    opacity: 0.8;
+    transition: .4s;
 }
 
 .btn-pago {
