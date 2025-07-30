@@ -315,7 +315,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                     {pedidoEnviado ? (
                         <>
                             <h2 className="modalTitle">✅ Pedido generado correctamente</h2>
-                            <p className="modalText">Segui los 2 pasos para finalizar tu compra de manera rapida</p>
+                            <p className="modalText">Finalizá tu pedido ahora: solo 2 pasos</p>
                             <p className="modalText">🧾 Número de orden:<br /><strong>{pedidoId}</strong></p>
                             <p className="modalText"><strong>Total del pedido:</strong><br /> <span className="totalCheckout">${ultimoTotal}</span></p>
 
