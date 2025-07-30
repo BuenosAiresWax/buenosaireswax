@@ -112,10 +112,8 @@
     border: none;
     font-family: var(--text-font);
     font-weight: 300;
-    font-style: Light;
     font-size: 17px;
     line-height: 100%;
-    letter-spacing: 0%;
     vertical-align: middle;
     cursor: pointer;
     margin-top: 0.5rem;
@@ -135,18 +133,25 @@
 }
 
 .faq-answer p {
-    margin: 0.5rem 0 1rem;
+    width: 90%;
+    margin: 0.5rem auto 1rem;
     font-family: var(--text-font);
     font-weight: 300;
-    font-style: Light;
     font-size: 13px;
-    letter-spacing: 0%;
     vertical-align: middle;
     color: var(--color-letra);
 }
 
 @media (max-width: 767px) {
     .faq-modal {
-        font-size: 17px;
+        font-size: 15px;
+    }
+
+    .faq-question {
+        font-size: 13px;
+    }
+
+    .faq-answer p {
+        font-size: 11px;
     }
 }
