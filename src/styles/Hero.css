@@ -28,10 +28,8 @@
     margin: 0;
     font-family: var(--title-font);
     font-weight: 300;
-    font-style: Light;
-    font-size: 22.09px;
-    line-height: 100%;
-    letter-spacing: 0%;
+    font-size: 28px;
+    line-height: 0;
     vertical-align: middle;
     text-transform: uppercase;
 }
@@ -39,8 +37,7 @@
 .hero-content h2 {
     font-family: var(--text-font);
     font-weight: 300;
-    font-style: Light;
-    font-size: 17.97px;
+    font-size: 17px;
     line-height: 100%;
     letter-spacing: 0%;
     vertical-align: middle;
@@ -54,6 +51,13 @@
         height: 120px;
         margin: 3rem auto;
         background-size: cover;
+    }
 
+    .hero-content h1 {
+        font-size: 22px;
+    }
+
+    .hero-content h2 {
+        font-size: 13px;
     }
 }
