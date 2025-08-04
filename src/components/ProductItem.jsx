@@ -83,7 +83,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 <p className="price">${producto.precio}</p>
                 <p className="description">{producto.descripcion} - {producto.estilo}</p>
                 <h4 className="sello">
-                    Made by: {producto.sello}
+                    Label: {producto.sello}
                 </h4>
 
                 <div className="stock">
