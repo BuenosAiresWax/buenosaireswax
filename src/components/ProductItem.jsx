@@ -80,6 +80,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                         {stockDisponible <= 0 ? "×" : "+"}
                     </button>
                 </div>
+                <p className="autor">{producto.autor}</p>
                 <p className="price">${producto.precio}</p>
                 <p className="description">
                     {`${(producto.descripcion + ' - ' + producto.estilo).slice(0, 150)}${(producto.descripcion + ' - ' + producto.estilo).length > 150 ? '...' : ''
