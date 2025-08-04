@@ -162,7 +162,7 @@
     background-color: rgba(28, 27, 27, 0.481);
 }
 
-.modal-content>form>input:nth-of-type(-n+3) {
+.modal-content>form>input:nth-of-type(-n+5) {
     width: 100%;
 }
 

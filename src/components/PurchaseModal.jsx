@@ -8,6 +8,8 @@ function PurchaseModal({ onClose }) {
     const backdropRef = useRef(null);
     const [visible, setVisible] = useState(false);
     const [nombre, setNombre] = useState("");
+    const [nombreInstagram, setNombreInstagram] = useState("");
+    const [dni, setDni] = useState("");
     const [telefono, setTelefono] = useState("");
     const [correo, setCorreo] = useState("");
     const [direccion, setDireccion] = useState("");
@@ -106,6 +108,8 @@ function PurchaseModal({ onClose }) {
     const guardarPedido = async (docId, fecha) => {
         const pedido = {
             cliente: nombre,
+            instagram: nombreInstagram,
+            dni,
             telefono,
             correo,
             direccion: metodoEntrega.includes("Retiro") ? "" : direccion,
@@ -143,6 +147,8 @@ function PurchaseModal({ onClose }) {
         setTimeout(() => {
             onClose();
             setNombre("");
+            setNombreInstagram("");
+            setDni("");
             setTelefono("");
             setCorreo("");
             setDireccion("");
@@ -176,6 +182,8 @@ function PurchaseModal({ onClose }) {
         setTimeout(() => {
             onClose();
             setNombre("");
+            setNombreInstagram("");
+            setDni("");
             setTelefono("");
             setCorreo("");
             setDireccion("");
@@ -254,7 +262,7 @@ function PurchaseModal({ onClose }) {
 ¡Hola BAWAX! Realicé un pedido.
 🧾 ID del Pedido: ${docId}
 📌 Fecha: ${fecha}
-👤 Nombre: ${nombre}
+👤 Nombre: ${nombre} - ${dni}
 📧 Email: ${correo}
 📱 Teléfono: ${telefono}
 📦 Método de entrega: ${metodoEntrega}
@@ -416,6 +424,22 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                     placeholder="Nombre"
                                     value={nombre}
                                     onChange={(e) => setNombre(e.target.value)}
+                                    required
+                                    disabled={loading}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Intagram @"
+                                    value={nombreInstagram}
+                                    onChange={(e) => setNombreInstagram(e.target.value)}
+                                    required
+                                    disabled={loading}
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="DNI"
+                                    value={dni}
+                                    onChange={(e) => setDni(e.target.value)}
                                     required
                                     disabled={loading}
                                 />
