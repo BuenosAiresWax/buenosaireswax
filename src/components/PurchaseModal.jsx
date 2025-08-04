@@ -324,13 +324,19 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                 <span>1</span> Ingresa el monto de tu orden, completá el pago y descarga el comprobante.
                             </div>
 
-                            <a href={obtenerLinkDePagoLibre()} target="_blank" rel="noopener noreferrer" className="btn-pago">
+                            {/*                             <a href={obtenerLinkDePagoLibre()} target="_blank" rel="noopener noreferrer" className="btn-pago">
                                 💳 Pagar con Mercado Pago
-                            </a>
+                            </a> */}
+
+                            <div className="infoPagoContainer">
+                                <p>Datos de deposito</p>
+                                <p>Alias: BuenosAiresWax</p>
+                                <p>Titular: Gonzalo Lijtenberg</p>
+                            </div>
 
                             {/* Texto 2 */}
                             <div className="info-box">
-                                <span>2</span> Regresa y enviá el pedido generado y el comprobante de pago descargado.
+                                <span>2</span>Envia el pedido generado y el comprobante de pago descargado.
                             </div>
 
                             <button
@@ -348,7 +354,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             </div>
 
                             <button className="btn-copiar" onClick={copiarMensajeAlPortapapeles}>
-                                Copiar pedido 📋 
+                                Copiar pedido 📋
                             </button>
 
                             <p className="modalText">Buenos Aires Wax</p>
