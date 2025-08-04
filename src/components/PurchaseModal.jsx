@@ -336,7 +336,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             <button
                                 className="btn-whatsapp-succes"
                                 onClick={() =>
-                                    window.open(`https://wa.me/541130504515?text=${encodeURIComponent(mensajeWsp)}`, "_blank")
+                                    window.open(`https://wa.me/541130115436?text=${encodeURIComponent(mensajeWsp)}`, "_blank")
                                 }
                             >
                                 📲 Enviar pedido por WhatsApp
