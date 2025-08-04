@@ -70,7 +70,14 @@ function App() {
         <img src={logo} alt="eStock" className="logo" />
 
         <div className="rightNav">
-          <a className="contactoNav" href="#">Contacto</a>
+          <a
+            href="https://wa.me/541130115436?text=Hola%20BaWax%2C%20tengo%20una%20consulta"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contactoNav"
+          >
+            CONTACTO
+          </a>
           <div
             className="cartIcon"
             onClick={() => {
