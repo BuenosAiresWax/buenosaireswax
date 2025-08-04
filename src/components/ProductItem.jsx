@@ -81,7 +81,10 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                     </button>
                 </div>
                 <p className="price">${producto.precio}</p>
-                <p className="description">{producto.descripcion} - {producto.estilo}</p>
+                <p className="description">
+                    {`${(producto.descripcion + ' - ' + producto.estilo).slice(0, 150)}${(producto.descripcion + ' - ' + producto.estilo).length > 150 ? '...' : ''
+                        }`}
+                </p>
                 <h4 className="sello">
                     Label: {producto.sello}
                 </h4>
