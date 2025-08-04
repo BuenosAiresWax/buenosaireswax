@@ -325,8 +325,12 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             <h2 className="modalTitle">✅ Pedido generado</h2>
                             <p className="modalText">Finalizá tu compra: solo 2 pasos</p>
                             <p className="modalText">🧾 Número de orden:<br /><strong>{pedidoId}</strong></p>
-                            <p className="modalText"><strong>Total del pedido:</strong><br /> <span className="totalCheckout">${ultimoTotal}</span></p>
-
+                            <p className="modalText">
+                                <strong>Total del pedido:</strong><br />
+                                <span className="totalCheckout">
+                                    ${ultimoTotal.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                </span>
+                            </p>
                             {/* Texto 1 */}
                             <div className="info-box">
                                 <span>1</span> Ingresa el monto de tu orden, completá el pago y descarga el comprobante.
@@ -407,7 +411,10 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             )}
 
                             <div className="totalContainer">
-                                <strong>Total:</strong> ${total}
+                                <strong>Total:</strong> ${total.toLocaleString("es-AR", {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                })}
                             </div>
 
                             <p className="modalText">Formulario de Compra</p>

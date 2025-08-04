@@ -81,7 +81,9 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                     </button>
                 </div>
                 <p className="autor">{producto.autor}</p>
-                <p className="price">${producto.precio}</p>
+                <p className="price">
+                    ${producto.precio.toLocaleString("es-AR", { minimumFractionDigits: 0 })}
+                </p>
                 <p className="description">
                     {`${(producto.descripcion + ' - ' + producto.estilo).slice(0, 150)}${(producto.descripcion + ' - ' + producto.estilo).length > 150 ? '...' : ''
                         }`}
