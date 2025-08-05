@@ -15,6 +15,8 @@ import "./styles/styles.css";
 import logo from '../assets/logo/header-logo.png';
 import carritoVacio from '../assets/icons/carrito-vacio.svg';
 import carritoLleno from '../assets/icons/carrito-lleno.svg';
+import HeroYoutube from "./components/HeroYoutube";
+import HeroSlider from "./components/HeroSlider";
 
 function App() {
   // Leer el valor guardado en localStorage para inicializar autenticado
@@ -98,7 +100,8 @@ function App() {
         </div>
       </div>
 
-      <Hero />
+      <HeroSlider />
+
 
       {!autenticado ? (
         <DropAccess

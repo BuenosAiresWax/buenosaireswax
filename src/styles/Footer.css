@@ -137,7 +137,7 @@
     }
 
     .footerAutor {
-        text-align: center;
+        text-align: start;
         margin-top: 2rem;
     }
 }

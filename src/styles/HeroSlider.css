@@ -1,0 +1,58 @@
+.hero-slider-manual {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    cursor: grab;
+}
+
+.hero-slider-manual:active {
+    cursor: grabbing;
+}
+
+.slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+}
+
+.slide.active {
+    opacity: 1;
+    position: relative;
+    pointer-events: auto;
+}
+
+.progress-bar-container-position {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0 10%;
+}
+
+.progress-bar-container {
+    position: absolute;
+    bottom: 3rem;
+    left: 5%;
+    right: 5%;
+    height: 4px;
+    background-color: #ffffff3b;
+    overflow: hidden;
+    z-index: 10;
+}
+
+
+.progress-bar {
+    height: 100%;
+    background-color: #0000004f;
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.1s linear;
+    z-index: 11;
+}

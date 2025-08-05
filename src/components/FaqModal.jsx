@@ -6,7 +6,7 @@ const preguntas = [
     {
         pregunta: "¿Dónde puedo hacer una consulta?",
         respuesta:
-            "Escribinos a buenosaireswax@gmail.com o por WhatsApp al +54 9 1130115436.",
+            "Escribinos a buenosaireswax@gmail.com o por WhatsApp al +54 11 3011-5436.",
     },
     {
         pregunta: "¿Cuáles son los medios de pago?",
@@ -26,7 +26,7 @@ const preguntas = [
     {
         pregunta: "¿Qué hago si realicé un pedido y no pude enviar el comprobante?",
         respuesta:
-            "No te preocupes. Podés enviarnos el comprobante por WhatsApp al +54 1150050556 para poder avanzar con el pedido.",
+            "No te preocupes. Podés enviarnos el comprobante por WhatsApp al +54 11 3011-5436 para poder avanzar con el pedido.",
     },
     {
         pregunta: "¿Cuánto tarda en llegar mi pedido?",

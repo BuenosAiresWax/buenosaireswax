@@ -1,0 +1,92 @@
+.hero-youtube {
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 90%;
+    height: 300px;
+    margin: 3rem auto;
+    overflow: hidden;
+    font-family: var(--text-font);
+}
+
+.hero-youtube::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(40, 35, 34, 0.792);
+    /* Gris con opacidad */
+    transition: background 0.5s ease;
+    z-index: 1;
+}
+
+.hero-youtube:hover::before {
+    background: rgba(40, 35, 34, 0.3);
+    /* Más oscuro al hacer hover */
+}
+
+.hero-youtube-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 2;
+    /* Por encima del overlay */
+}
+
+.hero-youtube-content {
+    color: white;
+    position: relative;
+    z-index: 3;
+}
+
+
+.hero-youtube-content {
+    color: white;
+}
+
+.hero-youtube-content h4 {
+    margin: 0 0 1rem 0;
+    font-family: var(--title-font);
+    font-weight: 300;
+    font-size: 26px;
+    text-transform: uppercase;
+}
+
+.hero-youtube-btn {
+    display: inline-block;
+    padding: 0.6rem 2rem;
+    font-size: 16px;
+    background: #ff0000;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.hero-youtube-btn:hover {
+    background: #cc0000;
+}
+
+@media (max-width: 767px) {
+    .hero-youtube {
+        width: 100%;
+        height: 180px;
+    }
+
+    .hero-youtube-content h1 {
+        font-size: 20px;
+    }
+
+    .hero-youtube-btn {
+        font-size: 14px;
+        padding: 0.5rem 1.2rem;
+    }
+}
