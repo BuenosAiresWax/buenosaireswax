@@ -44,6 +44,20 @@ function Filters({
                     />
                 </div>
 
+                <select value={estiloSeleccionado} onChange={(e) => setEstiloSeleccionado(e.target.value)} className="filters-item">
+                    <option value="">Estilos</option>
+                    {estilos.map((e) => (
+                        <option key={e} value={e}>{e}</option>
+                    ))}
+                </select>
+
+                <select value={generoSeleccionado} onChange={(e) => setGeneroSeleccionado(e.target.value)} className="filters-item">
+                    <option value="">Géneros</option>
+                    {generos.map((g) => (
+                        <option key={g} value={g}>{g}</option>
+                    ))}
+                </select>
+
                 <select value={selloSeleccionado} onChange={(e) => setSelloSeleccionado(e.target.value)} className="filters-item">
                     <option value="">Sellos</option>
                     {sellos.map((s) => (
@@ -55,20 +69,6 @@ function Filters({
                     <option value="">Artistas</option>
                     {autores.map((a) => (
                         <option key={a} value={a}>{a}</option>
-                    ))}
-                </select>
-
-                <select value={generoSeleccionado} onChange={(e) => setGeneroSeleccionado(e.target.value)} className="filters-item">
-                    <option value="">Géneros</option>
-                    {generos.map((g) => (
-                        <option key={g} value={g}>{g}</option>
-                    ))}
-                </select>
-
-                <select value={estiloSeleccionado} onChange={(e) => setEstiloSeleccionado(e.target.value)} className="filters-item">
-                    <option value="">Estilos</option>
-                    {estilos.map((e) => (
-                        <option key={e} value={e}>{e}</option>
                     ))}
                 </select>
 
