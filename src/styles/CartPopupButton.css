@@ -4,16 +4,12 @@
     right: 20px;
     width: 60px;
     height: 60px;
-    border-radius: 50%;
     background: rgba(37, 37, 37, 0.747);
     /* fondo translúcido tipo vidrio */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(2px);
-    box-shadow:
-        0 2px 4px rgba(255, 255, 255, 0.05),
-        0 8px 20px rgba(255, 255, 255, 0.08),
-        0 0 4px rgba(255, 255, 255, 0.03);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     cursor: pointer;
 
     display: flex;

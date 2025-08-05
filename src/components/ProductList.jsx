@@ -8,6 +8,7 @@ import ProductSkeleton from "./ProductSkeleton";
 import Filters from "./Filters";
 import Notificacion from "./Notificacion";
 import Spinner from "./Spinner";
+import YouTubePopup from "./YouTubePopup"
 
 import '../styles/ProductList.css'
 
@@ -141,6 +142,9 @@ const ProductList = () => {
                     ))
                 )}
             </div>
+
+            <YouTubePopup />
+
 
             {/* Loader spinner para scroll infinito */}
             {isLoadingMore && (
