@@ -46,7 +46,7 @@
 }
 
 
-.itemTitleContainer{
+.itemTitleContainer {
     display: flex;
     flex-flow: row;
     align-items: center;
@@ -82,7 +82,7 @@
     margin: 0;
 }
 
-.product-card .autor{
+.product-card .autor {
     margin: 0;
     opacity: 0.4;
     font-size: 1rem;
@@ -123,7 +123,7 @@
 /* Stock */
 .product-card .stock {
     font-size: 13px;
-    color: #aaa;
+    color: #971c1c;
     margin-top: 0.5rem;
 }
 
@@ -151,4 +151,13 @@
 
 .product-card .faq-button:hover {
     color: rgb(255, 255, 255);
+}
+
+.agotado {
+    text-decoration: line-through;
+    font-weight: bold;
+}
+
+.agotadoStock {
+    font-weight: bold;
 }

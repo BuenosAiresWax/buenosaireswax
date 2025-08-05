@@ -62,13 +62,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
             <div className="info">
                 <div className="itemTitleContainer">
-                    <h3
-                        style={
-                            stockDisponible <= 0
-                                ? { textDecoration: "line-through", color: "#888" }
-                                : {}
-                        }
-                    >
+                    <h3 className={stockDisponible <= 0 ? "agotado" : ""}>
                         {producto.titulo}
                     </h3>
                     <button
@@ -80,20 +74,24 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                         {stockDisponible <= 0 ? "×" : "+"}
                     </button>
                 </div>
+
                 <p className="autor">{producto.autor}</p>
-                <p className="price">
+
+                <p className={`price ${stockDisponible <= 0 ? "agotado" : ""}`}>
                     ${producto.precio.toLocaleString("es-AR", { minimumFractionDigits: 0 })}
                 </p>
+
                 <p className="description">
                     {`${(producto.descripcion + ' - ' + producto.estilo).slice(0, 150)}${(producto.descripcion + ' - ' + producto.estilo).length > 150 ? '...' : ''
                         }`}
                 </p>
+
                 <h4 className="sello">
                     Label: {producto.sello}
                 </h4>
 
-                <div className="stock">
-                    Stock: {stockDisponible}
+                <div className={`stock ${stockDisponible <= 0 ? "agotadoStock" : ""}`}>
+                    Stock: {stockDisponible > 0 ? stockDisponible : "AGOTADO"}
                     {cantidadEnCarrito > 0 && (
                         <span> (En carrito: {cantidadEnCarrito})</span>
                     )}
@@ -112,6 +110,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
             {mostrarFaq && <FaqModal onClose={() => setMostrarFaq(false)} />}
         </div>
     );
+
 }
 
 export default ProductItem;
