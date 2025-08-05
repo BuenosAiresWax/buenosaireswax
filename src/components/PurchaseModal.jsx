@@ -487,7 +487,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                     <>
                                         <input
                                             type="text"
-                                            placeholder="Dirección de envío"
+                                            placeholder="Calle y numero de envio"
                                             value={direccion}
                                             onChange={(e) => setDireccion(e.target.value)}
                                             required
