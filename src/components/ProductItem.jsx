@@ -46,8 +46,11 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     return (
         <div className="product-card">
             <div className="image">
-                <img src={producto.imagen} alt={producto.titulo} />
-                {producto.escucha && (
+                <img
+                    src={producto.imagen}
+                    alt={producto.titulo}
+                    className={stockDisponible <= 0 ? "agotadoImagen" : ""}
+                />                {producto.escucha && (
                     <a
                         href={producto.escucha}
                         target="_blank"

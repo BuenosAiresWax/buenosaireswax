@@ -162,3 +162,10 @@
 .agotadoStock {
     font-weight: bold;
 }
+
+.agotadoImagen {
+    opacity: 0.6;
+    /* Ejemplo: más tenue */
+    filter: grayscale(40%);
+    /* Ejemplo: un poco en blanco y negro */
+}
