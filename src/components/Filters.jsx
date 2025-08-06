@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import "../styles/styles.css";
 import '../styles/Filters.css'
 import searchIcon from "../../assets/icons/lupa.png";
@@ -14,8 +14,8 @@ function Filters({
     setSelloSeleccionado,
     autorSeleccionado,
     setAutorSeleccionado,
-    verDisponibles, // nuevo filtro
-    setVerDisponibles, // setter
+    verDisponibles,
+    setVerDisponibles,
     productos,
 }) {
     const generos = useMemo(() => [...new Set(productos.map((p) => p.genero).filter(Boolean))], [productos]);
@@ -29,8 +29,17 @@ function Filters({
         setEstiloSeleccionado("");
         setSelloSeleccionado("");
         setAutorSeleccionado("");
-        setVerDisponibles(false); // reseteamos el filtro
+        setVerDisponibles(false);
     };
+
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
 
     return (
         <div className="filters-container">
@@ -47,12 +56,26 @@ function Filters({
                     />
                 </div>
 
-                <select value={estiloSeleccionado} onChange={(e) => setEstiloSeleccionado(e.target.value)} className="filters-item">
-                    <option value="">Estilos</option>
-                    {estilos.map((e) => (
-                        <option key={e} value={e}>{e}</option>
-                    ))}
-                </select>
+                {/* 🔹 Si es mobile mostramos botón en lugar del select de Estilos */}
+                {isMobile ? (
+                    <button
+                        className={`filters-item ${verDisponibles ? "activo" : ""}`}
+                        onClick={() => setVerDisponibles(!verDisponibles)}
+                    >
+                        {verDisponibles ? "Ver Todos" : "Ver Disponibles"}
+                    </button>
+                ) : (
+                    <select
+                        value={estiloSeleccionado}
+                        onChange={(e) => setEstiloSeleccionado(e.target.value)}
+                        className="filters-item"
+                    >
+                        <option value="">Estilos</option>
+                        {estilos.map((e) => (
+                            <option key={e} value={e}>{e}</option>
+                        ))}
+                    </select>
+                )}
 
                 <select value={generoSeleccionado} onChange={(e) => setGeneroSeleccionado(e.target.value)} className="filters-item">
                     <option value="">Géneros</option>
@@ -74,14 +97,6 @@ function Filters({
                         <option key={a} value={a}>{a}</option>
                     ))}
                 </select>
-
-                {/* Botón Ver Disponibles */}
-                <button
-                    className={`filters-item ${verDisponibles ? "activo" : ""}`}
-                    onClick={() => setVerDisponibles(!verDisponibles)}
-                >
-                    {verDisponibles ? "Ver Todos" : "Ver Disponibles"}
-                </button>
 
                 {/* Botón limpiar */}
                 <button className="filters-clear-btn filters-item" onClick={limpiarFiltros}>
