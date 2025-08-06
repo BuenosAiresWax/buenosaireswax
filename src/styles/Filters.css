@@ -14,7 +14,7 @@
 
 
 .filters-item {
-    min-width: 150px;
+    width: 150px;
     padding: 0.5rem;
     background-color: transparent;
     border: none;
@@ -109,9 +109,5 @@
         min-width: 200px;
         flex: 1 1 200px;
         max-width: 300px;
-    }
-
-    .filters-item {
-        flex: 0 0 auto;
     }
 }
