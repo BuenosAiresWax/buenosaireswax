@@ -14,6 +14,8 @@ function Filters({
     setSelloSeleccionado,
     autorSeleccionado,
     setAutorSeleccionado,
+    verDisponibles, // nuevo filtro
+    setVerDisponibles, // setter
     productos,
 }) {
     const generos = useMemo(() => [...new Set(productos.map((p) => p.genero).filter(Boolean))], [productos]);
@@ -27,6 +29,7 @@ function Filters({
         setEstiloSeleccionado("");
         setSelloSeleccionado("");
         setAutorSeleccionado("");
+        setVerDisponibles(false); // reseteamos el filtro
     };
 
     return (
@@ -71,6 +74,14 @@ function Filters({
                         <option key={a} value={a}>{a}</option>
                     ))}
                 </select>
+
+                {/* Botón Ver Disponibles */}
+                <button
+                    className={`filters-item ${verDisponibles ? "activo" : ""}`}
+                    onClick={() => setVerDisponibles(!verDisponibles)}
+                >
+                    {verDisponibles ? "Ver Todos" : "Ver Disponibles"}
+                </button>
 
                 {/* Botón limpiar */}
                 <button className="filters-clear-btn filters-item" onClick={limpiarFiltros}>

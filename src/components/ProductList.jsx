@@ -25,6 +25,7 @@ const ProductList = () => {
     const [estiloSeleccionado, setEstiloSeleccionado] = useState("");
     const [selloSeleccionado, setSelloSeleccionado] = useState("");
     const [autorSeleccionado, setAutorSeleccionado] = useState("");
+    const [verDisponibles, setVerDisponibles] = useState(false); // 🔹 nuevo estado
     const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
 
     const sentinelRef = useRef();
@@ -59,8 +60,10 @@ const ProductList = () => {
             const coincideEstilo = !estiloSeleccionado || producto.estilo === estiloSeleccionado;
             const coincideSello = !selloSeleccionado || producto.sello === selloSeleccionado;
             const coincideAutor = !autorSeleccionado || producto.autor === autorSeleccionado;
+            const stockDisponible = ((producto.cantidad ?? 0) - (producto.reservados ?? 0)) > 0;
+            const coincideStock = !verDisponibles || stockDisponible; // 🔹 filtro stock
 
-            return coincideTexto && coincideGenero && coincideEstilo && coincideSello && coincideAutor;
+            return coincideTexto && coincideGenero && coincideEstilo && coincideSello && coincideAutor && coincideStock;
         });
     }, [
         productos,
@@ -68,7 +71,8 @@ const ProductList = () => {
         generoSeleccionado,
         estiloSeleccionado,
         selloSeleccionado,
-        autorSeleccionado
+        autorSeleccionado,
+        verDisponibles // 🔹 dependencia nueva
     ]);
 
     const productosLimitados = productosFiltrados.slice(0, limit);
@@ -123,6 +127,8 @@ const ProductList = () => {
                 setSelloSeleccionado={setSelloSeleccionado}
                 autorSeleccionado={autorSeleccionado}
                 setAutorSeleccionado={setAutorSeleccionado}
+                verDisponibles={verDisponibles} // 🔹 nueva prop
+                setVerDisponibles={setVerDisponibles} // 🔹 nueva prop
                 productos={productos}
             />
 
@@ -144,7 +150,6 @@ const ProductList = () => {
             </div>
 
             <YouTubePopup />
-
 
             {/* Loader spinner para scroll infinito */}
             {isLoadingMore && (
