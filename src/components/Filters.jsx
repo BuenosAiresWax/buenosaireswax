@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import "../styles/styles.css";
 import '../styles/Filters.css'
 import searchIcon from "../../assets/icons/lupa.png";
@@ -32,15 +32,6 @@ function Filters({
         setVerDisponibles(false);
     };
 
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
-        return () => window.removeEventListener("resize", checkMobile);
-    }, []);
-
     return (
         <div className="filters-container">
             <div className="filters-group">
@@ -56,42 +47,52 @@ function Filters({
                     />
                 </div>
 
-                {/* 🔹 Si es mobile mostramos botón en lugar del select de Estilos */}
-                {isMobile ? (
-                    <button
-                        className={`filters-item ${verDisponibles ? "activo" : ""}`}
-                        onClick={() => setVerDisponibles(!verDisponibles)}
-                    >
-                        {verDisponibles ? "Ver Todos" : "Ver Disponibles"}
-                    </button>
-                ) : (
-                    <select
-                        value={estiloSeleccionado}
-                        onChange={(e) => setEstiloSeleccionado(e.target.value)}
-                        className="filters-item"
-                    >
-                        <option value="">Estilos</option>
-                        {estilos.map((e) => (
-                            <option key={e} value={e}>{e}</option>
-                        ))}
-                    </select>
-                )}
+                {/* 🔹 Botón siempre antes que "Sellos" */}
+                <button
+                    className={`filters-item ${verDisponibles ? "activo" : ""}`}
+                    onClick={() => setVerDisponibles(!verDisponibles)}
+                >
+                    {verDisponibles ? "Ver Todos" : "Ver Disponibles"}
+                </button>
 
-                <select value={generoSeleccionado} onChange={(e) => setGeneroSeleccionado(e.target.value)} className="filters-item">
+                <select
+                    value={estiloSeleccionado}
+                    onChange={(e) => setEstiloSeleccionado(e.target.value)}
+                    className="filters-item"
+                >
+                    <option value="">Estilos</option>
+                    {estilos.map((e) => (
+                        <option key={e} value={e}>{e}</option>
+                    ))}
+                </select>
+
+                <select
+                    value={generoSeleccionado}
+                    onChange={(e) => setGeneroSeleccionado(e.target.value)}
+                    className="filters-item"
+                >
                     <option value="">Géneros</option>
                     {generos.map((g) => (
                         <option key={g} value={g}>{g}</option>
                     ))}
                 </select>
 
-                <select value={selloSeleccionado} onChange={(e) => setSelloSeleccionado(e.target.value)} className="filters-item">
+                <select
+                    value={selloSeleccionado}
+                    onChange={(e) => setSelloSeleccionado(e.target.value)}
+                    className="filters-item"
+                >
                     <option value="">Sellos</option>
                     {sellos.map((s) => (
                         <option key={s} value={s}>{s}</option>
                     ))}
                 </select>
 
-                <select value={autorSeleccionado} onChange={(e) => setAutorSeleccionado(e.target.value)} className="filters-item">
+                <select
+                    value={autorSeleccionado}
+                    onChange={(e) => setAutorSeleccionado(e.target.value)}
+                    className="filters-item"
+                >
                     <option value="">Artistas</option>
                     {autores.map((a) => (
                         <option key={a} value={a}>{a}</option>
