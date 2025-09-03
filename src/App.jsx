@@ -2,26 +2,28 @@ import { useEffect, useState, useContext } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase/config";
 import { CartContext } from "./context/CartContext";
-import Hero from "./components/Hero";
 import ProductList from "./components/ProductList";
 import PurchaseModal from "./components/PurchaseModal";
 import CartPopupButton from "./components/CartPopupButton";
 import LoaderOverlay from "./components/LoaderOverlay";
 import Footer from "./components/Footer";
 import DropAccess from "./components/DropAccess";
+import HeroSlider from "./components/HeroSlider";
 
 import "./styles/styles.css";
 
-import logo from '../assets/logo/header-logo.png';
-import carritoVacio from '../assets/icons/carrito-vacio.svg';
-import carritoLleno from '../assets/icons/carrito-lleno.svg';
-import HeroYoutube from "./components/HeroYoutube";
-import HeroSlider from "./components/HeroSlider";
+import logo from "../assets/logo/header-logo.png";
+import carritoVacio from "../assets/icons/carrito-vacio.svg";
+import carritoLleno from "../assets/icons/carrito-lleno.svg";
+
+const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
 
 function App() {
-  // Leer el valor guardado en localStorage para inicializar autenticado
+  // Leer localStorage y validar contra la versión actual
   const [autenticado, setAutenticado] = useState(() => {
-    return localStorage.getItem("autenticado") === "true";
+    const isAuth = localStorage.getItem("autenticado") === "true";
+    const savedVersion = localStorage.getItem("accessVersion");
+    return isAuth && savedVersion === ACCESS_VERSION;
   });
 
   const [productos, setProductos] = useState([]);
@@ -36,8 +38,8 @@ function App() {
       const productosRef = collection(db, "productos");
       const snapshot = await getDocs(productosRef);
       const docs = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(producto => {
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((producto) => {
           const cantidad = producto.cantidad;
           const reservas = producto.reservados ?? 0;
           return cantidad === undefined || reservas < cantidad;
@@ -56,10 +58,11 @@ function App() {
     }
   }, [autenticado]);
 
-  // Cuando el usuario se autentica guardamos en localStorage
+  // Guardar autenticación y versión en localStorage
   const manejarAutenticacion = () => {
     setAutenticado(true);
     localStorage.setItem("autenticado", "true");
+    localStorage.setItem("accessVersion", ACCESS_VERSION);
   };
 
   const totalCantidad = getTotalQuantity();
@@ -87,8 +90,8 @@ function App() {
                 setMostrarModal(true);
               }
             }}
-            style={{ cursor: totalCantidad > 0 ? 'pointer' : 'default' }}
-            title={totalCantidad > 0 ? 'Ver carrito' : 'Carrito vacío'}
+            style={{ cursor: totalCantidad > 0 ? "pointer" : "default" }}
+            title={totalCantidad > 0 ? "Ver carrito" : "Carrito vacío"}
           >
             <img
               src={totalCantidad > 0 ? carritoLleno : carritoVacio}
@@ -101,7 +104,6 @@ function App() {
       </div>
 
       <HeroSlider />
-
 
       {!autenticado ? (
         <DropAccess
