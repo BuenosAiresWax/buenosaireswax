@@ -98,6 +98,7 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="xxxxx"
+                        autoComplete="new-password"
                     />
                     {error && <p className="error">{error}</p>}
 
