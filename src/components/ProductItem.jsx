@@ -81,7 +81,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 <p className="autor">{producto.autor}</p>
 
                 <p className={`price ${stockDisponible <= 0 ? "agotado" : ""}`}>
-                    ${producto.precio.toLocaleString("es-AR", { minimumFractionDigits: 0 })}
+                    ${(producto?.precio ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 0 })}
                 </p>
 
                 <p className="description">
