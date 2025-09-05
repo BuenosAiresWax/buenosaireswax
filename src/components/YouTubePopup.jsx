@@ -51,7 +51,7 @@ const YouTubePopup = () => {
 
             <div className="popup-video">
                 <iframe
-                    src="https://www.youtube.com/embed/UZloKbF4mjw"
+                    src="https://www.youtube.com/embed/3yHDmkBbeZs"
                     title="YouTube Video"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -59,10 +59,10 @@ const YouTubePopup = () => {
                 ></iframe>
             </div>
 
-            <h3 className="popup-title">ABRIMOS CAJAS DE VINILOS DE HOUSE con CHIRI y GONZ | BAWAX DROP 004</h3>
+            <h3 className="popup-title">UNBOXING VINILOS DE CLASSIC HOUSE Y TECHNO con CHIRI y GONZ | BAWAX DROP 005</h3>
 
             <a
-                href="https://www.youtube.com/watch?v=UZloKbF4mjw"
+                href="https://www.youtube.com/watch?v=3yHDmkBbeZs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="popup-button"
