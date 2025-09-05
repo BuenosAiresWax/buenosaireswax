@@ -51,7 +51,7 @@ const ProductList = () => {
     }, [cartItems, mostrarMensaje]);
 
     const productosFiltrados = useMemo(() => {
-        return productos.filter((producto) => {
+        const filtrados = productos.filter((producto) => {
             const coincideTexto = (producto.titulo || "")
                 .toLowerCase()
                 .includes(filtroTexto.toLowerCase());
@@ -61,10 +61,31 @@ const ProductList = () => {
             const coincideSello = !selloSeleccionado || producto.sello === selloSeleccionado;
             const coincideAutor = !autorSeleccionado || producto.autor === autorSeleccionado;
             const stockDisponible = ((producto.cantidad ?? 0) - (producto.reservados ?? 0)) > 0;
-            const coincideStock = !verDisponibles || stockDisponible; // 🔹 filtro stock
+            const coincideStock = !verDisponibles || stockDisponible;
 
             return coincideTexto && coincideGenero && coincideEstilo && coincideSello && coincideAutor && coincideStock;
         });
+
+        // Normaliza: minúscula, sin acentos, letras primero, todo lo demás al final
+        const normalizar = (str) => {
+            if (!str) return '';
+            const limpio = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            // Si no empieza con letra, agregamos 'zzz' para moverlo al final
+            return /^[a-z]/.test(limpio) ? limpio : 'zzz' + limpio;
+        };
+
+        // Orden: sello -> título normalizado
+        filtrados.sort((a, b) => {
+            // 1️⃣ Por sello
+            if (a.sello && b.sello) {
+                const selloComp = a.sello.localeCompare(b.sello, 'es', { sensitivity: 'base' });
+                if (selloComp !== 0) return selloComp;
+            }
+            // 2️⃣ Por título
+            return normalizar(a.titulo).localeCompare(normalizar(b.titulo), 'es', { sensitivity: 'base' });
+        });
+
+        return filtrados;
     }, [
         productos,
         filtroTexto,
@@ -72,7 +93,7 @@ const ProductList = () => {
         estiloSeleccionado,
         selloSeleccionado,
         autorSeleccionado,
-        verDisponibles // 🔹 dependencia nueva
+        verDisponibles
     ]);
 
     const productosLimitados = productosFiltrados.slice(0, limit);
