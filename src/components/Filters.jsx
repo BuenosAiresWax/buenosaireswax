@@ -18,10 +18,27 @@ function Filters({
     setVerDisponibles,
     productos,
 }) {
-    const generos = useMemo(() => [...new Set(productos.map((p) => p.genero).filter(Boolean))], [productos]);
-    const estilos = useMemo(() => [...new Set(productos.map((p) => p.estilo).filter(Boolean))], [productos]);
-    const sellos = useMemo(() => [...new Set(productos.map((p) => p.sello).filter(Boolean))], [productos]);
-    const autores = useMemo(() => [...new Set(productos.map((p) => p.autor).filter(Boolean))], [productos]);
+    // 🔹 Función de orden personalizado: alfabético y números al final
+    // 🔹 Función de orden personalizado: letras → números → símbolos
+    const ordenarOpciones = (arr) =>
+        arr.sort((a, b) => {
+            const tipo = (str) => {
+                if (/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(str)) return 1; // letras
+                if (/^\d/.test(str)) return 2; // números
+                return 3; // símbolos u otros
+            };
+
+            const tipoA = tipo(a);
+            const tipoB = tipo(b);
+
+            if (tipoA !== tipoB) return tipoA - tipoB;
+            return a.localeCompare(b, "es", { sensitivity: "base" }); // orden alfabético
+        });
+
+    const generos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.genero).filter(Boolean))]), [productos]);
+    const estilos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.estilo).filter(Boolean))]), [productos]);
+    const sellos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.sello).filter(Boolean))]), [productos]);
+    const autores = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.autor).filter(Boolean))]), [productos]);
 
     const limpiarFiltros = () => {
         setFiltroTexto("");
