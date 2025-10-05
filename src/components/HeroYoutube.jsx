@@ -3,7 +3,7 @@ import "../styles/HeroYoutube.css";
 
 const HeroYoutube = () => {
     // URL del video de YouTube
-    const videoId = "3yHDmkBbeZs";
+    const videoId = "TGVdsUp0Ow8";
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
     const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
