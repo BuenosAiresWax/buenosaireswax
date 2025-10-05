@@ -51,37 +51,55 @@ const ProductList = () => {
     }, [cartItems, mostrarMensaje]);
 
     const productosFiltrados = useMemo(() => {
-        const filtrados = productos.filter((producto) => {
-            const coincideTexto = (producto.titulo || "")
-                .toLowerCase()
-                .includes(filtroTexto.toLowerCase());
+        const filtrados = productos
+            .map((producto) => ({
+                ...producto,
+                // Limpieza de espacios en blanco al inicio y final
+                titulo: producto.titulo?.trim() || "",
+                sello: producto.sello?.trim() || "",
+                autor: producto.autor?.trim() || "",
+                genero: producto.genero?.trim() || "",
+                estilo: producto.estilo?.trim() || "",
+            }))
+            .filter((producto) => {
+                const coincideTexto = (producto.titulo || "")
+                    .toLowerCase()
+                    .includes(filtroTexto.toLowerCase());
 
-            const coincideGenero = !generoSeleccionado || producto.genero === generoSeleccionado;
-            const coincideEstilo = !estiloSeleccionado || producto.estilo === estiloSeleccionado;
-            const coincideSello = !selloSeleccionado || producto.sello === selloSeleccionado;
-            const coincideAutor = !autorSeleccionado || producto.autor === autorSeleccionado;
-            const stockDisponible = ((producto.cantidad ?? 0) - (producto.reservados ?? 0)) > 0;
-            const coincideStock = !verDisponibles || stockDisponible;
+                const coincideGenero = !generoSeleccionado || producto.genero === generoSeleccionado;
+                const coincideEstilo = !estiloSeleccionado || producto.estilo === estiloSeleccionado;
+                const coincideSello = !selloSeleccionado || producto.sello === selloSeleccionado;
+                const coincideAutor = !autorSeleccionado || producto.autor === autorSeleccionado;
+                const stockDisponible = ((producto.cantidad ?? 0) - (producto.reservados ?? 0)) > 0;
+                const coincideStock = !verDisponibles || stockDisponible;
 
-            return coincideTexto && coincideGenero && coincideEstilo && coincideSello && coincideAutor && coincideStock;
-        });
+                return coincideTexto && coincideGenero && coincideEstilo && coincideSello && coincideAutor && coincideStock;
+            });
 
-        // Normaliza: minúscula, sin acentos, letras primero, todo lo demás al final
+        // Función para normalizar texto (acentos, mayúsculas, espacios)
         const normalizar = (str) => {
             if (!str) return '';
-            const limpio = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-            // Si no empieza con letra, agregamos 'zzz' para moverlo al final
-            return /^[a-z]/.test(limpio) ? limpio : 'zzz' + limpio;
+            const limpio = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+            return limpio;
         };
 
-        // Orden: sello -> título normalizado
+        // Función auxiliar para mover sellos con caracteres especiales al final
+        const prioridadSello = (sello) => {
+            if (!sello) return "zzz"; // los vacíos también van al final
+            const limpio = normalizar(sello);
+            // Si comienza con letra o número, se ordena normalmente
+            return /^[a-z0-9]/.test(limpio) ? limpio : "zzz" + limpio;
+        };
+
+        // Orden principal: sello → título
         filtrados.sort((a, b) => {
-            // 1️⃣ Por sello
-            if (a.sello && b.sello) {
-                const selloComp = a.sello.localeCompare(b.sello, 'es', { sensitivity: 'base' });
-                if (selloComp !== 0) return selloComp;
-            }
-            // 2️⃣ Por título
+            const selloA = prioridadSello(a.sello);
+            const selloB = prioridadSello(b.sello);
+
+            const selloComp = selloA.localeCompare(selloB, 'es', { sensitivity: 'base' });
+            if (selloComp !== 0) return selloComp;
+
+            // Si los sellos son iguales, ordenar por título normalizado
             return normalizar(a.titulo).localeCompare(normalizar(b.titulo), 'es', { sensitivity: 'base' });
         });
 
