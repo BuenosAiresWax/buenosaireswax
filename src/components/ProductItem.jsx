@@ -84,7 +84,10 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                     ${(producto?.precio ?? 0).toLocaleString("es-AR", { minimumFractionDigits: 0 })}
                 </p>
 
-                <p className="description">
+                <p
+                    className="description"
+                    title={`${producto.descripcion} - ${producto.estilo}`}
+                >
                     {`${(producto.descripcion + ' - ' + producto.estilo).slice(0, 150)}${(producto.descripcion + ' - ' + producto.estilo).length > 150 ? '...' : ''
                         }`}
                 </p>

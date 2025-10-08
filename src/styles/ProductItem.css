@@ -98,11 +98,19 @@
     font-family: var(--text-font);
     font-size: 13px;
     font-weight: 300;
-    font-style: Light;
-    font-size: 13px;
-    line-height: 100%;
-    letter-spacing: 0%;
+    line-height: 1.4;
+    letter-spacing: 0;
     vertical-align: middle;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    /* 👈 cantidad de líneas visibles */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    cursor: help;
+    /* 👈 permite saltos de línea */
 }
 
 .product-card .info .sello {
