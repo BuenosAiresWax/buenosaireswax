@@ -177,3 +177,14 @@
     filter: grayscale(40%);
     /* Ejemplo: un poco en blanco y negro */
 }
+
+@media (max-width: 768px) {
+    .product-card .info .description {
+        font-size: 12px;
+        /* texto levemente más chico */
+        line-height: 1.3;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        /* 👈 solo 2 líneas visibles en mobile */
+    }
+}
