@@ -102,8 +102,8 @@
     letter-spacing: 0;
     vertical-align: middle;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
     /* 👈 cantidad de líneas visibles */
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -210,7 +210,7 @@
     font-size: 12px;
     max-width: 100%;
     min-height: 200px;
-    max-height: 40vh;
+    max-height: 80vh;
     /* permite ver mucho texto */
     overflow-y: auto;
     /* scroll si es muy largo */
