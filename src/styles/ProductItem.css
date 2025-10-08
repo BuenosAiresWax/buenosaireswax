@@ -209,7 +209,7 @@
     padding: 0;
     font-size: 12px;
     max-width: 100%;
-    min-height: 180px;
+    min-height: 200px;
     max-height: 40vh;
     /* permite ver mucho texto */
     overflow-y: auto;
@@ -219,13 +219,6 @@
     z-index: 10;
     border-radius: 6px;
     animation: fadeIn 0.2s ease;
-}
-
-.ver-mas {
-    color: var(--color-letra);
-    font-weight: bold;
-    cursor: pointer;
-    margin: 0;
 }
 
 @keyframes fadeIn {

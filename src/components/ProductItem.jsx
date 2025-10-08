@@ -109,7 +109,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 {/* Descripción con tooltip mobile mostrando todo el texto */}
                 <div className="description-container" onClick={handleDescriptionClick}>
                     <p className="description" title={fullDescription}>
-                        {`${shortDescription}${isLong ? "..." : ""}`}
+                        {`${shortDescription}${isLong ? "... ver mas" : ""}`}
                     </p>
 
                     {showTooltip && (
