@@ -56,7 +56,7 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
                     const ahora2 = new Date();
                     const diff = fechaObj - ahora2;
                     if (diff <= 0) {
-                        setTiempoRestante("99:00:00:00");
+                        setTiempoRestante("00:00:00:00");
                         clearInterval(countdownRef.current);
                     } else {
                         setTiempoRestante(formatearTiempo(diff));
