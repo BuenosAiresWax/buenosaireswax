@@ -87,7 +87,7 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
 
     return (
         <div className="drop-access">
-            <img src={dropTitleImg} alt="Drop #004" className="drop-title-image" />
+            <img src={dropTitleImg} alt="Drop #006" className="drop-title-image" />
             <div className="countdown">{tiempoRestante}</div>
 
             {!ocultarFormulario && (
