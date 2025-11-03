@@ -1,0 +1,164 @@
+/* Contenedor principal de tarjetas de pedidos */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 columnas en desktop */
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+/* Controles de orden y refresh */
+.orden-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.orden-selector select {
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background-color: #1b1b1b;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.refresh-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.refresh-btn:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+/* Tarjeta individual */
+.pedido-card {
+    background: #1b1b1b;
+    border-radius: 14px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pedido-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 16px rgba(0, 255, 153, 0.2);
+}
+
+/* Encabezado de cada pedido */
+.pedido-header {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #fafafa;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+/* Secciones dentro de la tarjeta */
+.pedido-section {
+    margin-bottom: 1.2rem;
+}
+
+/* Títulos de secciones con emoji */
+.pedido-section h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #22c55e;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.pedido-section h4::before {
+    content: "🧾";
+    /* Emoji solo en los títulos */
+}
+
+/* Filas de información dentro de cada sección */
+.pedido-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    padding: 0.25rem 0;
+}
+
+/* Labels sin emoji */
+.label {
+    color: #93c5fd;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.label::before {
+    content: "";
+    /* sin emoji */
+}
+
+/* Valores a la derecha */
+.value {
+    color: #f1f5f9;
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Línea punteada entre label y value */
+.dots {
+    flex: 1;
+    border-bottom: 1px dotted #333;
+    margin: 0 0.5rem;
+    opacity: 0.5;
+}
+
+/* Loader de carga */
+.admin-loader {
+    color: #fafafa;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 2rem;
+}
+
+/* Responsive móvil */
+@media (max-width: 768px) {
+    .cards-container {
+        grid-template-columns: 1fr;
+        /* 1 columna en móvil */
+    }
+
+    .pedido-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dots {
+        display: none;
+    }
+
+    .value {
+        margin-left: 1.6rem;
+    }
+
+    .orden-selector {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

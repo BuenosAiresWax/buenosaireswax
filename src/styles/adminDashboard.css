@@ -1,0 +1,90 @@
+.admin-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    font-family: "Inter", sans-serif;
+    color: #e5e5e5;
+    background-color: #111;
+}
+
+.admin-controls {
+    display: flex;
+    justify-content: flex-start;
+    margin: 2% 0;
+}
+
+.admin-controls button {
+    background-color: #111;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 0 5px;
+}
+
+.admin-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.admin-title {
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-title::before {
+    content: "📦";
+}
+
+.admin-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #fff;
+}
+
+.btn-pedidos {
+    background: #16a34a;
+}
+
+.btn-productos {
+    background: #2563eb;
+}
+
+.btn-logout {
+    background: #ef4444;
+}
+
+.admin-btn:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+.pedidos-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .admin-controls {
+        justify-content: flex-start;
+    }
+
+    .pedidos-container {
+        grid-template-columns: 1fr;
+    }
+}
