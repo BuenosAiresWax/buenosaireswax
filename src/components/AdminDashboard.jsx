@@ -3,6 +3,7 @@ import { useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import PedidosAdmin from "./PedidosAdmin";
+import ProductosAdmin from "./AdminProductos";
 // import ProductosAdmin from "./ProductosAdmin"; // cuando tengas listo el módulo de productos
 import "../styles/adminDashboard.css";
 
@@ -45,10 +46,7 @@ export default function AdminDashboard() {
             {/* Contenido según tab activo */}
             <div className="tab-content">
                 {activeTab === "Pedidos" && <PedidosAdmin />}
-                {activeTab === "Productos" && (
-                    <p>Próximamente: módulo de Productos.</p>
-                    // <ProductosAdmin /> cuando lo tengas listo
-                )}
+                {activeTab === "Productos" && <ProductosAdmin />}
             </div>
         </div>
     );

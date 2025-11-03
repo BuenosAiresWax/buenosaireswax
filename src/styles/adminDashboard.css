@@ -1,5 +1,6 @@
 .admin-container {
-    max-width: 1200px;
+    max-width: 1500px;
+    min-height: 100vh;
     margin: 2rem auto;
     padding: 1rem;
     font-family: "Inter", sans-serif;
@@ -10,14 +11,14 @@
 .admin-controls {
     display: flex;
     justify-content: flex-start;
-    margin: 2% 0;
 }
 
 .admin-controls button {
-    background-color: #111;
+    background-color: #8585856e;
+    color: #fff;
     border-radius: 5px;
-    padding: 5px;
-    margin: 0 5px;
+    border: 2px solid grey;
+    padding: 5px 10px;
 }
 
 .admin-header {
@@ -51,16 +52,17 @@
     color: #fff;
 }
 
-.btn-pedidos {
+.pedidos-btn {
     background: #16a34a;
 }
 
-.btn-productos {
+.productos-btn {
     background: #2563eb;
 }
 
-.btn-logout {
-    background: #ef4444;
+.logout-btn {
+    background: #d34040;
+    margin: 0 5px;
 }
 
 .admin-btn:hover {
