@@ -176,6 +176,211 @@
     color: #ccc;
 }
 
+/* ✏️ y 🗑️ botones de acción */
+.card-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.producto-card:hover .card-actions {
+    opacity: 1;
+}
+
+.edit-btn,
+.delete-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 6px;
+    color: #fff;
+    font-size: 0.9rem;
+    transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.edit-btn:hover {
+    background: #5fd6ff33;
+    transform: scale(1.1);
+}
+
+.delete-btn:hover {
+    background: #ff5f5f44;
+    transform: scale(1.1);
+}
+
+/* Campos editables */
+.input-edit,
+.textarea-edit {
+    width: 100%;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+.textarea-edit {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 0.6rem;
+}
+
+.btn-save,
+.btn-cancel {
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-save {
+    background: #5fd6ff;
+    color: #111;
+}
+
+.btn-save:hover {
+    background: #42c8f2;
+}
+
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.input-edit.small {
+    width: 80px;
+    text-align: center;
+}
+
+/* 🪟 Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.25s ease forwards;
+}
+
+.modal {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 320px;
+    height: auto;
+    animation: fadeIn 0.25s ease forwards;
+}
+
+.modal p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.confirm-btn,
+.cancel-btn,
+.ok-btn {
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.confirm-btn {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.confirm-btn:hover {
+    background-color: #1b5e20;
+}
+
+.cancel-btn {
+    background-color: #c62828;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #8e0000;
+}
+
+.ok-btn {
+    background-color: #1976d2;
+    color: white;
+}
+
+.ok-btn:hover {
+    background-color: #0d47a1;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+.fadeIn {
+    animation: fadeIn 0.25s forwards;
+}
+
+.fadeOut {
+    animation: fadeOut 0.25s forwards;
+}
+
+
 /* 📱 Responsive ajustes */
 @media (max-width: 600px) {
 
@@ -196,7 +401,7 @@
 
     .producto-imagen {
         width: 100%;
-        max-width: 280px;
+        max-width: 180px;
         height: auto;
     }
 
