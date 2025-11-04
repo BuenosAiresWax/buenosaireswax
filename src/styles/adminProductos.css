@@ -6,7 +6,7 @@
 /* 🎨 Título principal */
 .productos-admin-title {
     font-size: 1.7rem;
-    margin-bottom: 2rem;
+    margin: 2rem 0;
     font-weight: 600;
     text-align: center;
     background: linear-gradient(90deg, #9b6bff, #5fd6ff);
@@ -380,9 +380,27 @@
     animation: fadeOut 0.25s forwards;
 }
 
+.search-input {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #cccccc44;
+    outline: none;
+    flex: 1;
+    max-width: 250px;
+    margin-right: auto;
+}
+
+.search-input:focus {
+    border-color: #666;
+}
+
 
 /* 📱 Responsive ajustes */
 @media (max-width: 600px) {
+
+    .search-input {
+        max-width: 94%;
+    }
 
     .productos-list {
         grid-template-columns: 1fr;

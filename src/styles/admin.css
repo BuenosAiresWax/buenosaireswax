@@ -1,3 +1,15 @@
+/* 🎨 Título principal */
+.productos-admin-title {
+    font-size: 1.7rem;
+    margin: 2rem 0;
+    font-weight: 600;
+    text-align: center;
+    background: linear-gradient(90deg, #9b6bff, #5fd6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: auto;
+}
+
 /* Contenedor principal de tarjetas de pedidos */
 .cards-container {
     display: grid;
@@ -7,26 +19,51 @@
     padding: 1rem 0;
 }
 
-/* Controles de orden y refresh */
+/* 🔍 Contenedor de orden, búsqueda y refresh */
 .orden-selector {
     display: flex;
+    flex-flow: row;
+    width: 100%;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.7rem;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
 }
 
-.orden-selector select {
-    padding: 4px 8px;
+/* Input de búsqueda */
+.busqueda-input {
+    flex: 1;
+    max-width: 200px;
+    margin: 1rem 0;
+    margin-right: auto;
+    padding: 6px 10px;
     border-radius: 5px;
     border: 1px solid #333;
     background-color: #1b1b1b;
     color: #fff;
-    font-weight: 600;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.busqueda-input:focus {
+    border-color: #22c55e;
+}
+
+/* Select de orden */
+.orden-selector select {
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background-color: #1b1b1b;
+    color: rgb(162, 162, 162);
     cursor: pointer;
 }
 
+/* Botón refresh */
 .refresh-btn {
-    padding: 4px 10px;
+    padding: 6px 12px;
     border: none;
     border-radius: 5px;
     background-color: #2563eb;
@@ -136,6 +173,26 @@
     margin-top: 2rem;
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+    .orden-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .busqueda-input {
+        width: 100%;
+        max-width: 94%;
+        margin: 0;
+        margin-top: 2rem;
+    }
+
+    .orden-selector select,
+    .refresh-btn {
+        width: 100%;
+    }
+}
+
 /* Responsive móvil */
 @media (max-width: 768px) {
     .cards-container {
@@ -154,11 +211,5 @@
 
     .value {
         margin-left: 1.6rem;
-    }
-
-    .orden-selector {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
     }
 }

@@ -2,48 +2,81 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import "../styles/adminProductos.css";
+import "../styles/admin.css"; // para reusar las clases de orden y refresh
 
 export default function ProductosAdmin() {
     const [productos, setProductos] = useState([]);
+    const [productosFiltrados, setProductosFiltrados] = useState([]);
+    const [busqueda, setBusqueda] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editando, setEditando] = useState(null);
     const [formData, setFormData] = useState({});
     const [modal, setModal] = useState(null);
     const [processing, setProcessing] = useState(false);
+    const [orden, setOrden] = useState("mayorPrecio"); // mayorPrecio o menorPrecio
+
+    // 🔄 Cargar productos
+    const fetchProductos = async () => {
+        setLoading(true);
+        try {
+            const querySnapshot = await getDocs(collection(db, "productos"));
+            const productosData = querySnapshot.docs.map((doc) => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    titulo: data.titulo || "Sin título",
+                    autor: data.autor || "Desconocido",
+                    genero: data.genero || "No especificado",
+                    estilo: data.estilo || "—",
+                    categoria: data.categoria || "Sin categoría",
+                    sello: data.sello || "Sin sello",
+                    precio: typeof data.precio === "number" ? data.precio : 0,
+                    descripcion: data.descripcion || "Sin descripción disponible.",
+                    cantidad: typeof data.cantidad === "number" ? data.cantidad : 0,
+                    reservados: typeof data.reservados === "number" ? data.reservados : 0,
+                    imagen: data.imagen || "/placeholder-image.png",
+                };
+            });
+
+            // ordenar por precio descendente por defecto
+            const ordenados = [...productosData].sort((a, b) => b.precio - a.precio);
+            setProductos(ordenados);
+            setProductosFiltrados(ordenados);
+        } catch (err) {
+            console.error("Error al obtener productos:", err);
+            setError("No se pudieron cargar los productos. Intenta nuevamente más tarde.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchProductos = async () => {
-            try {
-                const querySnapshot = await getDocs(collection(db, "productos"));
-                const productosData = querySnapshot.docs.map((doc) => {
-                    const data = doc.data();
-                    return {
-                        id: doc.id,
-                        titulo: data.titulo || "Sin título",
-                        autor: data.autor || "Desconocido",
-                        genero: data.genero || "No especificado",
-                        estilo: data.estilo || "—",
-                        categoria: data.categoria || "Sin categoría",
-                        sello: data.sello || "Sin sello",
-                        precio: typeof data.precio === "number" ? data.precio : 0,
-                        descripcion: data.descripcion || "Sin descripción disponible.",
-                        cantidad: typeof data.cantidad === "number" ? data.cantidad : 0,
-                        reservados: typeof data.reservados === "number" ? data.reservados : 0,
-                        imagen: data.imagen || "/placeholder-image.png",
-                    };
-                });
-                setProductos(productosData);
-            } catch (err) {
-                console.error("Error al obtener productos:", err);
-                setError("No se pudieron cargar los productos. Intenta nuevamente más tarde.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchProductos();
     }, []);
+
+    // 🔍 Filtrar por nombre
+    useEffect(() => {
+        if (busqueda.trim() === "") {
+            setProductosFiltrados(productos);
+        } else {
+            const filtrados = productos.filter((p) =>
+                p.titulo.toLowerCase().includes(busqueda.toLowerCase())
+            );
+            setProductosFiltrados(filtrados);
+        }
+    }, [busqueda, productos]);
+
+    // 🔁 Ordenar productos por precio
+    const handleOrdenChange = (e) => {
+        const nuevoOrden = e.target.value;
+        setOrden(nuevoOrden);
+
+        const productosOrdenados = [...productosFiltrados].sort((a, b) =>
+            nuevoOrden === "mayorPrecio" ? b.precio - a.precio : a.precio - b.precio
+        );
+        setProductosFiltrados(productosOrdenados);
+    };
 
     const handleEdit = (producto) => {
         setEditando(producto.id);
@@ -147,11 +180,29 @@ export default function ProductosAdmin() {
         <div className="productos-admin-container">
             <h2 className="productos-admin-title">Inventario de Productos</h2>
 
-            {productos.length === 0 ? (
-                <p>No hay productos cargados.</p>
+            {/* 🔽 Controles de búsqueda, orden y refresh */}
+            <div className="orden-selector">
+                <input
+                    type="text"
+                    placeholder="Buscar por titulo..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    className="search-input"
+                />
+                <select value={orden} onChange={handleOrdenChange}>
+                    <option value="mayorPrecio">Mayor precio primero</option>
+                    <option value="menorPrecio">Menor precio primero</option>
+                </select>
+                <button className="refresh-btn" onClick={fetchProductos} disabled={processing}>
+                    🔄 Refresh
+                </button>
+            </div>
+
+            {productosFiltrados.length === 0 ? (
+                <p>No hay productos que coincidan con la búsqueda.</p>
             ) : (
                 <div className="productos-list">
-                    {productos.map((producto) => {
+                    {productosFiltrados.map((producto) => {
                         const disponibles = Math.max(
                             0,
                             (producto.cantidad || 0) - (producto.reservados || 0)
@@ -282,8 +333,7 @@ export default function ProductosAdmin() {
                                                     <strong>{producto.reservados}</strong>
                                                 </div>
                                                 <div
-                                                    className={`stock-item disponibles ${disponibles <= 1 ? "low" : ""
-                                                        }`}
+                                                    className={`stock-item disponibles ${disponibles <= 1 ? "low" : ""}`}
                                                 >
                                                     <span>Disponibles</span>
                                                     <strong>{disponibles}</strong>
@@ -307,9 +357,7 @@ export default function ProductosAdmin() {
                             <div className="modal-buttons">
                                 <button
                                     className="confirm-btn"
-                                    onClick={() => {
-                                        modal.onConfirm();
-                                    }}
+                                    onClick={() => modal.onConfirm()}
                                 >
                                     Confirmar
                                 </button>

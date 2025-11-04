@@ -14,10 +14,10 @@
 }
 
 .admin-controls button {
-    background-color: #8585856e;
+    background-color: #85858527;
     color: #fff;
     border-radius: 5px;
-    border: 2px solid grey;
+    border: 2px solid rgba(128, 128, 128, 0.425);
     padding: 5px 10px;
 }
 
@@ -83,7 +83,7 @@
     }
 
     .admin-controls {
-        justify-content: flex-start;
+        justify-content: space-between;
     }
 
     .pedidos-container {
