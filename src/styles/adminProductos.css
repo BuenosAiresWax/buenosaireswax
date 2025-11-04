@@ -159,11 +159,11 @@
 }
 
 .stock-item.disponibles {
-    color: #5fd6ff;
+    color: #5fff64;
 }
 
 .stock-item.disponibles.low {
-    color: #ff5f5f;
+    color: #e2c3c3;
     font-weight: 600;
 }
 
