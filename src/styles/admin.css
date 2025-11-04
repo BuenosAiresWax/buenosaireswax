@@ -173,6 +173,32 @@
     margin-top: 2rem;
 }
 
+.download-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: #6161616c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: .4s;
+}
+
+.download-btn:hover {
+    background: #c2c6cccd;
+    transform: scale(1.1);
+    transition: .5s;
+}
+
+.pedido-card {
+    position: relative;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .orden-selector {
