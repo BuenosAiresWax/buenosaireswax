@@ -4,6 +4,7 @@ import { db } from "../firebase/config";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx"; // 📘 para exportar a Excel
 import logo from "../../assets/logo/logo-sin-punto.png";
 
 import "../styles/admin.css";
@@ -74,48 +75,84 @@ export default function PedidosAdmin() {
         setPedidos(pedidosOrdenados);
     };
 
-    // 🧾 Generar comprobante de envío PDF con logo y estilo
+    // 📦 Descargar lista completa en PDF o Excel
+    const handleDescargarLista = async (e) => {
+        const formato = e.target.value;
+        if (formato === "") return;
+
+        if (formato === "pdf") {
+            const doc = new jsPDF();
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.text("Lista de Pedidos", 105, 20, { align: "center" });
+
+            autoTable(doc, {
+                startY: 30,
+                head: [["Cliente", "Correo", "Teléfono", "Fecha", "Total"]],
+                body: pedidos.map(p => [
+                    p.cliente || "-",
+                    p.correo || "-",
+                    p.telefono || "-",
+                    p.fecha || "-",
+                    `$${p.total || 0}`
+                ]),
+                theme: "grid",
+                headStyles: { fillColor: [100, 100, 100] },
+                styles: { fontSize: 11 },
+            });
+
+            doc.save("lista_pedidos.pdf");
+        }
+
+        if (formato === "excel") {
+            const ws = XLSX.utils.json_to_sheet(
+                pedidos.map(p => ({
+                    Cliente: p.cliente || "-",
+                    Correo: p.correo || "-",
+                    Teléfono: p.telefono || "-",
+                    Fecha: p.fecha || "-",
+                    Total: p.total || 0,
+                    "Método de Entrega": p.metodoEntrega || "-",
+                }))
+            );
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
+            XLSX.writeFile(wb, "lista_pedidos.xlsx");
+        }
+
+        e.target.value = ""; // reset select
+    };
+
+    // 🧾 Generar comprobante PDF individual
     const handleDescargarPDF = async (pedido) => {
         const doc = new jsPDF();
-
-        // 🖼️ Logo de la tienda
         try {
             const img = new Image();
             img.src = logo;
-            await new Promise((res) => {
-                img.onload = res;
-            });
+            await new Promise((res) => { img.onload = res; });
             doc.addImage(img, "SVG", 15, 10, 25, 25);
         } catch (e) {
             console.warn("No se pudo cargar el logo:", e);
         }
 
-        // 🧾 Encabezado
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
         doc.text("Comprobante de Envío", 105, 25, { align: "center" });
 
-        // Línea decorativa
-        // Línea decorativa (gris)
-        doc.setDrawColor(120, 120, 120); // gris medio
+        doc.setDrawColor(120, 120, 120);
         doc.setLineWidth(0.8);
         doc.line(15, 35, 195, 35);
 
-        // 🧍 Datos del cliente
         doc.setFontSize(12);
-        doc.setTextColor(0);
-        doc.setFont("helvetica", "bold");
         doc.text("Datos del Cliente:", 15, 45);
         doc.setFont("helvetica", "normal");
         doc.text(`Nombre: ${pedido.cliente}`, 15, 53);
         doc.text(`Correo: ${pedido.correo}`, 15, 61);
         doc.text(`Teléfono: ${pedido.telefono}`, 15, 69);
-        if (pedido.instagram)
-            doc.text(`Instagram: ${pedido.instagram}`, 15, 77);
+        if (pedido.instagram) doc.text(`Instagram: ${pedido.instagram}`, 15, 77);
         doc.text(`Método de Entrega: ${pedido.metodoEntrega}`, 15, 85);
         doc.text(`Fecha del Pedido: ${pedido.fecha}`, 15, 93);
 
-        // 📦 Tabla de productos
         const productos = pedido.productos?.map(p => [
             p.titulo,
             p.cantidad,
@@ -132,10 +169,8 @@ export default function PedidosAdmin() {
             styles: { fontSize: 11 },
         });
 
-        // 💵 Total
         const yFinal = doc.lastAutoTable.finalY + 10;
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(12, 12, 12);
         doc.text(`TOTAL: $${pedido.total}`, 15, yFinal);
 
         doc.save(`comprobante_envio_${pedido.cliente}_${pedido.id}.pdf`);
@@ -158,6 +193,14 @@ export default function PedidosAdmin() {
                     <option value="masReciente">Más reciente primero</option>
                     <option value="menosReciente">Menos reciente primero</option>
                 </select>
+
+                {/* 📥 Selector gris de descarga */}
+                <select onChange={handleDescargarLista} className="descargar-select">
+                    <option value="">⬇️ Descargar Pedidos</option>
+                    <option value="pdf">📄 PDF</option>
+                    <option value="excel">📘 Excel</option>
+                </select>
+
                 <button onClick={fetchPedidos} className="refresh-btn">🔄 Refresh</button>
             </div>
 
