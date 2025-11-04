@@ -235,12 +235,23 @@ export default function ProductosAdmin() {
                                     </div>
                                 )}
 
-                                <img
-                                    src={producto.imagen}
-                                    alt={producto.titulo}
-                                    className="producto-imagen"
-                                    onError={(e) => (e.target.src = "/assets/logo/B-negro.png")}
-                                />
+                                {producto.imagen ? (
+                                    <img
+                                        src={producto.imagen}
+                                        alt={producto.titulo}
+                                        className="producto-imagen"
+                                        onError={(e) => {
+                                            e.target.onerror = null; // evita el bucle
+                                            e.target.style.display = "none"; // oculta la imagen rota
+                                            e.target.insertAdjacentHTML(
+                                                "afterend",
+                                                '<div class="producto-imagen-placeholder"></div>'
+                                            );
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="producto-imagen-placeholder"></div>
+                                )}
 
                                 <div className="producto-info">
                                     {isEditing ? (

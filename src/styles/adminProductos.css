@@ -394,6 +394,12 @@
     border-color: #666;
 }
 
+.producto-imagen-placeholder {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: #000;
+    border-radius: 8px;
+}
 
 /* 📱 Responsive ajustes */
 @media (max-width: 600px) {
