@@ -395,7 +395,8 @@
 }
 
 .producto-imagen-placeholder {
-    width: 100%;
+    width: 110px;
+    height: 110px;
     aspect-ratio: 1 / 1;
     background-color: #000;
     border-radius: 8px;
