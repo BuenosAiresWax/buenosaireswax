@@ -239,7 +239,7 @@ export default function ProductosAdmin() {
                                     src={producto.imagen}
                                     alt={producto.titulo}
                                     className="producto-imagen"
-                                    onError={(e) => (e.target.src = "/placeholder-image.png")}
+                                    onError={(e) => (e.target.src = "../../assets/logo/B-negro.png")}
                                 />
 
                                 <div className="producto-info">

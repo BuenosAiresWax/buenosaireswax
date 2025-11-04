@@ -4,7 +4,7 @@ import { db } from "../firebase/config";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx"; // 📘 para exportar a Excel
+import * as XLSX from "xlsx";
 import logo from "../../assets/logo/logo-sin-punto.png";
 
 import "../styles/admin.css";
@@ -75,44 +75,73 @@ export default function PedidosAdmin() {
         setPedidos(pedidosOrdenados);
     };
 
-    // 📦 Descargar lista completa en PDF o Excel
+    // 📥 Descargar lista completa (PDF o Excel)
     const handleDescargarLista = async (e) => {
         const formato = e.target.value;
         if (formato === "") return;
 
+        // 📄 PDF general
         if (formato === "pdf") {
-            const doc = new jsPDF();
+            const doc = new jsPDF({ orientation: "landscape" });
             doc.setFont("helvetica", "bold");
             doc.setFontSize(18);
-            doc.text("Lista de Pedidos", 105, 20, { align: "center" });
+            doc.text("Lista de Pedidos", 148, 20, { align: "center" });
 
             autoTable(doc, {
                 startY: 30,
-                head: [["Cliente", "Correo", "Teléfono", "Fecha", "Total"]],
+                head: [[
+                    "Cliente", "Correo", "Teléfono", "Método de Entrega",
+                    "Dirección", "Ciudad", "C.P.", "Departamento", "DNI", "Fecha", "Total"
+                ]],
                 body: pedidos.map(p => [
-                    p.cliente || "-",
-                    p.correo || "-",
-                    p.telefono || "-",
-                    p.fecha || "-",
+                    p.cliente || "No disponible",
+                    p.correo || "No disponible",
+                    p.telefono || "No disponible",
+                    p.metodoEntrega || "No disponible",
+                    p.direccion || "No disponible",
+                    p.ciudad || "No disponible",
+                    p.codigoPostal || "No disponible",
+                    p.departamento || "No disponible",
+                    p.dni || "No disponible",
+                    p.fecha || "No disponible",
                     `$${p.total || 0}`
                 ]),
                 theme: "grid",
-                headStyles: { fillColor: [100, 100, 100] },
-                styles: { fontSize: 11 },
+                headStyles: { fillColor: [90, 90, 90] },
+                styles: { fontSize: 10 },
+                columnStyles: {
+                    0: { cellWidth: 30 },
+                    1: { cellWidth: 40 },
+                    2: { cellWidth: 25 },
+                    3: { cellWidth: 35 },
+                    4: { cellWidth: 35 },
+                    5: { cellWidth: 25 },
+                    6: { cellWidth: 20 },
+                    7: { cellWidth: 25 },
+                    8: { cellWidth: 20 },
+                    9: { cellWidth: 30 },
+                    10: { cellWidth: 25 },
+                },
             });
 
             doc.save("lista_pedidos.pdf");
         }
 
+        // 📘 Excel general
         if (formato === "excel") {
             const ws = XLSX.utils.json_to_sheet(
                 pedidos.map(p => ({
-                    Cliente: p.cliente || "-",
-                    Correo: p.correo || "-",
-                    Teléfono: p.telefono || "-",
-                    Fecha: p.fecha || "-",
+                    Cliente: p.cliente || "No disponible",
+                    Correo: p.correo || "No disponible",
+                    Teléfono: p.telefono || "No disponible",
+                    "Método de Entrega": p.metodoEntrega || "No disponible",
+                    Dirección: p.direccion || "No disponible",
+                    Ciudad: p.ciudad || "No disponible",
+                    "Código Postal": p.codigoPostal || "No disponible",
+                    Departamento: p.departamento || "No disponible",
+                    DNI: p.dni || "No disponible",
+                    Fecha: p.fecha || "No disponible",
                     Total: p.total || 0,
-                    "Método de Entrega": p.metodoEntrega || "-",
                 }))
             );
             const wb = XLSX.utils.book_new();
@@ -120,10 +149,10 @@ export default function PedidosAdmin() {
             XLSX.writeFile(wb, "lista_pedidos.xlsx");
         }
 
-        e.target.value = ""; // reset select
+        e.target.value = "";
     };
 
-    // 🧾 Generar comprobante PDF individual
+    // 🧾 PDF individual
     const handleDescargarPDF = async (pedido) => {
         const doc = new jsPDF();
         try {
@@ -140,19 +169,29 @@ export default function PedidosAdmin() {
         doc.text("Comprobante de Envío", 105, 25, { align: "center" });
 
         doc.setDrawColor(120, 120, 120);
-        doc.setLineWidth(0.8);
         doc.line(15, 35, 195, 35);
 
         doc.setFontSize(12);
         doc.text("Datos del Cliente:", 15, 45);
         doc.setFont("helvetica", "normal");
-        doc.text(`Nombre: ${pedido.cliente}`, 15, 53);
-        doc.text(`Correo: ${pedido.correo}`, 15, 61);
-        doc.text(`Teléfono: ${pedido.telefono}`, 15, 69);
-        if (pedido.instagram) doc.text(`Instagram: ${pedido.instagram}`, 15, 77);
-        doc.text(`Método de Entrega: ${pedido.metodoEntrega}`, 15, 85);
-        doc.text(`Fecha del Pedido: ${pedido.fecha}`, 15, 93);
+        doc.text(`Nombre: ${pedido.cliente || "No disponible"}`, 15, 53);
+        doc.text(`Correo: ${pedido.correo || "No disponible"}`, 15, 61);
+        doc.text(`Teléfono: ${pedido.telefono || "No disponible"}`, 15, 69);
+        doc.text(`Instagram: ${pedido.instagram || "No disponible"}`, 15, 77);
+        doc.text(`Método de Entrega: ${pedido.metodoEntrega || "No disponible"}`, 15, 85);
+        doc.text(`Fecha del Pedido: ${pedido.fecha || "No disponible"}`, 15, 93);
 
+        // 📍 Dirección
+        doc.setFont("helvetica", "bold");
+        doc.text("Dirección de Envío:", 15, 105);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Dirección: ${pedido.direccion || "No disponible"}`, 15, 113);
+        doc.text(`Ciudad: ${pedido.ciudad || "No disponible"}`, 15, 121);
+        doc.text(`Código Postal: ${pedido.codigoPostal || "No disponible"}`, 15, 129);
+        doc.text(`Departamento: ${pedido.departamento || "No disponible"}`, 15, 137);
+        doc.text(`DNI: ${pedido.dni || "No disponible"}`, 15, 145);
+
+        const startY = 155;
         const productos = pedido.productos?.map(p => [
             p.titulo,
             p.cantidad,
@@ -161,7 +200,7 @@ export default function PedidosAdmin() {
         ]) || [];
 
         autoTable(doc, {
-            startY: 105,
+            startY,
             head: [["Producto", "Cantidad", "Precio", "Subtotal"]],
             body: productos,
             theme: "grid",
@@ -194,7 +233,6 @@ export default function PedidosAdmin() {
                     <option value="menosReciente">Menos reciente primero</option>
                 </select>
 
-                {/* 📥 Selector gris de descarga */}
                 <select onChange={handleDescargarLista} className="descargar-select">
                     <option value="">⬇️ Descargar Pedidos</option>
                     <option value="pdf">📄 PDF</option>
@@ -219,17 +257,25 @@ export default function PedidosAdmin() {
                             </button>
 
                             <div className="pedido-header">
-                                <h3>{pedido.cliente}</h3>
-                                <span className="pedido-fecha">{pedido.fecha}</span>
+                                <h3>{pedido.cliente || "No disponible"}</h3>
+                                <span className="pedido-fecha">{pedido.fecha || "No disponible"}</span>
                             </div>
 
                             <div className="pedido-section">
                                 <h4>📦 Detalles del pedido</h4>
-                                <div className="pedido-row"><span className="label">Correo</span><span className="dots"></span><span className="value">{pedido.correo}</span></div>
-                                <div className="pedido-row"><span className="label">Teléfono</span><span className="dots"></span><span className="value">{pedido.telefono}</span></div>
-                                <div className="pedido-row"><span className="label">Método de entrega</span><span className="dots"></span><span className="value">{pedido.metodoEntrega}</span></div>
-                                <div className="pedido-row"><span className="label">Instagram</span><span className="dots"></span><span className="value">{pedido.instagram}</span></div>
-                                <div className="pedido-row total"><span className="label">Total</span><span className="dots"></span><span className="value">${pedido.total}</span></div>
+                                <div className="pedido-row"><span className="label">Correo</span><span className="dots"></span><span className="value">{pedido.correo || "No disponible"}</span></div>
+                                <div className="pedido-row"><span className="label">Teléfono</span><span className="dots"></span><span className="value">{pedido.telefono || "No disponible"}</span></div>
+                                <div className="pedido-row"><span className="label">Método de entrega</span><span className="dots"></span><span className="value">{pedido.metodoEntrega || "No disponible"}</span></div>
+                                <div className="pedido-row"><span className="label">Instagram</span><span className="dots"></span><span className="value">{pedido.instagram || "No disponible"}</span></div>
+                            </div>
+
+                            <div className="pedido-section">
+                                <h4>📍 Dirección de envío</h4>
+                                <div className="pedido-row"><span className="label">Dirección</span><span className="dots"></span><span className="value">{pedido.direccion || "No disponible"}</span></div>
+                                <div className="pedido-row"><span className="label">Ciudad</span><span className="dots"></span><span className="value">{pedido.ciudad || "No disponible"}</span></div>
+                                <div className="pedido-row"><span className="label">Código Postal</span><span className="dots"></span><span className="value">{pedido.codigoPostal || "No disponible"}</span></div>
+                                <div className="pedido-row"><span className="label">Departamento</span><span className="dots"></span><span className="value">{pedido.departamento || "No disponible"}</span></div>
+                                <div className="pedido-row"><span className="label">DNI</span><span className="dots"></span><span className="value">{pedido.dni || "No disponible"}</span></div>
                             </div>
 
                             <div className="pedido-section productos">
@@ -238,9 +284,16 @@ export default function PedidosAdmin() {
                                     <div className="pedido-row" key={idx}>
                                         <span className="label">{prod.titulo}</span>
                                         <span className="dots"></span>
-                                        <span className="value">{prod.cantidad} x ${prod.precioUnitario} = ${prod.subtotal}</span>
+                                        <span className="value">
+                                            {prod.cantidad} x ${prod.precioUnitario} = ${prod.subtotal}
+                                        </span>
                                     </div>
                                 ))}
+                                <div className="pedido-row total">
+                                    <span className="label">Total</span>
+                                    <span className="dots"></span>
+                                    <span className="value">${pedido.total}</span>
+                                </div>
                             </div>
                         </div>
                     ))
