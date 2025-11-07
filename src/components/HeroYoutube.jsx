@@ -3,7 +3,7 @@ import "../styles/HeroYoutube.css";
 
 const HeroYoutube = () => {
     // URL del video de YouTube
-    const videoId = "TGVdsUp0Ow8";
+    const videoId = "2rODsfdvtb8";
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
     const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
@@ -14,7 +14,7 @@ const HeroYoutube = () => {
         >
             <div className="hero-youtube-overlay">
                 <div className="hero-youtube-content">
-                    <h4>Nuevo drop 📦 Disponible en YouTube</h4>
+                    <h4>Drop 007 📦 Disponible en YouTube</h4>
                     <a
                         href={videoUrl}
                         target="_blank"

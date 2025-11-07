@@ -215,6 +215,17 @@ export default function PedidosAdmin() {
         doc.save(`comprobante_envio_${pedido.cliente}_${pedido.id}.pdf`);
     };
 
+    const handleWhatsApp = (pedido) => {
+        if (!pedido.telefono) return; // no hace nada si no hay número
+
+        const telefono = pedido.telefono.replace(/\D/g, ""); // limpia caracteres no numéricos
+        const mensaje = encodeURIComponent(
+            `¡Hola ${pedido.cliente || "cliente"}! 👋 Tu pedido ya fue despachado 🚚💚 Gracias por tu compra.`
+        );
+
+        window.open(`https://wa.me/${telefono}?text=${mensaje}`, "_blank");
+    };
+
     if (loading) return <p className="admin-loader">Cargando pedidos...</p>;
 
     return (
@@ -248,12 +259,22 @@ export default function PedidosAdmin() {
                 ) : (
                     pedidosFiltrados.map((pedido) => (
                         <div key={pedido.id} className="pedido-card">
+
                             <button
                                 className="download-btn"
                                 title="Descargar comprobante de envío"
                                 onClick={() => handleDescargarPDF(pedido)}
                             >
                                 🚚
+                            </button>
+
+                            {/* 🟢 Nuevo botón de WhatsApp */}
+                            <button
+                                className="whatsapp-btn"
+                                title="Enviar mensaje de despacho por WhatsApp"
+                                onClick={() => handleWhatsApp(pedido)}
+                            >
+                                💬
                             </button>
 
                             <div className="pedido-header">
