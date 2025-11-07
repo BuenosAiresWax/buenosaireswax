@@ -272,7 +272,7 @@
 }
 
 /* 🪟 Modal */
-.modal-overlay {
+.admin-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -287,7 +287,7 @@
     animation: fadeIn 0.25s ease forwards;
 }
 
-.modal {
+.modal-admin {
     background: #1a1a1a;
     border-radius: 12px;
     padding: 1.5rem 2rem;
@@ -298,12 +298,12 @@
     animation: fadeIn 0.25s ease forwards;
 }
 
-.modal p {
+.modal-admin p {
     margin-bottom: 1rem;
     font-size: 1.1rem;
 }
 
-.modal-buttons {
+.modal-admin-buttons {
     display: flex;
     justify-content: center;
     gap: 1rem;

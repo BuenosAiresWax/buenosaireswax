@@ -361,11 +361,11 @@ export default function ProductosAdmin() {
 
             {/* 🪟 Modal dinámico */}
             {modal && (
-                <div className="modal-overlay">
-                    <div className={`modal ${modal.fadeOut ? "fadeOut" : "fadeIn"}`}>
+                <div className="admin-modal-overlay">
+                    <div className={`modal-admin ${modal.fadeOut ? "fadeOut" : "fadeIn"}`}>
                         <p>{modal.message}</p>
                         {modal.type === "confirm" && (
-                            <div className="modal-buttons">
+                            <div className="modal-admin-buttons">
                                 <button
                                     className="confirm-btn"
                                     onClick={() => modal.onConfirm()}
@@ -392,7 +392,7 @@ export default function ProductosAdmin() {
                             </button>
                         )}
                         {modal.type === "loading" && (
-                            <div className="modal-buttons">
+                            <div className="modal-admin-buttons">
                                 <p className="loading">⏳ {modal.message}</p>
                             </div>
                         )}
