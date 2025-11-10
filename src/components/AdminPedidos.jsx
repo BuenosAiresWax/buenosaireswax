@@ -82,46 +82,73 @@ export default function PedidosAdmin() {
 
         // 📄 PDF general
         if (formato === "pdf") {
-            const doc = new jsPDF({ orientation: "landscape" });
+            const doc = new jsPDF({ orientation: "portrait" });
             doc.setFont("helvetica", "bold");
             doc.setFontSize(18);
-            doc.text("Lista de Pedidos", 148, 20, { align: "center" });
+            doc.text("Lista Completa de Pedidos", 105, 20, { align: "center" });
 
-            autoTable(doc, {
-                startY: 30,
-                head: [[
-                    "Cliente", "Correo", "Teléfono", "Método de Entrega",
-                    "Dirección", "Ciudad", "C.P.", "Departamento", "DNI", "Fecha", "Total"
-                ]],
-                body: pedidos.map(p => [
-                    p.cliente || "No disponible",
-                    p.correo || "No disponible",
-                    p.telefono || "No disponible",
-                    p.metodoEntrega || "No disponible",
-                    p.direccion || "No disponible",
-                    p.ciudad || "No disponible",
-                    p.codigoPostal || "No disponible",
-                    p.departamento || "No disponible",
-                    p.dni || "No disponible",
-                    p.fecha || "No disponible",
-                    `$${p.total || 0}`
-                ]),
-                theme: "grid",
-                headStyles: { fillColor: [90, 90, 90] },
-                styles: { fontSize: 10 },
-                columnStyles: {
-                    0: { cellWidth: 30 },
-                    1: { cellWidth: 40 },
-                    2: { cellWidth: 25 },
-                    3: { cellWidth: 35 },
-                    4: { cellWidth: 35 },
-                    5: { cellWidth: 25 },
-                    6: { cellWidth: 20 },
-                    7: { cellWidth: 25 },
-                    8: { cellWidth: 20 },
-                    9: { cellWidth: 30 },
-                    10: { cellWidth: 25 },
-                },
+            let y = 30;
+
+            pedidos.forEach((p, index) => {
+                doc.setFontSize(13);
+                doc.setTextColor(40);
+                doc.text(`Pedido ${index + 1}`, 15, y);
+                doc.setDrawColor(180);
+                doc.line(15, y + 2, 195, y + 2);
+                y += 8;
+
+                const datos = [
+                    ["Cliente", p.cliente || "No disponible"],
+                    ["Correo", p.correo || "No disponible"],
+                    ["Teléfono", p.telefono || "No disponible"],
+                    ["Instagram", p.instagram || "No disponible"],
+                    ["Método de entrega", p.metodoEntrega || "No disponible"],
+                    ["Dirección", p.direccion || "No disponible"],
+                    ["Ciudad", p.ciudad || "No disponible"],
+                    ["Código Postal", p.codigoPostal || "No disponible"],
+                    ["Departamento", p.departamento || "No disponible"],
+                    ["DNI", p.dni || "No disponible"],
+                    ["Fecha", p.fecha || "No disponible"],
+                ];
+
+                autoTable(doc, {
+                    startY: y,
+                    body: datos,
+                    theme: "plain",
+                    styles: { fontSize: 10, cellPadding: 2 },
+                    columnStyles: {
+                        0: { fontStyle: "bold", cellWidth: 50 },
+                        1: { cellWidth: 120 },
+                    },
+                });
+
+                y = doc.lastAutoTable.finalY + 5;
+
+                const productos = p.productos?.map(prod => [
+                    prod.titulo,
+                    prod.cantidad,
+                    `$${prod.precioUnitario}`,
+                    `$${prod.subtotal}`,
+                ]) || [];
+
+                autoTable(doc, {
+                    startY: y,
+                    head: [["Producto", "Cantidad", "Precio", "Subtotal"]],
+                    body: productos,
+                    theme: "grid",
+                    headStyles: { fillColor: [90, 90, 90], textColor: 255 },
+                    styles: { fontSize: 10 },
+                });
+
+                y = doc.lastAutoTable.finalY + 8;
+                doc.setFont("helvetica", "bold");
+                doc.text(`TOTAL: $${p.total || 0}`, 15, y);
+
+                y += 15;
+                if (y > 270 && index < pedidos.length - 1) {
+                    doc.addPage();
+                    y = 30;
+                }
             });
 
             doc.save("lista_pedidos.pdf");
@@ -129,21 +156,53 @@ export default function PedidosAdmin() {
 
         // 📘 Excel general
         if (formato === "excel") {
-            const ws = XLSX.utils.json_to_sheet(
-                pedidos.map(p => ({
-                    Cliente: p.cliente || "No disponible",
-                    Correo: p.correo || "No disponible",
-                    Teléfono: p.telefono || "No disponible",
-                    "Método de Entrega": p.metodoEntrega || "No disponible",
-                    Dirección: p.direccion || "No disponible",
-                    Ciudad: p.ciudad || "No disponible",
-                    "Código Postal": p.codigoPostal || "No disponible",
-                    Departamento: p.departamento || "No disponible",
-                    DNI: p.dni || "No disponible",
-                    Fecha: p.fecha || "No disponible",
-                    Total: p.total || 0,
-                }))
-            );
+            const filas = [];
+
+            pedidos.forEach((p) => {
+                if (p.productos && p.productos.length > 0) {
+                    p.productos.forEach((prod, idx) => {
+                        filas.push({
+                            Cliente: p.cliente || "No disponible",
+                            Correo: p.correo || "No disponible",
+                            Teléfono: p.telefono || "No disponible",
+                            Instagram: p.instagram || "No disponible",
+                            "Método de Entrega": p.metodoEntrega || "No disponible",
+                            Dirección: p.direccion || "No disponible",
+                            Ciudad: p.ciudad || "No disponible",
+                            "Código Postal": p.codigoPostal || "No disponible",
+                            Departamento: p.departamento || "No disponible",
+                            DNI: p.dni || "No disponible",
+                            Fecha: p.fecha || "No disponible",
+                            Producto: prod.titulo || "No disponible",
+                            Cantidad: prod.cantidad || 0,
+                            "Precio Unitario": prod.precioUnitario ? `$${prod.precioUnitario}` : "—",
+                            Subtotal: prod.subtotal ? `$${prod.subtotal}` : "—",
+                            Total: idx === 0 ? `$${p.total}` : "", // solo mostrar el total en la primera fila del pedido
+                        });
+                    });
+                } else {
+                    filas.push({
+                        Cliente: p.cliente || "No disponible",
+                        Correo: p.correo || "No disponible",
+                        Teléfono: p.telefono || "No disponible",
+                        Instagram: p.instagram || "No disponible",
+                        "Método de Entrega": p.metodoEntrega || "No disponible",
+                        Dirección: p.direccion || "No disponible",
+                        Ciudad: p.ciudad || "No disponible",
+                        "Código Postal": p.codigoPostal || "No disponible",
+                        Departamento: p.departamento || "No disponible",
+                        DNI: p.dni || "No disponible",
+                        Fecha: p.fecha || "No disponible",
+                        Producto: "Sin productos",
+                        Cantidad: "",
+                        "Precio Unitario": "",
+                        Subtotal: "",
+                        Total: `$${p.total || 0}`,
+                    });
+                }
+            });
+
+            const ws = XLSX.utils.json_to_sheet(filas);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
             XLSX.writeFile(wb, "lista_pedidos.xlsx");
