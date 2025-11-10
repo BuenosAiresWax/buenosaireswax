@@ -76,21 +76,56 @@ export default function PedidosAdmin() {
     };
 
     // 📥 Descargar lista completa (PDF o Excel)
-    // 📥 Descargar lista completa (PDF o Excel)
     const handleDescargarLista = async (e) => {
         const formato = e.target.value;
         if (formato === "") return;
 
-        // 📄 PDF general
-        if (formato === "pdf") {
+        // ✅ Nueva función: obtiene el último mes con pedidos disponibles
+        const obtenerPedidosUltimoMes = () => {
+            if (pedidos.length === 0) return [];
+
+            // Tomamos todos los meses disponibles en los pedidos
+            const fechas = pedidos.map(p => p.fechaObj).filter(d => d instanceof Date && !isNaN(d));
+            if (fechas.length === 0) return [];
+
+            // Buscamos la fecha más reciente
+            const ultimaFecha = new Date(Math.max(...fechas.map(d => d.getTime())));
+            const ultimoMes = ultimaFecha.getMonth();
+            const ultimoAño = ultimaFecha.getFullYear();
+
+            const inicioUltimoMes = new Date(ultimoAño, ultimoMes, 1);
+            const finUltimoMes = new Date(ultimoAño, ultimoMes + 1, 0, 23, 59, 59);
+
+            // Filtramos los pedidos de ese mes
+            return pedidos.filter(
+                p => p.fechaObj >= inicioUltimoMes && p.fechaObj <= finUltimoMes
+            );
+        };
+
+        // 📄 PDF general o del último mes
+        if (formato === "pdf" || formato === "pdfUltimoMes") {
+            const listaFuente = formato === "pdfUltimoMes" ? obtenerPedidosUltimoMes() : pedidos;
+
+            if (listaFuente.length === 0) {
+                alert("No hay pedidos registrados en el último mes.");
+                e.target.value = "";
+                return;
+            }
+
             const doc = new jsPDF({ orientation: "portrait" });
             doc.setFont("helvetica", "bold");
             doc.setFontSize(18);
-            doc.text("Lista Completa de Pedidos", 105, 20, { align: "center" });
+
+            const titulo =
+                formato === "pdfUltimoMes"
+                    ? "Pedidos del Último Mes"
+                    : "Lista Completa de Pedidos";
+
+            doc.text(titulo, 105, 20, { align: "center" });
 
             let y = 30;
 
-            pedidos.forEach((p, index) => {
+            listaFuente.forEach((p, index) => {
                 doc.setFontSize(13);
                 doc.setTextColor(40);
                 doc.text(`Pedido ${index + 1}`, 15, y);
@@ -98,7 +133,6 @@ export default function PedidosAdmin() {
                 doc.line(15, y + 2, 195, y + 2);
                 y += 8;
 
-                // 🔹 Combinamos en una sola tabla de 4 columnas (dato izquierda, valor izquierda, dato derecha, valor derecha)
                 const datosCombinados = [
                     ["Cliente", p.cliente || "No disponible", "Dirección", p.direccion || "No disponible"],
                     ["Correo", p.correo || "No disponible", "Ciudad", p.ciudad || "No disponible"],
@@ -121,10 +155,8 @@ export default function PedidosAdmin() {
                     margin: { left: 15 },
                 });
 
-                // 📏 Espacio debajo del bloque de datos
                 y = doc.lastAutoTable.finalY + 10;
 
-                // 🔹 Fecha
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "bold");
                 doc.text(`Fecha:`, 15, y);
@@ -132,11 +164,9 @@ export default function PedidosAdmin() {
                 doc.text(p.fecha || "No disponible", 30, y);
                 y += 8;
 
-                // 🔹 Línea divisoria gris (opcional, mejora la lectura)
                 doc.setDrawColor(220);
                 doc.line(15, y - 3, 195, y - 3);
 
-                // 🔹 Tabla de productos
                 const productos = p.productos?.map(prod => [
                     prod.titulo,
                     prod.cantidad,
@@ -158,20 +188,33 @@ export default function PedidosAdmin() {
                 doc.text(`TOTAL: $${p.total || 0}`, 15, y);
 
                 y += 15;
-                if (y > 270 && index < pedidos.length - 1) {
+                if (y > 270 && index < listaFuente.length - 1) {
                     doc.addPage();
                     y = 30;
                 }
             });
 
-            doc.save("lista_pedidos.pdf");
+            const nombreArchivo =
+                formato === "pdfUltimoMes"
+                    ? "pedidos_ultimo_mes.pdf"
+                    : "lista_pedidos.pdf";
+
+            doc.save(nombreArchivo);
         }
 
-        // 📘 Excel general (sin cambios)
-        if (formato === "excel") {
+        // 📘 Excel general o del último mes
+        if (formato === "excel" || formato === "excelUltimoMes") {
+            const listaFuente = formato === "excelUltimoMes" ? obtenerPedidosUltimoMes() : pedidos;
+
+            if (listaFuente.length === 0) {
+                alert("No hay pedidos registrados en el último mes.");
+                e.target.value = "";
+                return;
+            }
+
             const filas = [];
 
-            pedidos.forEach((p) => {
+            listaFuente.forEach((p) => {
                 if (p.productos && p.productos.length > 0) {
                     p.productos.forEach((prod, idx) => {
                         filas.push({
@@ -218,7 +261,13 @@ export default function PedidosAdmin() {
             const ws = XLSX.utils.json_to_sheet(filas);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
-            XLSX.writeFile(wb, "lista_pedidos.xlsx");
+
+            const nombreArchivo =
+                formato === "excelUltimoMes"
+                    ? "pedidos_ultimo_mes.xlsx"
+                    : "lista_pedidos.xlsx";
+
+            XLSX.writeFile(wb, nombreArchivo);
         }
 
         e.target.value = "";
@@ -319,7 +368,9 @@ export default function PedidosAdmin() {
                 <select onChange={handleDescargarLista} className="descargar-select">
                     <option value="">⬇️ Descargar Pedidos</option>
                     <option value="pdf">📄 PDF</option>
-                    <option value="excel">📘 Excel</option>
+                    <option value="pdfUltimoMes">📄 Último mes (PDF)</option>
+                    <option value="excel">📊 Excel</option>
+                    <option value="excelUltimoMes">📊 Último mes (Excel)</option>
                 </select>
 
                 <button onClick={fetchPedidos} className="refresh-btn">🔄 Refresh</button>
