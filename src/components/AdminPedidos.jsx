@@ -76,6 +76,7 @@ export default function PedidosAdmin() {
     };
 
     // 📥 Descargar lista completa (PDF o Excel)
+    // 📥 Descargar lista completa (PDF o Excel)
     const handleDescargarLista = async (e) => {
         const formato = e.target.value;
         if (formato === "") return;
@@ -97,33 +98,45 @@ export default function PedidosAdmin() {
                 doc.line(15, y + 2, 195, y + 2);
                 y += 8;
 
-                const datos = [
-                    ["Cliente", p.cliente || "No disponible"],
-                    ["Correo", p.correo || "No disponible"],
-                    ["Teléfono", p.telefono || "No disponible"],
-                    ["Instagram", p.instagram || "No disponible"],
-                    ["Método de entrega", p.metodoEntrega || "No disponible"],
-                    ["Dirección", p.direccion || "No disponible"],
-                    ["Ciudad", p.ciudad || "No disponible"],
-                    ["Código Postal", p.codigoPostal || "No disponible"],
-                    ["Departamento", p.departamento || "No disponible"],
-                    ["DNI", p.dni || "No disponible"],
-                    ["Fecha", p.fecha || "No disponible"],
+                // 🔹 Combinamos en una sola tabla de 4 columnas (dato izquierda, valor izquierda, dato derecha, valor derecha)
+                const datosCombinados = [
+                    ["Cliente", p.cliente || "No disponible", "Dirección", p.direccion || "No disponible"],
+                    ["Correo", p.correo || "No disponible", "Ciudad", p.ciudad || "No disponible"],
+                    ["Teléfono", p.telefono || "No disponible", "Código Postal", p.codigoPostal || "No disponible"],
+                    ["Instagram", p.instagram || "No disponible", "Departamento", p.departamento || "No disponible"],
+                    ["Método de entrega", p.metodoEntrega || "No disponible", "DNI", p.dni || "No disponible"],
                 ];
 
                 autoTable(doc, {
                     startY: y,
-                    body: datos,
+                    body: datosCombinados,
                     theme: "plain",
                     styles: { fontSize: 10, cellPadding: 2 },
                     columnStyles: {
-                        0: { fontStyle: "bold", cellWidth: 50 },
-                        1: { cellWidth: 120 },
+                        0: { fontStyle: "bold", cellWidth: 40 },
+                        1: { cellWidth: 45 },
+                        2: { fontStyle: "bold", cellWidth: 40 },
+                        3: { cellWidth: 45 },
                     },
+                    margin: { left: 15 },
                 });
 
-                y = doc.lastAutoTable.finalY + 5;
+                // 📏 Espacio debajo del bloque de datos
+                y = doc.lastAutoTable.finalY + 10;
 
+                // 🔹 Fecha
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "bold");
+                doc.text(`Fecha:`, 15, y);
+                doc.setFont("helvetica", "normal");
+                doc.text(p.fecha || "No disponible", 30, y);
+                y += 8;
+
+                // 🔹 Línea divisoria gris (opcional, mejora la lectura)
+                doc.setDrawColor(220);
+                doc.line(15, y - 3, 195, y - 3);
+
+                // 🔹 Tabla de productos
                 const productos = p.productos?.map(prod => [
                     prod.titulo,
                     prod.cantidad,
@@ -154,7 +167,7 @@ export default function PedidosAdmin() {
             doc.save("lista_pedidos.pdf");
         }
 
-        // 📘 Excel general
+        // 📘 Excel general (sin cambios)
         if (formato === "excel") {
             const filas = [];
 
@@ -177,7 +190,7 @@ export default function PedidosAdmin() {
                             Cantidad: prod.cantidad || 0,
                             "Precio Unitario": prod.precioUnitario ? `$${prod.precioUnitario}` : "—",
                             Subtotal: prod.subtotal ? `$${prod.subtotal}` : "—",
-                            Total: idx === 0 ? `$${p.total}` : "", // solo mostrar el total en la primera fila del pedido
+                            Total: idx === 0 ? `$${p.total}` : "",
                         });
                     });
                 } else {
