@@ -1,0 +1,164 @@
+/* Contenedor principal */
+.np-container {
+    padding: 30px;
+    max-width: 700px;
+    margin: 30px auto;
+    font-family: 'Inter', sans-serif;
+    background-color: #ffffff04;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Título */
+.np-title {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+}
+
+/* Formulario */
+.np-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;
+}
+
+/* Fieldset */
+.np-fieldset {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 15px 20px 20px 20px;
+    transition: all 0.2s ease;
+}
+
+.np-fieldset:hover {
+    border-color: #4d8d5f;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+}
+
+.np-legend {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #13e2b2;
+    padding: 0 5px;
+}
+
+/* Labels e Inputs */
+.np-label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #7b828e;
+    margin-bottom: 10px;
+}
+
+.np-input,
+.np-textarea {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 0.95rem;
+    outline: none;
+    margin-top: 4px;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.np-input:focus,
+.np-textarea:focus {
+    border-color: #13e2b2;
+    box-shadow: 0 0 0 3px #13e2b2;
+}
+
+.np-textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* Grid de Inputs */
+.np-input-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+/* Imagen */
+
+.np-imagen-input{
+    width: 90%;
+}
+
+.np-imagen-preview {
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    margin-top: 10px;
+}
+
+/* Botones */
+.np-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.np-btn {
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.np-btn-guardar {
+    background-color: #03e285;
+    color: white;
+}
+
+.np-btn-guardar:hover {
+    background-color: rgb(33, 226, 3);
+}
+
+.np-btn-cancelar {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.np-btn-cancelar:hover {
+    background-color: #e5e7eb;
+}
+
+/* Errores */
+.np-error {
+    text-align: center;
+    color: #ef4444;
+    font-size: 0.95rem;
+    margin-top: 10px;
+}
+
+.np-status {
+    text-align: center;
+    font-weight: 500;
+    margin-top: 10px;
+    color: #03e285;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .np-container {
+        padding: 20px;
+        max-width: 90%;
+    }
+
+    .np-btns {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .np-btn {
+        width: 100%;
+    }
+}

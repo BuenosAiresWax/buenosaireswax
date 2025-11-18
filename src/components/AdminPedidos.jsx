@@ -16,41 +16,80 @@ const meses = {
 
 function parseFecha(fechaStr) {
     if (!fechaStr) return new Date(0);
+
     const [diaMes, tiempo] = fechaStr.split(", ");
     const [dia, , mes, , año] = diaMes.split(" ");
+
     let [hora, min] = tiempo.split(":");
     let pm = false;
+
     if (min.includes("p. m.")) {
         pm = true;
         min = min.replace(" p. m.", "");
     } else {
         min = min.replace(" a. m.", "");
     }
+
     hora = parseInt(hora);
     min = parseInt(min);
+
     if (pm && hora < 12) hora += 12;
     if (!pm && hora === 12) hora = 0;
+
     return new Date(parseInt(año), meses[mes.toLowerCase()], parseInt(dia), hora, min);
 }
 
 export default function PedidosAdmin() {
-    const [pedidos, setPedidos] = useState([]);
+    const [pedidosTodos, setPedidosTodos] = useState([]);
+    const [pedidosVisibles, setPedidosVisibles] = useState([]);
+    const [mesesOrdenados, setMesesOrdenados] = useState([]);
+    const [mesActualIndex, setMesActualIndex] = useState(0);
+
     const [loading, setLoading] = useState(true);
+    const [cargandoMes, setCargandoMes] = useState(false);
+
     const [orden, setOrden] = useState("masReciente");
     const [busqueda, setBusqueda] = useState("");
 
+    // ------------------------------------------
+    // 1) Traer pedidos y agrupar por mes
+    // ------------------------------------------
     const fetchPedidos = async () => {
         setLoading(true);
         try {
             const pedidosRef = collection(db, "pedidos");
             const snapshot = await getDocs(pedidosRef);
-            const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const pedidosConFecha = docs.map(p => ({
-                ...p,
-                fechaObj: parseFecha(p.fecha)
+
+            const docs = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                fechaObj: parseFecha(doc.data().fecha)
             }));
-            pedidosConFecha.sort((a, b) => b.fechaObj - a.fechaObj);
-            setPedidos(pedidosConFecha);
+
+            const ordenados = docs.sort((a, b) => b.fechaObj - a.fechaObj);
+            setPedidosTodos(ordenados);
+
+            // Agrupar por año-mes
+            const grupos = {};
+
+            ordenados.forEach(p => {
+                const y = p.fechaObj.getFullYear();
+                const m = p.fechaObj.getMonth() + 1; // 1-12
+                const key = `${y}-${String(m).padStart(2, "0")}`;
+
+                if (!grupos[key]) grupos[key] = [];
+                grupos[key].push(p);
+            });
+
+            const keysOrdenadas = Object.keys(grupos).sort((a, b) => b.localeCompare(a));
+
+            setMesesOrdenados(keysOrdenadas);
+
+            // Primer mes visible
+            const primerMes = keysOrdenadas[0];
+            setPedidosVisibles(grupos[primerMes]);
+            setMesActualIndex(0);
+
         } catch (error) {
             console.error("Error al cargar pedidos:", error);
         } finally {
@@ -62,18 +101,67 @@ export default function PedidosAdmin() {
         fetchPedidos();
     }, []);
 
-    const pedidosFiltrados = pedidos.filter(p =>
+    // ------------------------------------------
+    // 2) Scroll infinito para cargar meses anteriores
+    // ------------------------------------------
+    const handleScroll = () => {
+        if (cargandoMes || mesesOrdenados.length === 0) return;
+
+        const bottom =
+            window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
+
+        if (bottom) {
+            cargarSiguienteMes();
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    });
+
+    const cargarSiguienteMes = () => {
+        if (mesActualIndex >= mesesOrdenados.length - 1) return;
+
+        setCargandoMes(true);
+
+        setTimeout(() => {
+            const nuevoIndex = mesActualIndex + 1;
+            const mesKey = mesesOrdenados[nuevoIndex];
+
+            const nuevosPedidos = pedidosTodos.filter(p => {
+                const y = p.fechaObj.getFullYear();
+                const m = p.fechaObj.getMonth() + 1;
+                return mesKey === `${y}-${String(m).padStart(2, "0")}`;
+            });
+
+            setPedidosVisibles(prev => [...prev, ...nuevosPedidos]);
+            setMesActualIndex(nuevoIndex);
+            setCargandoMes(false);
+        }, 400);
+    };
+
+    // ------------------------------------------
+    //  FILTRO POR BUSQUEDA
+    // ------------------------------------------
+    const pedidosFiltrados = pedidosVisibles.filter(p =>
         p.cliente?.toLowerCase().includes(busqueda.toLowerCase())
     );
 
+    // ------------------------------------------
+    //  ORDENAMIENTO (solo afecta visibles)
+    // ------------------------------------------
     const handleOrdenChange = (e) => {
         const nuevoOrden = e.target.value;
         setOrden(nuevoOrden);
-        const pedidosOrdenados = [...pedidos].sort((a, b) =>
+
+        const ordenados = [...pedidosVisibles].sort((a, b) =>
             nuevoOrden === "masReciente" ? b.fechaObj - a.fechaObj : a.fechaObj - b.fechaObj
         );
-        setPedidos(pedidosOrdenados);
+
+        setPedidosVisibles(ordenados);
     };
+
 
     // 📥 Descargar lista completa (PDF o Excel)
     const handleDescargarLista = async (e) => {

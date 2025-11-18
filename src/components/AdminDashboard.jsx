@@ -4,7 +4,7 @@ import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import AdminPedidos from "./AdminPedidos";
 import AdminProductos from "./AdminProductos";
-// import ProductosAdmin from "./ProductosAdmin"; // cuando tengas listo el módulo de productos
+import AdminProductoNuevo from "./AdminProductoNuevo"; // Importar componente
 import "../styles/adminDashboard.css";
 
 export default function AdminDashboard() {
@@ -15,6 +15,11 @@ export default function AdminDashboard() {
     const handleLogout = async () => {
         await signOut(auth);
         navigate("/admin");
+    };
+
+    const handleNuevoProducto = (nuevoProducto) => {
+        // Aquí se puede actualizar la lista de productos si quieres
+        console.log("Producto creado:", nuevoProducto);
     };
 
     return (
@@ -36,6 +41,12 @@ export default function AdminDashboard() {
                     >
                         Productos
                     </button>
+                    <button
+                        className={`tab-btn ${activeTab === "CrearProducto" ? "active-tab" : ""}`}
+                        onClick={() => setActiveTab("CrearProducto")}
+                    >
+                        Crear Producto
+                    </button>
                 </div>
 
                 <button className="logout-btn" onClick={handleLogout}>
@@ -47,6 +58,9 @@ export default function AdminDashboard() {
             <div className="tab-content">
                 {activeTab === "Pedidos" && <AdminPedidos />}
                 {activeTab === "Productos" && <AdminProductos />}
+                {activeTab === "CrearProducto" && (
+                    <AdminProductoNuevo onNuevo={handleNuevoProducto} />
+                )}
             </div>
         </div>
     );

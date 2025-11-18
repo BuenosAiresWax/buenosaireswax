@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { useEffect, useState, useRef } from "react";
+import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, limit, startAfter } from "firebase/firestore";
 import { db } from "../firebase/config";
 import "../styles/adminProductos.css";
-import "../styles/admin.css"; // para reusar las clases de orden y refresh
+import "../styles/admin.css";
 
 export default function ProductosAdmin() {
     const [productos, setProductos] = useState([]);
@@ -14,40 +14,53 @@ export default function ProductosAdmin() {
     const [formData, setFormData] = useState({});
     const [modal, setModal] = useState(null);
     const [processing, setProcessing] = useState(false);
-    const [orden, setOrden] = useState("mayorPrecio"); // mayorPrecio o menorPrecio
+    const [orden, setOrden] = useState("mayorPrecio");
 
-    // 🔄 Cargar productos
-    const fetchProductos = async () => {
-        setLoading(true);
+    const [ultimoDoc, setUltimoDoc] = useState(null);
+    const [cargandoMas, setCargandoMas] = useState(false);
+    const LIMITE = 30;
+
+    const loaderRef = useRef(null);
+
+    const fetchProductos = async (loadMore = false) => {
         try {
-            const querySnapshot = await getDocs(collection(db, "productos"));
-            const productosData = querySnapshot.docs.map((doc) => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    titulo: data.titulo || "Sin título",
-                    autor: data.autor || "Desconocido",
-                    genero: data.genero || "No especificado",
-                    estilo: data.estilo || "—",
-                    categoria: data.categoria || "Sin categoría",
-                    sello: data.sello || "Sin sello",
-                    precio: typeof data.precio === "number" ? data.precio : 0,
-                    descripcion: data.descripcion || "Sin descripción disponible.",
-                    cantidad: typeof data.cantidad === "number" ? data.cantidad : 0,
-                    reservados: typeof data.reservados === "number" ? data.reservados : 0,
-                    imagen: data.imagen || "/placeholder-image.png",
-                };
-            });
+            if (loadMore) setCargandoMas(true);
+            else setLoading(true);
 
-            // ordenar por precio descendente por defecto
-            const ordenados = [...productosData].sort((a, b) => b.precio - a.precio);
-            setProductos(ordenados);
-            setProductosFiltrados(ordenados);
+            let ref = query(
+                collection(db, "productos"),
+                orderBy("precio", "desc"),
+                limit(LIMITE)
+            );
+
+            if (loadMore && ultimoDoc) {
+                ref = query(
+                    collection(db, "productos"),
+                    orderBy("precio", "desc"),
+                    startAfter(ultimoDoc),
+                    limit(LIMITE)
+                );
+            }
+
+            const snap = await getDocs(ref);
+            const last = snap.docs[snap.docs.length - 1] || null;
+            setUltimoDoc(last);
+
+            const nuevos = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+            if (!loadMore) {
+                setProductos(nuevos);
+                setProductosFiltrados(nuevos);
+            } else {
+                setProductos((prev) => [...prev, ...nuevos]);
+                setProductosFiltrados((prev) => [...prev, ...nuevos]);
+            }
         } catch (err) {
-            console.error("Error al obtener productos:", err);
-            setError("No se pudieron cargar los productos. Intenta nuevamente más tarde.");
+            console.error(err);
+            setError("No se pudieron cargar los productos.");
         } finally {
             setLoading(false);
+            setCargandoMas(false);
         }
     };
 
@@ -55,7 +68,6 @@ export default function ProductosAdmin() {
         fetchProductos();
     }, []);
 
-    // 🔍 Filtrar por nombre
     useEffect(() => {
         if (busqueda.trim() === "") {
             setProductosFiltrados(productos);
@@ -67,7 +79,21 @@ export default function ProductosAdmin() {
         }
     }, [busqueda, productos]);
 
-    // 🔁 Ordenar productos por precio
+    useEffect(() => {
+        if (!loaderRef.current) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !cargandoMas && ultimoDoc) {
+                    fetchProductos(true);
+                }
+            },
+            { threshold: 1 }
+        );
+        observer.observe(loaderRef.current);
+
+        return () => observer.disconnect();
+    }, [loaderRef.current, cargandoMas, ultimoDoc]);
+
     const handleOrdenChange = (e) => {
         const nuevoOrden = e.target.value;
         setOrden(nuevoOrden);
@@ -110,6 +136,7 @@ export default function ProductosAdmin() {
                 try {
                     const docRef = doc(db, "productos", id);
                     await updateDoc(docRef, formData);
+
                     setProductos((prev) =>
                         prev.map((p) => (p.id === id ? { ...p, ...formData } : p))
                     );
@@ -117,7 +144,7 @@ export default function ProductosAdmin() {
                     setTimeout(() => {
                         setModal({
                             type: "success",
-                            message: "✅ Cambios guardados correctamente.",
+                            message: "Cambios guardados correctamente.",
                             onClose: () => {
                                 setModal(null);
                                 setEditando(null);
@@ -126,10 +153,9 @@ export default function ProductosAdmin() {
                         });
                     }, 600);
                 } catch (err) {
-                    console.error("Error al actualizar producto:", err);
                     setModal({
                         type: "error",
-                        message: "❌ No se pudo guardar el producto. Intenta nuevamente.",
+                        message: "No se pudo guardar el producto.",
                         onClose: () => setModal(null),
                     });
                     setProcessing(false);
@@ -141,7 +167,7 @@ export default function ProductosAdmin() {
     const handleDelete = (id, titulo) => {
         setModal({
             type: "confirm",
-            message: `¿Eliminar el producto "${titulo}"? Esta acción no se puede deshacer.`,
+            message: `¿Eliminar el producto "${titulo}"?`,
             onConfirm: async () => {
                 setProcessing(true);
                 setModal({ type: "loading", message: "Eliminando producto..." });
@@ -153,7 +179,7 @@ export default function ProductosAdmin() {
                     setTimeout(() => {
                         setModal({
                             type: "success",
-                            message: "🗑️ Producto eliminado correctamente.",
+                            message: "Producto eliminado.",
                             onClose: () => {
                                 setModal(null);
                                 setProcessing(false);
@@ -161,10 +187,9 @@ export default function ProductosAdmin() {
                         });
                     }, 600);
                 } catch (err) {
-                    console.error("Error al eliminar producto:", err);
                     setModal({
                         type: "error",
-                        message: "❌ No se pudo eliminar el producto. Intenta nuevamente.",
+                        message: "No se pudo eliminar el producto.",
                         onClose: () => setModal(null),
                     });
                     setProcessing(false);
@@ -178,9 +203,9 @@ export default function ProductosAdmin() {
 
     return (
         <div className="productos-admin-container">
+
             <h2 className="productos-admin-title">Inventario de Productos</h2>
 
-            {/* 🔽 Controles de búsqueda, orden y refresh */}
             <div className="orden-selector">
                 <input
                     type="text"
@@ -193,7 +218,7 @@ export default function ProductosAdmin() {
                     <option value="mayorPrecio">Mayor precio primero</option>
                     <option value="menorPrecio">Menor precio primero</option>
                 </select>
-                <button className="refresh-btn" onClick={fetchProductos} disabled={processing}>
+                <button className="refresh-btn" onClick={() => fetchProductos()} disabled={processing}>
                     🔄 Refresh
                 </button>
             </div>
@@ -216,18 +241,13 @@ export default function ProductosAdmin() {
                                         <button
                                             className="edit-btn"
                                             onClick={() => !processing && handleEdit(producto)}
-                                            title="Editar producto"
                                             disabled={processing}
                                         >
                                             ✏️
                                         </button>
                                         <button
                                             className="delete-btn"
-                                            onClick={() =>
-                                                !processing &&
-                                                handleDelete(producto.id, producto.titulo)
-                                            }
-                                            title="Eliminar producto"
+                                            onClick={() => !processing && handleDelete(producto.id, producto.titulo)}
                                             disabled={processing}
                                         >
                                             🗑️
@@ -241,8 +261,8 @@ export default function ProductosAdmin() {
                                         alt={producto.titulo}
                                         className="producto-imagen"
                                         onError={(e) => {
-                                            e.target.onerror = null; // evita el bucle
-                                            e.target.style.display = "none"; // oculta la imagen rota
+                                            e.target.onerror = null;
+                                            e.target.style.display = "none";
                                             e.target.insertAdjacentHTML(
                                                 "afterend",
                                                 '<div class="producto-imagen-placeholder"></div>'
@@ -325,7 +345,7 @@ export default function ProductosAdmin() {
                                         <>
                                             <h3>{producto.titulo}</h3>
                                             <p className="precio">
-                                                <strong>Precio:</strong> ${producto.precio.toLocaleString()}
+                                                <strong>Precio:</strong> ${producto.precio?.toLocaleString()}
                                             </p>
                                             <div className="info-grid">
                                                 <p><strong>Autor:</strong> {producto.autor}</p>
@@ -343,9 +363,7 @@ export default function ProductosAdmin() {
                                                     <span>Reservados</span>
                                                     <strong>{producto.reservados}</strong>
                                                 </div>
-                                                <div
-                                                    className={`stock-item disponibles ${disponibles <= 1 ? "low" : ""}`}
-                                                >
+                                                <div className={`stock-item disponibles ${disponibles <= 1 ? "low" : ""}`}>
                                                     <span>Disponibles</span>
                                                     <strong>{disponibles}</strong>
                                                 </div>
@@ -356,30 +374,27 @@ export default function ProductosAdmin() {
                             </div>
                         );
                     })}
+                    <div ref={loaderRef} />
+                    {cargandoMas && <p className="loading">Cargando más...</p>}
                 </div>
             )}
 
-            {/* 🪟 Modal dinámico */}
             {modal && (
                 <div className="admin-modal-overlay">
-                    <div className={`modal-admin ${modal.fadeOut ? "fadeOut" : "fadeIn"}`}>
+                    <div className="modal-admin">
                         <p>{modal.message}</p>
+
                         {modal.type === "confirm" && (
                             <div className="modal-admin-buttons">
-                                <button
-                                    className="confirm-btn"
-                                    onClick={() => modal.onConfirm()}
-                                >
+                                <button className="confirm-btn" onClick={() => modal.onConfirm()}>
                                     Confirmar
                                 </button>
-                                <button
-                                    className="cancel-btn"
-                                    onClick={() => setModal(null)}
-                                >
+                                <button className="cancel-btn" onClick={() => setModal(null)}>
                                     Cancelar
                                 </button>
                             </div>
                         )}
+
                         {["success", "error"].includes(modal.type) && (
                             <button
                                 className="ok-btn"
@@ -391,6 +406,7 @@ export default function ProductosAdmin() {
                                 OK
                             </button>
                         )}
+
                         {modal.type === "loading" && (
                             <div className="modal-admin-buttons">
                                 <p className="loading">⏳ {modal.message}</p>
