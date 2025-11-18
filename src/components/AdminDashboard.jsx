@@ -33,25 +33,33 @@ export default function AdminDashboard() {
                         className={`tab-btn ${activeTab === "Pedidos" ? "active-tab" : ""}`}
                         onClick={() => setActiveTab("Pedidos")}
                     >
-                        Pedidos
+                        <span className="tab-icon">📬</span>
+                        <span>Pedidos</span>
                     </button>
+
                     <button
                         className={`tab-btn ${activeTab === "Productos" ? "active-tab" : ""}`}
                         onClick={() => setActiveTab("Productos")}
                     >
-                        Productos
+                        <span className="tab-icon">📦</span>
+                        <span>Productos</span>
                     </button>
+
                     <button
                         className={`tab-btn ${activeTab === "CrearProducto" ? "active-tab" : ""}`}
                         onClick={() => setActiveTab("CrearProducto")}
                     >
-                        Crear Producto
+                        <span className="tab-icon">🆕</span>
+                        <span>Crear Producto</span>
                     </button>
                 </div>
 
+
                 <button className="logout-btn" onClick={handleLogout}>
-                    Cerrar sesión
+                    <span className="tab-icon">📤</span>
+                    <span>Cerrar sesión</span>
                 </button>
+
             </div>
 
             {/* Contenido según tab activo */}

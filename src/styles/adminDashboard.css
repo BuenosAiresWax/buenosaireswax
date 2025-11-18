@@ -10,16 +10,39 @@
 
 .admin-controls {
     display: flex;
+    flex-flow: row wrap;
     justify-content: flex-start;
 }
 
-.admin-controls button {
+.tab-btn {
     background-color: #85858527;
-    color: #fff;
+    color: #9c9a9a;
     border-radius: 5px;
     border: 2px solid rgba(128, 128, 128, 0.425);
-    padding: 5px 10px;
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    /* Ícono arriba */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    min-width: 110px;
+    font-size: 14px;
+    font-weight: 600;
 }
+
+.tab-icon {
+    font-size: 26px;
+    /* Emojis más claros y visibles */
+    line-height: 1;
+}
+
+.active-tab {
+    border-color: #ffffff;
+    background-color: #a2a2a23d;
+}
+
 
 .admin-header {
     display: flex;
@@ -76,14 +99,47 @@
     gap: 1.5rem;
 }
 
+.logout-btn {
+    background-color: #ff4d4d1a;
+    color: #fff;
+    border-radius: 5px;
+    border: 2px solid rgba(255, 77, 77, 0.315);
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    min-width: 110px;
+    margin-left: auto;
+}
+
+.logout-btn .tab-icon {
+    font-size: 26px;
+    line-height: 1;
+}
+
+.logout-btn:hover {
+    background-color: #ff4d4d55;
+}
+
 @media (max-width: 768px) {
     .admin-header {
         align-items: flex-start;
         gap: 1rem;
     }
 
+    .logout-btn {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+
     .admin-controls {
         justify-content: space-between;
+        flex-flow: column-reverse;
+        align-items: center;
     }
 
     .pedidos-container {

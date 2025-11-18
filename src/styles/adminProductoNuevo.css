@@ -10,9 +10,14 @@
 
 /* Título */
 .np-title {
+    font-size: 1.7rem;
+    margin: 2rem 0;
+    font-weight: 600;
     text-align: center;
-    font-size: 1.8rem;
-    margin-bottom: 25px;
+    background: linear-gradient(90deg, #9b6bff, #5fd6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: auto;
 }
 
 /* Formulario */
@@ -84,7 +89,7 @@
 
 /* Imagen */
 
-.np-imagen-input{
+.np-imagen-input {
     width: 90%;
 }
 

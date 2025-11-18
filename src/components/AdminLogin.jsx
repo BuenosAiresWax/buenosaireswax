@@ -2,7 +2,12 @@
 import { useState } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import "../styles/adminLogin.css"; // ⬅️ importamos los estilos
+import "../styles/adminLogin.css";
+
+// ⬅️ IMPORTA TU LOGO LOCAL
+import logo from "../../assets/logo/header-logo.png";
+import bg from "../../assets/logo/favicon.png";
+
 
 export default function AdminLogin() {
     const [email, setEmail] = useState("");
@@ -17,30 +22,46 @@ export default function AdminLogin() {
             await signInWithEmailAndPassword(auth, email, password);
             navigate("/admin");
         } catch (err) {
-            setError("Credenciales inválidas o error al iniciar sesión");
+            setError("Credenciales inválidas");
         }
     };
 
     return (
-        <div className="admin-container">
-            <form onSubmit={handleLogin} className="admin-card">
-                <h2>Panel Admin</h2>
-                <input
-                    type="email"
-                    placeholder="Correo"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Contraseña"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                {error && <p className="error-message">{error}</p>}
-                <button type="submit">Iniciar sesión</button>
+        <div className="login-wrapper">
+            <form className="login-card" onSubmit={handleLogin}>
+
+                {/* LOGO */}
+                <img src={logo} alt="Logo" className="login-logo" />
+
+                <h2 className="login-title">Panel Administrativo</h2>
+
+                <div className="input-group">
+                    <span className="input-icon">📧</span>
+                    <input
+                        type="email"
+                        placeholder="Usuario"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className="input-group">
+                    <span className="input-icon">🔑</span>
+                    <input
+                        type="password"
+                        placeholder="Contraseña"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
+
+                {error && <p className="login-error">{error}</p>}
+
+                <button type="submit" className="login-btn">
+                    Iniciar sesión
+                </button>
             </form>
         </div>
     );
