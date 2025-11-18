@@ -235,7 +235,15 @@ export default function ProductosAdmin() {
                         const isEditing = editando === producto.id;
 
                         return (
-                            <div key={producto.id} className="producto-card">
+                            <div
+                                key={producto.id}
+                                className={`producto-card ${disponibles === 0
+                                    ? "sin-stock"
+                                    : disponibles === 1
+                                        ? "stock-bajo"
+                                        : "stock-ok"
+                                    }`}
+                            >
                                 {!isEditing && (
                                     <div className="card-actions">
                                         <button

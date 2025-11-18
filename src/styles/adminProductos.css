@@ -402,6 +402,25 @@
     border-radius: 8px;
 }
 
+/* 🟩 Fondo verde para productos con stock normal */
+.producto-card.stock-ok {
+    background: rgba(60, 255, 100, 0.15);
+    /* verde suave translúcido */
+    border-color: rgba(60, 255, 100, 0.25);
+}
+
+/* 🟥 Fondo rojo para productos sin stock */
+.producto-card.sin-stock {
+    background: rgba(255, 80, 80, 0.18);
+    border-color: rgba(255, 80, 80, 0.3);
+}
+
+/* ⚪ Fondo gris para último disponible */
+.producto-card.stock-bajo {
+    background: rgba(180, 180, 180, 0.18);
+    border-color: rgba(200, 200, 200, 0.3);
+}
+
 /* 📱 Responsive ajustes */
 @media (max-width: 600px) {
 
