@@ -3,7 +3,7 @@ import { useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebase/config";
-import "../styles/AdminProductoNuevo.css";
+import "../styles/adminProductoNuevo.css";
 
 export default function AdminProductoNuevo({ onNuevo }) {
     const [formData, setFormData] = useState({
