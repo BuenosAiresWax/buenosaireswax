@@ -15,7 +15,7 @@
 }
 
 .tab-btn {
-    background-color: #85858527;
+    background-color: #8585852c;
     color: #9c9a9a;
     border-radius: 5px;
     border: 2px solid rgba(128, 128, 128, 0.425);
@@ -39,8 +39,8 @@
 }
 
 .active-tab {
-    border-color: #ffffff;
-    background-color: #a2a2a23d;
+    border-color: #92de1839;
+    background-color: #ffffff00;
 }
 
 
@@ -62,7 +62,14 @@
 }
 
 .admin-title::before {
-    content: "📦";
+    content: "";
+    width: 100px;
+    height: 100px;
+    background-image: url(../../assets/logo/favicon.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 90px;
+    opacity: 075;
 }
 
 .admin-btn {
@@ -83,11 +90,6 @@
     background: #2563eb;
 }
 
-.logout-btn {
-    background: #d34040;
-    margin: 0 5px;
-}
-
 .admin-btn:hover {
     filter: brightness(1.2);
     transform: translateY(-2px);
@@ -100,7 +102,7 @@
 }
 
 .logout-btn {
-    background-color: #ff4d4d1a;
+    background-color: #8585852c;
     color: #fff;
     border-radius: 5px;
     border: 2px solid rgba(255, 77, 77, 0.315);
@@ -113,6 +115,7 @@
     cursor: pointer;
     min-width: 110px;
     margin-left: auto;
+    transition: .4s;
 }
 
 .logout-btn .tab-icon {
@@ -122,6 +125,7 @@
 
 .logout-btn:hover {
     background-color: #ff4d4d55;
+    transition: .3s;
 }
 
 @media (max-width: 768px) {
@@ -130,11 +134,14 @@
         gap: 1rem;
     }
 
+    .admin-title {
+        font-size: 1.3rem;
+    }
+
     .logout-btn {
         margin-bottom: 10px;
         width: 100%;
     }
-
 
     .admin-controls {
         justify-content: space-between;

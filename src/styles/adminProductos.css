@@ -193,7 +193,7 @@
 
 .edit-btn,
 .delete-btn {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.423);
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -204,12 +204,12 @@
 }
 
 .edit-btn:hover {
-    background: #5fd6ff33;
+    background: #5fd7ffed;
     transform: scale(1.1);
 }
 
 .delete-btn:hover {
-    background: #ff5f5f44;
+    background: #ff5f5fd6;
     transform: scale(1.1);
 }
 

@@ -112,7 +112,7 @@ export default function AdminProductoNuevo({ onNuevo }) {
                             />
                         </label>
                         <label className="np-label">
-                            Precio (ARS)
+                            Precio (ARS - sin "," o "." EJ: 60000)
                             <input
                                 className="np-input np-precio"
                                 name="precio"
