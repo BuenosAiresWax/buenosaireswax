@@ -19,6 +19,7 @@ const HeroYoutube = () => {
                         href={videoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        referrerPolicy="strict-origin-when-cross-origin"
                         className="hero-youtube-btn"
                     >
                         ▶ Reproducir
