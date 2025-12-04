@@ -169,14 +169,16 @@ export default function PedidosAdmin() {
         if (formato === "") return;
 
         // ✅ Nueva función: obtiene el último mes con pedidos disponibles
+        // Función correcta: usa pedidosTodos
         const obtenerPedidosUltimoMes = () => {
-            if (pedidos.length === 0) return [];
+            if (pedidosTodos.length === 0) return [];
 
-            // Tomamos todos los meses disponibles en los pedidos
-            const fechas = pedidos.map(p => p.fechaObj).filter(d => d instanceof Date && !isNaN(d));
+            const fechas = pedidosTodos
+                .map(p => p.fechaObj)
+                .filter(d => d instanceof Date && !isNaN(d));
+
             if (fechas.length === 0) return [];
 
-            // Buscamos la fecha más reciente
             const ultimaFecha = new Date(Math.max(...fechas.map(d => d.getTime())));
             const ultimoMes = ultimaFecha.getMonth();
             const ultimoAño = ultimaFecha.getFullYear();
@@ -184,15 +186,14 @@ export default function PedidosAdmin() {
             const inicioUltimoMes = new Date(ultimoAño, ultimoMes, 1);
             const finUltimoMes = new Date(ultimoAño, ultimoMes + 1, 0, 23, 59, 59);
 
-            // Filtramos los pedidos de ese mes
-            return pedidos.filter(
+            return pedidosTodos.filter(
                 p => p.fechaObj >= inicioUltimoMes && p.fechaObj <= finUltimoMes
             );
         };
 
         // 📄 PDF general o del último mes
         if (formato === "pdf" || formato === "pdfUltimoMes") {
-            const listaFuente = formato === "pdfUltimoMes" ? obtenerPedidosUltimoMes() : pedidos;
+            const listaFuente = formato === "pdfUltimoMes" ? obtenerPedidosUltimoMes() : pedidosTodos;
 
             if (listaFuente.length === 0) {
                 alert("No hay pedidos registrados en el último mes.");
@@ -292,7 +293,7 @@ export default function PedidosAdmin() {
 
         // 📘 Excel general o del último mes
         if (formato === "excel" || formato === "excelUltimoMes") {
-            const listaFuente = formato === "excelUltimoMes" ? obtenerPedidosUltimoMes() : pedidos;
+            const listaFuente = formato === "excelUltimoMes" ? obtenerPedidosUltimoMes() : pedidosTodos;
 
             if (listaFuente.length === 0) {
                 alert("No hay pedidos registrados en el último mes.");
