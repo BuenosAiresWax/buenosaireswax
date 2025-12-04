@@ -33,7 +33,7 @@ function Footer() {
                     PREGUNTAS FRECUENTES
                 </button>
                 <a
-                    href="https://wa.me/541165825180?text=Hola%20BaWax%2C%20tengo%20una%20consulta"
+                    href="https://wa.me/5491165825180?text=Hola%20BaWax%2C%20tengo%20una%20consulta"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="contact-link"
