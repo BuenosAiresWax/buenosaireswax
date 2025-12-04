@@ -270,7 +270,7 @@ ${!esRetiro ? `🏠 Dirección: ${direccion}${departamento ? `, (${departamento}
 🛒 Productos:
 ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
 💰 Total: $${total}
-👉 Adjunto el comprobante de pago.
+👉 Adjuntar el comprobante de pago.
         `.trim();
 
             setPedidoEnviado(true);
@@ -354,7 +354,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             <button
                                 className="btn-whatsapp-succes"
                                 onClick={() =>
-                                    window.open(`https://wa.me/541130115436?text=${encodeURIComponent(mensajeWsp)}`, "_blank")
+                                    window.open(`https://wa.me/541130504515?text=${encodeURIComponent(mensajeWsp)}`, "_blank")
                                 }
                             >
                                 📲 Enviar pedido por WhatsApp
@@ -476,8 +476,6 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                         disabled={loading}
                                     >
                                         <option value="" disabled>Seleccioná un medio de entrega</option>
-                                        <option value="Retiro por Microcentro">Retiro por Microcentro</option>
-                                        <option value="Retiro por Chacarita">Retiro por Chacarita</option>
                                         <option value="Envío a domicilio (Andreani)">Envío a domicilio (Andreani)</option>
                                     </select>
                                 </label>
@@ -487,7 +485,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                     <>
                                         <input
                                             type="text"
-                                            placeholder="Calle y numero de envio"
+                                            placeholder="Calle y numero"
                                             value={direccion}
                                             onChange={(e) => setDireccion(e.target.value)}
                                             required
