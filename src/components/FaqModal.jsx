@@ -6,7 +6,7 @@ const preguntas = [
     {
         pregunta: "¿Dónde puedo hacer una consulta?",
         respuesta:
-            "Escribinos a buenosaireswax@gmail.com o por WhatsApp al +54 11 3011-5436.",
+            "Escribinos a buenosaireswax@gmail.com o por WhatsApp al +54 11 6582-5180.",
     },
     {
         pregunta: "¿Cuáles son los medios de pago?",

@@ -76,7 +76,7 @@ function App() {
 
         <div className="rightNav">
           <a
-            href="https://wa.me/541130115436?text=Hola%20BaWax%2C%20tengo%20una%20consulta"
+            href="https://wa.me/541165825180?text=Hola%20BaWax%2C%20tengo%20una%20consulta"
             target="_blank"
             rel="noopener noreferrer"
             className="contactoNav"
