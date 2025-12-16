@@ -1,31 +1,33 @@
 .admin-container {
-    max-width: 1500px;
+    max-width: 1400px;
     min-height: 100vh;
     margin: 2rem auto;
     padding: 1rem;
     font-family: "Inter", sans-serif;
     color: #e5e5e5;
     background-color: #1111115a;
+    overflow-x: hidden;
 }
 
 .admin-controls {
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
+    overflow-y: hidden;
 }
 
 .tab-btn {
-    background-color: #8585852c;
+    background-color: #85858513;
     color: #9c9a9a;
     border-radius: 5px;
-    border: 2px solid rgba(128, 128, 128, 0.425);
-    padding: 10px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 6px 10px;
     display: flex;
     flex-direction: column;
     /* Ícono arriba */
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 4px;
     cursor: pointer;
     min-width: 110px;
     font-size: 14px;
@@ -149,7 +151,59 @@
         align-items: center;
     }
 
+    .admin-controls>div {
+        flex-flow: column;
+        width: 100%;
+    }
+
     .pedidos-container {
         grid-template-columns: 1fr;
+    }
+}
+
+/* --- SOLO MOBILE (≤768px) --- */
+@media (max-width: 768px) {
+
+    .admin-container{
+        padding: 0 5px;
+        margin: 0;
+    }
+
+    /* Contenedor de pestañas scrolleable */
+    .admin-controls>div {
+        display: flex;
+        flex-direction: row ;
+        overflow-x: auto;
+        /* permite scroll horizontal */
+        gap: 10px;
+        padding-bottom: 10px;
+        width: 100%;
+        scrollbar-width: thin;
+        /* opcional */
+    }
+
+    /* Botones más grandes y contenidos al lado */
+    .tab-btn {
+        flex-direction: row;
+        /* icono y texto al lado */
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px;
+        min-width: 200px;
+        /* más visibles */
+        font-size: 16px;
+        gap: 12px;
+        white-space: nowrap;
+        /* evita que el texto salte de línea */
+    }
+
+    /* Ícono más visible en mobile */
+    .tab-icon {
+        font-size: 28px;
+    }
+
+    /* Ocultar scroll bar (opcional) */
+    .admin-controls>div::-webkit-scrollbar {
+        height: 6px;
     }
 }

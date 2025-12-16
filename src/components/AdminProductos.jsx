@@ -1,14 +1,15 @@
-import { useEffect, useState, useRef } from "react";
-import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, limit, startAfter } from "firebase/firestore";
+import { useMemo, useState, useRef } from "react";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
+import { useAdminData } from "../context/AdminDataContext";
+
 import "../styles/adminProductos.css";
 import "../styles/admin.css";
 
 export default function ProductosAdmin() {
-    const [productos, setProductos] = useState([]);
-    const [productosFiltrados, setProductosFiltrados] = useState([]);
+    const { productos, loading, refetch } = useAdminData();
+
     const [busqueda, setBusqueda] = useState("");
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editando, setEditando] = useState(null);
     const [formData, setFormData] = useState({});
@@ -16,94 +17,40 @@ export default function ProductosAdmin() {
     const [processing, setProcessing] = useState(false);
     const [orden, setOrden] = useState("mayorPrecio");
 
-    const [ultimoDoc, setUltimoDoc] = useState(null);
-    const [cargandoMas, setCargandoMas] = useState(false);
-    const LIMITE = 30;
-
+    // Infinite scroll (se mantiene aunque ahora cargue todo del contexto)
     const loaderRef = useRef(null);
 
-    const fetchProductos = async (loadMore = false) => {
-        try {
-            if (loadMore) setCargandoMas(true);
-            else setLoading(true);
+    /* -----------------------------
+       USE MEMO
+    ------------------------------ */
+    const productosFiltrados = useMemo(() => {
+        let lista = [...productos];
 
-            let ref = query(
-                collection(db, "productos"),
-                orderBy("precio", "desc"),
-                limit(LIMITE)
+        // 🔍 búsqueda
+        if (busqueda.trim() !== "") {
+            lista = lista.filter((p) =>
+                p.titulo?.toLowerCase().includes(busqueda.toLowerCase())
             );
-
-            if (loadMore && ultimoDoc) {
-                ref = query(
-                    collection(db, "productos"),
-                    orderBy("precio", "desc"),
-                    startAfter(ultimoDoc),
-                    limit(LIMITE)
-                );
-            }
-
-            const snap = await getDocs(ref);
-            const last = snap.docs[snap.docs.length - 1] || null;
-            setUltimoDoc(last);
-
-            const nuevos = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-            if (!loadMore) {
-                setProductos(nuevos);
-                setProductosFiltrados(nuevos);
-            } else {
-                setProductos((prev) => [...prev, ...nuevos]);
-                setProductosFiltrados((prev) => [...prev, ...nuevos]);
-            }
-        } catch (err) {
-            console.error(err);
-            setError("No se pudieron cargar los productos.");
-        } finally {
-            setLoading(false);
-            setCargandoMas(false);
         }
-    };
 
-    useEffect(() => {
-        fetchProductos();
-    }, []);
-
-    useEffect(() => {
-        if (busqueda.trim() === "") {
-            setProductosFiltrados(productos);
-        } else {
-            const filtrados = productos.filter((p) =>
-                p.titulo.toLowerCase().includes(busqueda.toLowerCase())
-            );
-            setProductosFiltrados(filtrados);
-        }
-    }, [busqueda, productos]);
-
-    useEffect(() => {
-        if (!loaderRef.current) return;
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && !cargandoMas && ultimoDoc) {
-                    fetchProductos(true);
-                }
-            },
-            { threshold: 1 }
+        // ↕️ orden
+        lista.sort((a, b) =>
+            orden === "mayorPrecio"
+                ? (b.precio || 0) - (a.precio || 0)
+                : (a.precio || 0) - (b.precio || 0)
         );
-        observer.observe(loaderRef.current);
 
-        return () => observer.disconnect();
-    }, [loaderRef.current, cargandoMas, ultimoDoc]);
-
+        return lista;
+    }, [productos, busqueda, orden]);
+    /* -----------------------------
+       ORDEN
+    ------------------------------ */
     const handleOrdenChange = (e) => {
-        const nuevoOrden = e.target.value;
-        setOrden(nuevoOrden);
-
-        const productosOrdenados = [...productosFiltrados].sort((a, b) =>
-            nuevoOrden === "mayorPrecio" ? b.precio - a.precio : a.precio - b.precio
-        );
-        setProductosFiltrados(productosOrdenados);
+        setOrden(e.target.value);
     };
-
+    /* -----------------------------
+       EDICIÓN
+    ------------------------------ */
     const handleEdit = (producto) => {
         setEditando(producto.id);
         setFormData({ ...producto });
@@ -134,12 +81,9 @@ export default function ProductosAdmin() {
                 setModal({ type: "loading", message: "Guardando cambios..." });
 
                 try {
-                    const docRef = doc(db, "productos", id);
-                    await updateDoc(docRef, formData);
+                    await updateDoc(doc(db, "productos", id), formData);
 
-                    setProductos((prev) =>
-                        prev.map((p) => (p.id === id ? { ...p, ...formData } : p))
-                    );
+                    await refetch();
 
                     setTimeout(() => {
                         setModal({
@@ -153,6 +97,7 @@ export default function ProductosAdmin() {
                         });
                     }, 600);
                 } catch (err) {
+                    console.error(err);
                     setModal({
                         type: "error",
                         message: "No se pudo guardar el producto.",
@@ -164,6 +109,9 @@ export default function ProductosAdmin() {
         });
     };
 
+    /* -----------------------------
+       ELIMINAR
+    ------------------------------ */
     const handleDelete = (id, titulo) => {
         setModal({
             type: "confirm",
@@ -174,7 +122,7 @@ export default function ProductosAdmin() {
 
                 try {
                     await deleteDoc(doc(db, "productos", id));
-                    setProductos((prev) => prev.filter((p) => p.id !== id));
+                    await refetch();
 
                     setTimeout(() => {
                         setModal({
@@ -187,6 +135,7 @@ export default function ProductosAdmin() {
                         });
                     }, 600);
                 } catch (err) {
+                    console.error(err);
                     setModal({
                         type: "error",
                         message: "No se pudo eliminar el producto.",
@@ -198,27 +147,35 @@ export default function ProductosAdmin() {
         });
     };
 
+    /* -----------------------------
+       ESTADOS
+    ------------------------------ */
     if (loading) return <p className="loading">Cargando productos...</p>;
     if (error) return <p className="error">{error}</p>;
 
     return (
         <div className="productos-admin-container">
-
             <h2 className="productos-admin-title">Inventario de Productos</h2>
 
             <div className="orden-selector">
                 <input
                     type="text"
-                    placeholder="Buscar por titulo..."
+                    placeholder="Buscar por título..."
                     value={busqueda}
                     onChange={(e) => setBusqueda(e.target.value)}
                     className="search-input"
                 />
+
                 <select value={orden} onChange={handleOrdenChange}>
                     <option value="mayorPrecio">Mayor precio primero</option>
                     <option value="menorPrecio">Menor precio primero</option>
                 </select>
-                <button className="refresh-btn" onClick={() => fetchProductos()} disabled={processing}>
+
+                <button
+                    className="refresh-btn"
+                    onClick={refetch}
+                    disabled={processing}
+                >
                     🔄 Refresh
                 </button>
             </div>
@@ -230,7 +187,8 @@ export default function ProductosAdmin() {
                     {productosFiltrados.map((producto) => {
                         const disponibles = Math.max(
                             0,
-                            (producto.cantidad || 0) - (producto.reservados || 0)
+                            (producto.cantidad || 0) -
+                            (producto.reservados || 0)
                         );
                         const isEditing = editando === producto.id;
 
@@ -248,14 +206,23 @@ export default function ProductosAdmin() {
                                     <div className="card-actions">
                                         <button
                                             className="edit-btn"
-                                            onClick={() => !processing && handleEdit(producto)}
+                                            onClick={() =>
+                                                !processing &&
+                                                handleEdit(producto)
+                                            }
                                             disabled={processing}
                                         >
                                             ✏️
                                         </button>
                                         <button
                                             className="delete-btn"
-                                            onClick={() => !processing && handleDelete(producto.id, producto.titulo)}
+                                            onClick={() =>
+                                                !processing &&
+                                                handleDelete(
+                                                    producto.id,
+                                                    producto.titulo
+                                                )
+                                            }
                                             disabled={processing}
                                         >
                                             🗑️
@@ -268,17 +235,9 @@ export default function ProductosAdmin() {
                                         src={producto.imagen}
                                         alt={producto.titulo}
                                         className="producto-imagen"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.style.display = "none";
-                                            e.target.insertAdjacentHTML(
-                                                "afterend",
-                                                '<div class="producto-imagen-placeholder"></div>'
-                                            );
-                                        }}
                                     />
                                 ) : (
-                                    <div className="producto-imagen-placeholder"></div>
+                                    <div className="producto-imagen-placeholder" />
                                 )}
 
                                 <div className="producto-info">
@@ -292,10 +251,10 @@ export default function ProductosAdmin() {
                                             />
                                             <input
                                                 name="precio"
+                                                type="number"
                                                 value={formData.precio}
                                                 onChange={handleChange}
                                                 className="input-edit"
-                                                type="number"
                                             />
                                             <textarea
                                                 name="descripcion"
@@ -303,46 +262,60 @@ export default function ProductosAdmin() {
                                                 onChange={handleChange}
                                                 className="textarea-edit"
                                             />
+
                                             <div className="info-grid">
-                                                {["autor", "genero", "estilo", "categoria", "sello"].map(
-                                                    (campo) => (
-                                                        <input
-                                                            key={campo}
-                                                            name={campo}
-                                                            value={formData[campo]}
-                                                            onChange={handleChange}
-                                                            className="input-edit"
-                                                        />
-                                                    )
-                                                )}
+                                                {[
+                                                    "autor",
+                                                    "genero",
+                                                    "estilo",
+                                                    "categoria",
+                                                    "sello",
+                                                ].map((campo) => (
+                                                    <input
+                                                        key={campo}
+                                                        name={campo}
+                                                        value={
+                                                            formData[campo] ||
+                                                            ""
+                                                        }
+                                                        onChange={handleChange}
+                                                        className="input-edit"
+                                                    />
+                                                ))}
                                             </div>
+
                                             <div className="stock-info">
                                                 <input
                                                     name="cantidad"
+                                                    type="number"
                                                     value={formData.cantidad}
                                                     onChange={handleChange}
                                                     className="input-edit small"
-                                                    type="number"
                                                 />
                                                 <input
                                                     name="reservados"
+                                                    type="number"
                                                     value={formData.reservados}
                                                     onChange={handleChange}
                                                     className="input-edit small"
-                                                    type="number"
                                                 />
                                             </div>
+
                                             <div className="edit-actions">
                                                 <button
                                                     className="btn-save"
-                                                    onClick={() => !processing && handleSave(producto.id)}
+                                                    onClick={() =>
+                                                        handleSave(producto.id)
+                                                    }
                                                     disabled={processing}
                                                 >
-                                                    {processing ? "Guardando..." : "Guardar"}
+                                                    {processing
+                                                        ? "Guardando..."
+                                                        : "Guardar"}
                                                 </button>
                                                 <button
                                                     className="btn-cancel"
-                                                    onClick={!processing ? handleCancel : undefined}
+                                                    onClick={handleCancel}
                                                     disabled={processing}
                                                 >
                                                     Cancelar
@@ -353,27 +326,57 @@ export default function ProductosAdmin() {
                                         <>
                                             <h3>{producto.titulo}</h3>
                                             <p className="precio">
-                                                <strong>Precio:</strong> ${producto.precio?.toLocaleString()}
+                                                <strong>Precio:</strong> $
+                                                {producto.precio?.toLocaleString()}
                                             </p>
+
                                             <div className="info-grid">
-                                                <p><strong>Autor:</strong> {producto.autor}</p>
-                                                <p><strong>Género:</strong> {producto.genero} — {producto.estilo}</p>
-                                                <p><strong>Categoría:</strong> {producto.categoria}</p>
-                                                <p><strong>Sello:</strong> {producto.sello}</p>
+                                                <p>
+                                                    <strong>Autor:</strong>{" "}
+                                                    {producto.autor}
+                                                </p>
+                                                <p>
+                                                    <strong>Género:</strong>{" "}
+                                                    {producto.genero} —{" "}
+                                                    {producto.estilo}
+                                                </p>
+                                                <p>
+                                                    <strong>Categoría:</strong>{" "}
+                                                    {producto.categoria}
+                                                </p>
+                                                <p>
+                                                    <strong>Sello:</strong>{" "}
+                                                    {producto.sello}
+                                                </p>
                                             </div>
-                                            <p className="descripcion">{producto.descripcion}</p>
+
+                                            <p className="descripcion">
+                                                {producto.descripcion}
+                                            </p>
+
                                             <div className="stock-info">
                                                 <div className="stock-item total">
                                                     <span>Stock</span>
-                                                    <strong>{producto.cantidad}</strong>
+                                                    <strong>
+                                                        {producto.cantidad}
+                                                    </strong>
                                                 </div>
                                                 <div className="stock-item reservados">
                                                     <span>Reservados</span>
-                                                    <strong>{producto.reservados}</strong>
+                                                    <strong>
+                                                        {producto.reservados}
+                                                    </strong>
                                                 </div>
-                                                <div className={`stock-item disponibles ${disponibles <= 1 ? "low" : ""}`}>
+                                                <div
+                                                    className={`stock-item disponibles ${disponibles <= 1
+                                                        ? "low"
+                                                        : ""
+                                                        }`}
+                                                >
                                                     <span>Disponibles</span>
-                                                    <strong>{disponibles}</strong>
+                                                    <strong>
+                                                        {disponibles}
+                                                    </strong>
                                                 </div>
                                             </div>
                                         </>
@@ -383,7 +386,6 @@ export default function ProductosAdmin() {
                         );
                     })}
                     <div ref={loaderRef} />
-                    {cargandoMas && <p className="loading">Cargando más...</p>}
                 </div>
             )}
 
@@ -394,10 +396,16 @@ export default function ProductosAdmin() {
 
                         {modal.type === "confirm" && (
                             <div className="modal-admin-buttons">
-                                <button className="confirm-btn" onClick={() => modal.onConfirm()}>
+                                <button
+                                    className="confirm-btn"
+                                    onClick={modal.onConfirm}
+                                >
                                     Confirmar
                                 </button>
-                                <button className="cancel-btn" onClick={() => setModal(null)}>
+                                <button
+                                    className="cancel-btn"
+                                    onClick={() => setModal(null)}
+                                >
                                     Cancelar
                                 </button>
                             </div>
@@ -416,9 +424,7 @@ export default function ProductosAdmin() {
                         )}
 
                         {modal.type === "loading" && (
-                            <div className="modal-admin-buttons">
-                                <p className="loading">⏳ {modal.message}</p>
-                            </div>
+                            <p className="loading">⏳ {modal.message}</p>
                         )}
                     </div>
                 </div>

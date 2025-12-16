@@ -2,33 +2,43 @@
 import { useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+
+import { AdminDataProvider, useAdminData } from "../context/AdminDataContext";
+
 import AdminPedidos from "./AdminPedidos";
 import AdminProductos from "./AdminProductos";
-import AdminProductoNuevo from "./AdminProductoNuevo"; // Importar componente
+import AdminProductoNuevo from "./AdminProductoNuevo";
+import AdminOverview from "./AdminOverview";
+
 import "../styles/adminDashboard.css";
 
-export default function AdminDashboard() {
+// Wrapper para poder usar el contexto dentro de AdminProductoNuevo
+function AdminDashboardContent() {
+    const { refetch } = useAdminData(); // ⬅ obtenemos refetch del contexto
     const auth = getAuth();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState("Pedidos");
+    const [activeTab, setActiveTab] = useState("Overview");
 
     const handleLogout = async () => {
         await signOut(auth);
         navigate("/admin");
     };
 
-    const handleNuevoProducto = (nuevoProducto) => {
-        // Aquí se puede actualizar la lista de productos si quieres
-        console.log("Producto creado:", nuevoProducto);
-    };
-
     return (
         <div className="admin-container">
             <h1 className="admin-title">Panel de Administración</h1>
 
-            {/* Controles superiores: tabs y logout */}
             <div className="admin-controls">
                 <div style={{ display: "flex", gap: "0.5rem" }}>
+
+                    <button
+                        className={`tab-btn ${activeTab === "Overview" ? "active-tab" : ""}`}
+                        onClick={() => setActiveTab("Overview")}
+                    >
+                        <span className="tab-icon">📊</span>
+                        <span>Overview</span>
+                    </button>
+
                     <button
                         className={`tab-btn ${activeTab === "Pedidos" ? "active-tab" : ""}`}
                         onClick={() => setActiveTab("Pedidos")}
@@ -54,22 +64,26 @@ export default function AdminDashboard() {
                     </button>
                 </div>
 
-
                 <button className="logout-btn" onClick={handleLogout}>
                     <span className="tab-icon">📤</span>
                     <span>Cerrar sesión</span>
                 </button>
-
             </div>
 
-            {/* Contenido según tab activo */}
             <div className="tab-content">
+                {activeTab === "Overview" && <AdminOverview />}
                 {activeTab === "Pedidos" && <AdminPedidos />}
                 {activeTab === "Productos" && <AdminProductos />}
-                {activeTab === "CrearProducto" && (
-                    <AdminProductoNuevo onNuevo={handleNuevoProducto} />
-                )}
+                {activeTab === "CrearProducto" && <AdminProductoNuevo onNuevo={refetch} />}
             </div>
         </div>
+    );
+}
+
+export default function AdminDashboard() {
+    return (
+        <AdminDataProvider>
+            <AdminDashboardContent />
+        </AdminDataProvider>
     );
 }

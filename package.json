@@ -18,6 +18,7 @@
     "react-router-dom": "^7.9.5",
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^1.8.11",
+    "recharts": "^3.5.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

@@ -1,0 +1,284 @@
+/* adminOverview.css - Tema oscuro moderno */
+/* Contenedor general */
+.ao-container {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #e6eef8;
+    min-height: 100%;
+    font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Header */
+.ao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.ao-title {
+    margin: 0;
+    margin-top: 1rem;
+    font-size: 1rem;
+    letter-spacing: 0.2px;
+    color: #f8fafc;
+}
+
+.ao-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ao-label {
+    font-size: 0.85rem;
+    color: #9aa7bd;
+}
+
+.ao-select {
+    background: #262626d7;
+    color: #d7e7fb;
+    border: 1px solid #1d2124;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+/* Cards */
+.ao-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 2rem;
+}
+
+.ao-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+    min-height: 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ao-card-title {
+    font-size: 0.85rem;
+    color: #9fb0c9;
+}
+
+.ao-card-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 6px;
+    color: #f1f8ff;
+}
+
+.ao-card-sub {
+    font-size: 0.8rem;
+    color: #8fa2be;
+    margin-top: 4px;
+}
+
+/* Charts row */
+.ao-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.ao-chart-card {
+    padding: 12px;
+    border-radius: 10px;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.ao-chart-title {
+    color: #d6e6ff;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.ao-chart-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ao-empty {
+    color: #8fa2be;
+    font-size: 0.95rem;
+}
+
+/* Lista de pedidos resumen */
+.ao-list-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 2rem;
+}
+
+.ao-list-title {
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #e9f2ff;
+}
+
+.ao-list-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ao-list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+}
+
+.ao-row-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.ao-row-name {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.ao-row-meta {
+    color: #9fb0c9;
+    font-size: 0.85rem;
+}
+
+.ao-row-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.ao-row-total {
+    font-weight: 700;
+    color: #c1e9ff;
+}
+
+.ao-row-date {
+    color: #8fa2be;
+    font-size: 0.82rem;
+}
+
+/* ----------------------------
+   BARRAS FINITAS + COLOR
+----------------------------- */
+.ao-bar {
+    fill: #414141;
+    /* color */
+    width: 6px;
+    /* más finita */
+}
+
+/* Para obligar a Recharts a respetar el grosor */
+.ao-bars-chart .recharts-bar-rectangle path {
+    width: 6px;
+    rx: 3px;
+    /* puntas suaves */
+}
+
+/* ----------------------------
+   TOOLTIP OSCURO PERSONALIZADO
+----------------------------- */
+.ao-tooltip {
+    background: #000;
+    border: 1px solid #222;
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.85rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.ao-tooltip-label {
+    color: #9fc4ff;
+    margin-bottom: 4px;
+}
+
+.ao-tooltip-item {
+    color: #fff;
+}
+
+/* ---- Barras de Productos Más Vendidos ---- */
+.ao-bar-producto {
+    rx: 4px;
+    /* puntas redondeadas */
+}
+
+/* Reduce el grosor visual de las barras sin romper el layout */
+.recharts-bar-rectangle {
+    width: 8px;
+    /* no usa !important, solo una preferencia */
+}
+
+/* Tooltip - fondo negro opaco */
+.recharts-default-tooltip {
+    background-color: #000 !important;
+    /* requiere important por Recharts */
+    border: 1px solid #444;
+    border-radius: 6px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.4);
+}
+
+.recharts-tooltip-label {
+    color: #fff;
+}
+
+.recharts-tooltip-item {
+    color: #e0e0e0;
+}
+
+.ao-see-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.ao-see-more-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    background: #222;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.ao-see-more-btn:hover {
+    background: #000;
+}
+
+
+/* Responsive */
+@media (max-width: 980px) {
+    .ao-charts-row {
+        grid-template-columns: 1fr;
+    }
+
+    .ao-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+}

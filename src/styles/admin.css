@@ -80,9 +80,10 @@
 
 /* Tarjeta individual */
 .pedido-card {
-    background: #1b1b1b;
-    border-radius: 14px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
     padding: 1.5rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

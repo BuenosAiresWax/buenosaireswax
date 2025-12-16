@@ -5,7 +5,8 @@
     margin: 30px auto;
     font-family: 'Inter', sans-serif;
     background-color: #ffffff04;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
 }
 
 /* Título */
@@ -30,21 +31,21 @@
 
 /* Fieldset */
 .np-fieldset {
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: 10px;
     padding: 15px 20px 20px 20px;
     transition: all 0.2s ease;
 }
 
 .np-fieldset:hover {
-    border-color: #4d8d5f;
+    border-color: #ebefec;
     box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
 }
 
 .np-legend {
     font-weight: 600;
     font-size: 1rem;
-    color: #13e2b2;
+    color: #eaf0ef;
     padding: 0 5px;
 }
 
@@ -71,8 +72,8 @@
 
 .np-input:focus,
 .np-textarea:focus {
-    border-color: #13e2b2;
-    box-shadow: 0 0 0 3px #13e2b2;
+    border-color: #ebefec;
+    box-shadow: 0 0 0 1px #ebefec;
 }
 
 .np-textarea {
