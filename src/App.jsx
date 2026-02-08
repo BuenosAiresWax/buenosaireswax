@@ -107,7 +107,7 @@ function App() {
 
       {!autenticado ? (
         <DropAccess
-          fechaObjetivo="2026-01-08T20:00:00"
+          fechaObjetivo="2026-02-09T20:00:00"
           onAccesoPermitido={manejarAutenticacion}
         />
       ) : (
