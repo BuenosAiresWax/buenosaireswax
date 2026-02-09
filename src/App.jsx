@@ -12,7 +12,7 @@ import HeroSlider from "./components/HeroSlider";
 
 import "./styles/styles.css";
 
-import logo from "../assets/logo/logo-completo-negro.png";
+import logo from "../assets/logo/header-logo.png";
 import carritoVacio from "../assets/icons/carrito-vacio.svg";
 import carritoLleno from "../assets/icons/carrito-lleno.svg";
 
