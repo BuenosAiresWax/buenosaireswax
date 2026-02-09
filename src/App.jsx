@@ -12,7 +12,7 @@ import HeroSlider from "./components/HeroSlider";
 
 import "./styles/styles.css";
 
-import logo from "../assets/logo/header-logo.png";
+import logo from "../assets/logo/logo-completo-negro.png";
 import carritoVacio from "../assets/icons/carrito-vacio.svg";
 import carritoLleno from "../assets/icons/carrito-lleno.svg";
 
@@ -72,7 +72,7 @@ function App() {
       <LoaderOverlay visible={autenticado && loading} />
 
       <div className="headerContainer">
-        <img src={logo} alt="eStock" className="logo" />
+        <img src={logo} alt="bawax" className="logo" />
 
         <div className="rightNav">
           <a
