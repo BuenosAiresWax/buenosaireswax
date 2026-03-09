@@ -1,6 +1,6 @@
 // AdminProductoNuevo.jsx
 import { useState, useCallback } from "react";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebase/config";
 import "../styles/adminProductoNuevo.css";
@@ -69,15 +69,20 @@ export default function AdminProductoNuevo({ onNuevo }) {
                 imagenUrl = await getDownloadURL(storageRef);
             }
 
+            const idProducto = formData.titulo
+                .toLowerCase()
+                .trim()
+                .replace(/\s+/g, "-");
+
             const nuevoProducto = {
                 ...formData,
                 imagen: imagenUrl,
                 createdAt: serverTimestamp(),
             };
 
-            await addDoc(collection(db, "productos"), nuevoProducto);
+            await setDoc(doc(db, "productos", idProducto), nuevoProducto);
 
-            if (onNuevo) onNuevo(); // idealmente refetch()
+            if (onNuevo) onNuevo();
 
             resetForm();
             setStatusMsg("✅ Producto creado correctamente.");
@@ -103,7 +108,6 @@ export default function AdminProductoNuevo({ onNuevo }) {
             <div className="np-container">
                 <form className="np-form" onSubmit={handleSubmit}>
 
-                    {/* Información básica */}
                     <fieldset className="np-fieldset np-basic">
                         <legend className="np-legend">Información Básica</legend>
 
@@ -131,7 +135,6 @@ export default function AdminProductoNuevo({ onNuevo }) {
                         </label>
                     </fieldset>
 
-                    {/* Detalles */}
                     <fieldset className="np-fieldset np-detalles">
                         <legend className="np-legend">Detalles del Producto</legend>
 
@@ -160,7 +163,6 @@ export default function AdminProductoNuevo({ onNuevo }) {
                         </label>
                     </fieldset>
 
-                    {/* Inventario */}
                     <fieldset className="np-fieldset np-inventario">
                         <legend className="np-legend">Inventario</legend>
 
@@ -189,7 +191,6 @@ export default function AdminProductoNuevo({ onNuevo }) {
                         </div>
                     </fieldset>
 
-                    {/* Imagen */}
                     <fieldset className="np-fieldset np-imagen">
                         <legend className="np-legend">Imagen del Producto</legend>
 
