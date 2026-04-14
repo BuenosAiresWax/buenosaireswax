@@ -23,7 +23,7 @@ const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
    (solo cambias esto cada mes)
 ================================ */
 
-const DROP_DATE = "2026-03-09T20:00:00";
+const DROP_DATE = "2026-04-14T20:00:00";
 
 function App() {
   const [autenticado, setAutenticado] = useState(() => {
