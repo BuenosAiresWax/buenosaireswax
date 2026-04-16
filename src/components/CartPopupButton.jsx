@@ -1,43 +1,68 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
-import carritoLleno from '../../assets/icons/carrito-lleno.svg';
-import carritoVacio from '../../assets/icons/carrito-vacio.svg';
 
 import "../styles/CartPopupButton.css";
 
 export default function CartPopupButton({ onOpen }) {
-  const { getTotalQuantity } = useContext(CartContext);
-  const [shouldRender, setShouldRender] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const { cartItems, removeFromCart, getTotalQuantity } = useContext(CartContext);
+  const total = cartItems.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  const totalQuantity = getTotalQuantity();
 
-  const totalCantidad = getTotalQuantity();
+  const handleCheckout = () => {
+    onOpen();
+  };
 
-  useEffect(() => {
-    if (totalCantidad > 0) {
-      setShouldRender(true);
-      setTimeout(() => setVisible(true), 20);
-    } else {
-      setVisible(false);
-      const timer = setTimeout(() => setShouldRender(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [totalCantidad]);
+  const handleRemoveItem = (productId) => {
+    removeFromCart(productId);
+  };
 
-  if (!shouldRender) return null;
+  if (totalQuantity === 0) {
+    return null;
+  }
 
   return (
-    <button
-      onClick={onOpen}
-      aria-label="Abrir carrito"
-      title="Abrir carrito"
-      className={`cart-popup-button ${visible ? "visible" : "hidden"}`}
-    >
-      <img
-        src={totalCantidad > 0 ? carritoLleno : carritoVacio}
-        alt="Carrito"
-        className="cart-icon"
-      />
-      <span className="cart-count">{totalCantidad}</span>
-    </button>
+    <div className="cart-popup">
+      <div className="cart-popup-header">
+        <h3>🛒 Carrito ({totalQuantity})</h3>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={`toggle-cart-button ${isExpanded ? "expanded" : "collapsed"}`}
+          aria-label={isExpanded ? "Contraer carrito" : "Expandir carrito"}
+        >
+          ▼
+        </button>
+      </div>
+      {isExpanded && (
+        <>
+          <div className="cart-items">
+            {cartItems.map((item) => (
+              <div key={item.id} className="cart-item">
+                <img src={item.imagen} alt={item.titulo} className="cart-item-image" />
+                <div className="cart-item-info">
+                  <p className="cart-item-name">{item.titulo}</p>
+                  <p className="cart-item-price">${item.precio.toLocaleString('es-AR')}</p>
+                  <p className="cart-item-quantity">Cant: {item.cantidad}</p>
+                </div>
+                <button
+                  onClick={() => handleRemoveItem(item.id)}
+                  className="cart-item-remove"
+                  aria-label={`Eliminar ${item.titulo} del carrito`}
+                  title="Eliminar del carrito"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="cart-total">
+            <p>Total: ${total.toLocaleString('es-AR')}</p>
+          </div>
+          <button onClick={handleCheckout} className="checkout-button">
+            Finalizar compra
+          </button>
+        </>
+      )}
+    </div>
   );
 }

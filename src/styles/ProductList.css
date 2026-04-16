@@ -1,10 +1,25 @@
+/* contenedor principal */
+.product-list-container {
+  display: flex;
+  position: relative;
+}
+
 /* lista de productos */
 .product-list {
-    display: flex;
-    flex-flow: row wrap;
-    align-items: stretch;
-    justify-content: space-between;
-    gap: 4rem;
-    padding: 0 8%;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 8%;
+  padding-left: 0;
+  flex: 1;
+}
 
+@media (max-width: 767px) {
+  .product-list {
+    padding-left: 8%;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
 }

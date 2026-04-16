@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
@@ -8,6 +9,7 @@ import "../styles/ProductItem.css";
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
+  const navigate = useNavigate();
 
   const [producto, setProducto] = useState(productoProp);
   const [mostrarFaq, setMostrarFaq] = useState(false);
@@ -55,16 +57,20 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     addToCart(productoProp);
 
     mostrarMensaje("Producto añadido al carrito");
-
-    /* cambia URL al anchor del producto */
-
-    window.history.replaceState(null, "", `#producto-${productoProp.id}`);
   };
 
   const handleRemove = () => {
     removeFromCart(productoProp.id);
 
     mostrarMensaje("Producto eliminado del carrito");
+  };
+
+  const handleCardClick = (e) => {
+    // No navegar si se hace click en botones o elementos exluidos
+    if (e.target.closest('.add-button') || e.target.closest('.faq-button') || e.target.closest('.play-button')) {
+      return;
+    }
+    navigate(`/producto/${productoProp.id}`);
   };
 
   /* ================================
@@ -186,7 +192,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     ================================= */
 
   return (
-    <div id={`producto-${productoProp.id}`} className="product-card">
+    <div className="product-card" onClick={handleCardClick}>
       <div className="image">
         <img
           src={producto.imagen}
@@ -195,15 +201,16 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
         />
 
         {producto.escucha && (
-          <a
-            href={producto.escucha}
-            target="_blank"
-            rel="noopener noreferrer"
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              window.open(producto.escucha, '_blank');
+            }}
             className="play-button"
             title="Escuchar"
           >
             ▶
-          </a>
+          </div>
         )}
       </div>
 
@@ -215,7 +222,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
           <button
             className="add-button"
-            onClick={handleAdd}
+            onClick={(e) => { e.preventDefault(); handleAdd(); }}
             title="Agregar al carrito"
             disabled={stockDisponible <= 0}
           >
@@ -259,7 +266,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
       <div
         className="faq-button"
-        onClick={() => setMostrarFaq(true)}
+        onClick={(e) => { e.preventDefault(); setMostrarFaq(true); }}
         title="Preguntas frecuentes"
       >
         i

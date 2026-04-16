@@ -1,20 +1,16 @@
 import { useEffect, useState, useContext } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase/config";
 import { CartContext } from "./context/CartContext";
 import ProductList from "./components/ProductList";
 import PurchaseModal from "./components/PurchaseModal";
 import CartPopupButton from "./components/CartPopupButton";
-import LoaderOverlay from "./components/LoaderOverlay";
-import Footer from "./components/Footer";
 import DropAccess from "./components/DropAccess";
 import HeroSlider from "./components/HeroSlider";
 
 import "./styles/styles.css";
 
 import logo from "../assets/logo/header-logo.png";
-import carritoVacio from "../assets/icons/carrito-vacio.svg";
-import carritoLleno from "../assets/icons/carrito-lleno.svg";
 
 const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
 
@@ -33,7 +29,6 @@ function App() {
   });
 
   const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
 
   const { getTotalQuantity } = useContext(CartContext);
@@ -151,35 +146,15 @@ function App() {
      FIREBASE PRODUCTS
   -------------------------------- */
 
-  const fetchProductos = async () => {
-    setLoading(true);
-
-    try {
-      const productosRef = collection(db, "productos");
-
-      const snapshot = await getDocs(productosRef);
-
-      const docs = snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((producto) => {
-          const cantidad = producto.cantidad;
-          const reservas = producto.reservados ?? 0;
-
-          return cantidad === undefined || reservas < cantidad;
-        });
-
-      setProductos(docs);
-    } catch (error) {
-      console.error("Error al cargar productos", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (autenticado) {
-      fetchProductos();
-    }
+    if (!autenticado) return;
+
+    const unsubscribe = onSnapshot(collection(db, "productos"), (snapshot) => {
+      const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setProductos(docs);
+    });
+
+    return () => unsubscribe();
   }, [autenticado]);
 
   /* --------------------------------
@@ -196,43 +171,7 @@ function App() {
   const totalCantidad = getTotalQuantity();
 
   return (
-    <div className="app-container">
-      <LoaderOverlay visible={autenticado && loading} />
-
-      <div className="headerContainer">
-        <img src={logo} alt="bawax" className="logo" />
-
-        <div className="rightNav">
-          <a
-            href="https://wa.me/5491165825180?text=Hola%20BaWax%2C%20tengo%20una%20consulta"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="contactoNav"
-          >
-            CONTACTO
-          </a>
-
-          <div
-            className="cartIcon"
-            onClick={() => {
-              if (totalCantidad > 0) {
-                setMostrarModal(true);
-              }
-            }}
-            style={{ cursor: totalCantidad > 0 ? "pointer" : "default" }}
-            title={totalCantidad > 0 ? "Ver carrito" : "Carrito vacío"}
-          >
-            <img
-              src={totalCantidad > 0 ? carritoLleno : carritoVacio}
-              alt="Carrito"
-              className="cartSVG"
-            />
-
-            <span className="cartCount">{totalCantidad}</span>
-          </div>
-        </div>
-      </div>
-
+    <>
       <HeroSlider />
 
       {!autenticado ? (
@@ -243,8 +182,7 @@ function App() {
       ) : (
         <ProductList
           productos={productos}
-          loading={loading}
-          refetchProductos={fetchProductos}
+          refetchProductos={() => {}} // No needed anymore
         />
       )}
 
@@ -253,12 +191,10 @@ function App() {
       {mostrarModal && (
         <PurchaseModal
           onClose={() => setMostrarModal(false)}
-          refetchProductos={fetchProductos}
+          refetchProductos={() => {}} // No needed
         />
       )}
-
-      <Footer />
-    </div>
+    </>
   );
 }
 

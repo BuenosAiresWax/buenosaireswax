@@ -1,0 +1,137 @@
+.detail-container {
+  color: #fff;
+}
+
+.breadcrumb {
+  grid-column: 1 / -1;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.breadcrumb a {
+  color: #00ff88;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr 250px;
+  gap: 40px;
+  padding: 40px 15%;
+  font-family: var(--text-font);
+}
+
+/* LEFT */
+.detail-image {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* CENTER */
+.detail-title {
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.detail-artist {
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+/* TRACKLIST */
+.tracklist {
+  margin-bottom: 20px;
+}
+
+.tracklist h4 {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+.track {
+  padding: 5px 0;
+  border-bottom: 1px solid #222;
+  font-size: 14px;
+}
+
+/* PLAYER */
+.detail-player {
+  width: 100%;
+  height: 120px;
+  margin: 20px 0;
+  border: none;
+}
+
+/* DESCRIPTION */
+.detail-description {
+  color: #ccc;
+  line-height: 1.6;
+}
+
+/* TAGS */
+.tags {
+  margin-top: 20px;
+}
+
+.tags span {
+  background: #111;
+  padding: 6px 10px;
+  margin-right: 8px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+/* RIGHT */
+.detail-right {
+  font-size: 1rem;
+  color: #ccc;
+}
+
+.stock-ok {
+  color: #00ff88;
+  margin-top: 20px;
+}
+
+.stock-off {
+  color: red;
+  margin-top: 20px;
+}
+
+.cart-actions {
+  margin-top: 20px;
+}
+
+.cart-actions button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #00ff88;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: var(--text-font);
+}
+
+.cart-actions button:hover {
+  background: #00cc66;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
+
+  .detail-container {
+    padding: 20px;
+  }
+}

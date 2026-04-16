@@ -36,6 +36,33 @@ const ProductList = () => {
   const [autorSeleccionado, setAutorSeleccionado] = useState("");
   const [verDisponibles, setVerDisponibles] = useState(false);
 
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  const [estilosOpen, setEstilosOpen] = useState(true);
+  const [generosOpen, setGenerosOpen] = useState(true);
+  const [sellosOpen, setSellosOpen] = useState(false);
+  const [autoresOpen, setAutoresOpen] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (sidebarVisible && isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [sidebarVisible, isMobile]);
+
   const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
 
   const sentinelRef = useRef();
@@ -65,6 +92,31 @@ const ProductList = () => {
       mostrarMensaje("Carrito vacío");
     }
   }, [cartItems, mostrarMensaje]);
+
+  /* -------------------------------
+    FILTROS OPCIONES
+    --------------------------------*/
+
+  // 🔹 Función de orden personalizado: letras → números → símbolos
+  const ordenarOpciones = (arr) =>
+    arr.sort((a, b) => {
+      const tipo = (str) => {
+        if (/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(str)) return 1; // letras
+        if (/^\d/.test(str)) return 2; // números
+        return 3; // símbolos u otros
+      };
+
+      const tipoA = tipo(a);
+      const tipoB = tipo(b);
+
+      if (tipoA !== tipoB) return tipoA - tipoB;
+      return a.localeCompare(b, "es", { sensitivity: "base" }); // orden alfabético
+    });
+
+  const generos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.genero).filter(Boolean))]), [productos]);
+  const estilos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.estilo).filter(Boolean))]), [productos]);
+  const sellos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.sello).filter(Boolean))]), [productos]);
+  const autores = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.autor).filter(Boolean))]), [productos]);
 
   /* -------------------------------
     FILTROS
@@ -327,28 +379,139 @@ const ProductList = () => {
         verDisponibles={verDisponibles}
         setVerDisponibles={setVerDisponibles}
         productos={productos}
+        generos={generos}
+        estilos={estilos}
+        sellos={sellos}
+        autores={autores}
+        sidebarVisible={sidebarVisible}
+        setSidebarVisible={setSidebarVisible}
       />
 
-      <Notificacion mensaje={mensaje} visible={visible} />
+      <div className="product-list-container">
+        {sidebarVisible && isMobile && <div className="sidebar-overlay" onClick={() => setSidebarVisible(false)} />}
+        <div className={`filters-sidebar ${sidebarVisible ? 'visible' : ''}`}>
+            <div className="sidebar-filter">
+              <button className="filter-toggle" onClick={() => setEstilosOpen(!estilosOpen)}>
+                Estilos {estilosOpen ? '−' : '+'}
+              </button>
+              {estilosOpen && (
+                <div className="filter-options">
+                  <button
+                    onClick={() => setEstiloSeleccionado("")}
+                    className={estiloSeleccionado === "" ? "active" : ""}
+                  >
+                    Todos
+                  </button>
+                  {estilos.map((e) => (
+                    <button
+                      key={e}
+                      onClick={() => setEstiloSeleccionado(e)}
+                      className={estiloSeleccionado === e ? "active" : ""}
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-      <div className="product-list">
-        {productosLimitados.length === 0 ? (
-          <div className="product-item no-results">
-            <div className="info">
-              <h2>Ups!</h2>
-              <p>Seguinos en redes y no te pierdas nuestros drops.</p>
+            <div className="sidebar-filter">
+              <button className="filter-toggle" onClick={() => setGenerosOpen(!generosOpen)}>
+                Géneros {generosOpen ? '−' : '+'}
+              </button>
+              {generosOpen && (
+                <div className="filter-options">
+                  <button
+                    onClick={() => setGeneroSeleccionado("")}
+                    className={generoSeleccionado === "" ? "active" : ""}
+                  >
+                    Todos
+                  </button>
+                  {generos.map((g) => (
+                    <button
+                      key={g}
+                      onClick={() => setGeneroSeleccionado(g)}
+                      className={generoSeleccionado === g ? "active" : ""}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="sidebar-filter">
+              <button className="filter-toggle" onClick={() => setSellosOpen(!sellosOpen)}>
+                Sellos {sellosOpen ? '−' : '+'}
+              </button>
+              {sellosOpen && (
+                <div className="filter-options">
+                  <button
+                    onClick={() => setSelloSeleccionado("")}
+                    className={selloSeleccionado === "" ? "active" : ""}
+                  >
+                    Todos
+                  </button>
+                  {sellos.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSelloSeleccionado(s)}
+                      className={selloSeleccionado === s ? "active" : ""}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="sidebar-filter">
+              <button className="filter-toggle" onClick={() => setAutoresOpen(!autoresOpen)}>
+                Artistas {autoresOpen ? '−' : '+'}
+              </button>
+              {autoresOpen && (
+                <div className="filter-options">
+                  <button
+                    onClick={() => setAutorSeleccionado("")}
+                    className={autorSeleccionado === "" ? "active" : ""}
+                  >
+                    Todos
+                  </button>
+                  {autores.map((a) => (
+                    <button
+                      key={a}
+                      onClick={() => setAutorSeleccionado(a)}
+                      className={autorSeleccionado === a ? "active" : ""}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        ) : (
-          productosLimitados.map((producto) => (
-            <ProductItem
-              key={producto.id}
-              producto={producto}
-              mostrarMensaje={mostrarMensaje}
-            />
-          ))
-        )}
+
+        <div className="product-list">
+          {productosLimitados.length === 0 ? (
+            <div className="product-item no-results">
+              <div className="info">
+                <h2>Ups!</h2>
+                <p>Seguinos en redes y no te pierdas nuestros drops.</p>
+              </div>
+            </div>
+          ) : (
+            productosLimitados.map((producto) => (
+              <ProductItem
+                key={producto.id}
+                producto={producto}
+                mostrarMensaje={mostrarMensaje}
+              />
+            ))
+          )}
+        </div>
       </div>
+
+      <Notificacion mensaje={mensaje} visible={visible} />
 
       <YouTubePopup />
 
