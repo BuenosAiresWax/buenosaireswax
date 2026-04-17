@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
-import { PlayerContext } from "../player/PlayerContext"; // <-- NUEVO
+import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
 import PurchaseModal from "./PurchaseModal";
 import CartPopupButton from "./CartPopupButton";
 
@@ -49,7 +49,12 @@ function ProductPage() {
   };
 
   const handlePlay = () => {
-    setTrack(HARDCODED_SC_URL, true);
+    setTrack(HARDCODED_SC_URL, true, {
+      titulo: producto.titulo,
+      autor: producto.autor,
+      imagen: producto.imagen,
+      sello: producto.sello,
+    });
   };
 
   return (
@@ -85,11 +90,6 @@ function ProductPage() {
             </div>
           )}
 
-          {/* Botón que controla el PLAYER GLOBAL */}
-          <button className="detail-play-btn" onClick={handlePlay}>
-            🔊 Reproducir
-          </button>
-
           {/* DESCRIPCIÓN */}
           <p className="detail-description">{producto.descripcion}</p>
 
@@ -99,6 +99,11 @@ function ProductPage() {
             {producto.estilo && <span>{producto.estilo}</span>}
             <span>Vinyl</span>
           </div>
+
+          {/* Botón que controla el PLAYER GLOBAL */}
+          <button className="detail-play-btn" onClick={handlePlay}>
+            🔊 Reproducir
+          </button>
         </div>
 
         {/* RIGHT - META */}

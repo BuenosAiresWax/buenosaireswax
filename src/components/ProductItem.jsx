@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
-import { PlayerContext } from "../player/PlayerContext"; // <-- NUEVO
+import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -12,7 +12,8 @@ const HARDCODED_SC_URL = "https://soundcloud.com/forss/flickermood"; // <-- NUEV
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
-  const { setTrack } = useContext(PlayerContext); // <-- NUEVO
+  const player = useContext(PlayerContext);
+  const setTrack = player?.setTrack ?? (() => {}); // <-- NUEVO
   const navigate = useNavigate();
 
   const [producto, setProducto] = useState(productoProp);
@@ -193,7 +194,12 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setTrack(HARDCODED_SC_URL, true);
+            setTrack(HARDCODED_SC_URL, true, {
+              titulo: producto.titulo,
+              autor: producto.autor,
+              imagen: producto.imagen,
+              sello: producto.sello,
+            });
           }}
         >
           🔊

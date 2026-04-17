@@ -1,9 +1,26 @@
 import { createContext, useCallback, useMemo, useRef, useState } from "react";
 
-export const PlayerContext = createContext(null);
+const defaultPlayerContextValue = {
+    currentTrackUrl: null,
+    currentTrackMetadata: null,
+    trackRequestId: 0,
+    isPlaying: false,
+    setIsPlaying: () => {},
+    autoplayRef: { current: true },
+    registerHandlers: () => {},
+    setTrack: () => {},
+    play: () => {},
+    pause: () => {},
+    toggle: () => {},
+    stop: () => {},
+};
+
+export const PlayerContext = createContext(defaultPlayerContextValue);
 
 export function PlayerProvider({ children }) {
     const [currentTrackUrl, setCurrentTrackUrl] = useState(null);
+    const [currentTrackMetadata, setCurrentTrackMetadata] = useState(null);
+    const [trackRequestId, setTrackRequestId] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
 
     const autoplayRef = useRef(true);
@@ -19,10 +36,12 @@ export function PlayerProvider({ children }) {
         handlersRef.current = { ...handlersRef.current, ...handlers };
     }, []);
 
-    const setTrack = useCallback((url, autoplay = true) => {
+    const setTrack = useCallback((url, autoplay = true, metadata = null) => {
         autoplayRef.current = !!autoplay;
         setCurrentTrackUrl(url);
-        setIsPlaying(!!autoplay);
+        setCurrentTrackMetadata(metadata);
+        setTrackRequestId((prev) => prev + 1);
+        // NO cambiar isPlaying aquí - dejar que los callbacks del widget lo manejen
     }, []);
 
     const play = useCallback(() => handlersRef.current.play?.(), []);
@@ -42,6 +61,8 @@ export function PlayerProvider({ children }) {
     const value = useMemo(
         () => ({
             currentTrackUrl,
+            currentTrackMetadata,
+            trackRequestId,
             isPlaying,
             setIsPlaying,
             autoplayRef,
@@ -52,7 +73,7 @@ export function PlayerProvider({ children }) {
             toggle,
             stop,
         }),
-        [currentTrackUrl, isPlaying, registerHandlers, setTrack, play, pause, toggle, stop],
+        [currentTrackUrl, currentTrackMetadata, trackRequestId, isPlaying, registerHandlers, setTrack, play, pause, toggle, stop],
     );
 
     return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;

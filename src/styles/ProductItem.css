@@ -26,11 +26,27 @@
 /* Botón ▶ flotante */
 .product-card .play-button {
     position: absolute;
-    bottom: 0;
-    left: 8px;
-    font-size: 1rem;
+    bottom: 10px;
+    left: 10px;
+    font-size: 1.2rem;
     cursor: pointer;
     text-decoration: none;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.product-card .play-button:hover {
+    background: var(--color-letra, #e4e4e4);
+    border-color: rgba(8, 8, 8, 0.5);
 }
 
 /* Contenido de info */
@@ -72,21 +88,26 @@
 }
 
 .product-card .info h3 {
-    font-size: 22px;
-    font-weight: lighter;
+    font-size: 18px;
+    font-weight: 600;
     margin: 0;
+    color: var(--color-letra);
+    line-height: 1.3;
 }
 
 .product-card .autor {
     margin: 0;
-    opacity: 0.4;
-    font-size: 1rem;
+    opacity: 0.6;
+    font-size: 0.95rem;
+    color: #a8a8a8;
+    margin-bottom: 0.4rem;
 }
 
 .product-card .info .price {
-    font-size: 35px;
-    font-weight: lighter;
-    margin: 0 0 0.8rem;
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0.6rem 0 1rem;
+    color: var(--color-letra);
 }
 
 .product-card .info .description {
@@ -110,50 +131,55 @@
 
 .product-card .info .sello {
     font-family: var(--text-font);
-    font-size: 13px;
-    font-weight: 300;
-    font-style: Light;
-    font-size: 13px;
-    line-height: 100%;
-    letter-spacing: 0%;
-    vertical-align: middle;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #8a8a8a;
     border-top: 1px solid #444;
     border-bottom: 1px solid #444;
-    text-transform: uppercase;
-    padding: 0.5rem 0;
+    padding: 0.6rem 0;
+    margin: 0.8rem 0;
 }
 
 /* Stock */
 .product-card .stock {
-    font-size: 13px;
-    color: #8c8c8c;
-    margin-top: 0.5rem;
+    font-size: 12px;
+    color: #7a7a7a;
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
 }
 
 .product-card .stock span {
-    font-weight: bold;
-    color: #ccc;
+    font-weight: 600;
+    color: #a0a0a0;
 }
 
 /* Botón info FAQ */
 .product-card .faq-button {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: #33333373;
-    color: rgba(255, 255, 255, 0.443);
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    color: rgba(255, 255, 255, 0.7);
     border-radius: 50%;
-    width: 22px;
-    height: 22px;
+    width: 30px;
+    height: 30px;
     text-align: center;
-    font-size: 13px;
-    line-height: 22px;
+    font-size: 12px;
+    line-height: 30px;
     cursor: pointer;
     font-weight: bold;
+    transition: all 0.3s ease;
+    z-index: 10;
 }
 
 .product-card .faq-button:hover {
     color: rgb(255, 255, 255);
+    border-color: rgba(100, 150, 200, 0.8);
+    background: rgba(100, 150, 200, 0.2);
+    transform: scale(1.1);
 }
 
 .agotado {
@@ -176,23 +202,25 @@
 .description-container {
     position: relative;
     width: 100%;
+    margin: 0.8rem 0;
 }
 
 .description {
     font-family: var(--text-font);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 300;
-    line-height: 1.4;
+    line-height: 1.5;
     letter-spacing: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     /* desktop */
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: normal;
     cursor: default;
+    color: #b8b8b8;
 }
 
 .tooltip-mobile {
@@ -245,7 +273,8 @@
 }
 
 .product-card:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s ease;
 }
 
 .product-card-link {

@@ -16,17 +16,48 @@
     right: 0;
     bottom: 0;
 
-    background: var(--color-fondo, #282322);
+    background: rgba(128, 128, 128, 0.3);
+    backdrop-filter: blur(4px);
     color: var(--color-letra, #e4e4e4);
 
     padding: 10px 12px;
 
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly;
     gap: 12px;
 
     z-index: 9999;
+}
+
+/* Thumbnail/Foto del track */
+.playerbar__thumbnail {
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playerbar__placeholder {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.playerbar__placeholder--empty {
+    opacity: 0.6;
+}
+
+.playerbar__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .playerbar__left {
@@ -43,19 +74,36 @@
 .playerbar__meta {
     display: flex;
     gap: 6px;
-    align-items: baseline;
+    align-items: center;
     min-width: 0;
 }
 
 .playerbar__label {
-    font-size: 12px;
-    opacity: 0.8;
+    font-size: 14px;
+    opacity: 0.9;
     white-space: nowrap;
 }
 
-.playerbar__url {
+.playerbar__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.playerbar__title {
     font-size: 12px;
-    opacity: 0.9;
+    font-weight: 600;
+    opacity: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playerbar__artist {
+    font-size: 11px;
+    opacity: 0.7;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -81,11 +129,22 @@
     cursor: pointer;
     font-size: 12px;
     white-space: nowrap;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.2s ease;
 }
 
-.playerbar__btn:hover {
+.playerbar__btn:hover:not(:disabled) {
     background: var(--color-letra, #e4e4e4);
     color: var(--color-fondo, #282322);
+    transform: scale(1.05);
+}
+
+.playerbar__btn:active:not(:disabled) {
+    transform: scale(0.95);
 }
 
 .playerbar__btn:disabled {
@@ -93,14 +152,41 @@
     cursor: not-allowed;
 }
 
+.playerbar__btn--play {
+    border-color: rgba(100, 200, 100, 0.5);
+}
+
+.playerbar__btn--play:hover:not(:disabled) {
+    border-color: rgba(100, 200, 100, 0.8);
+    background: rgba(100, 200, 100, 0.2);
+    color: #64c864;
+}
+
+.playerbar__btn--stop {
+    border-color: rgba(200, 100, 100, 0.5);
+}
+
+.playerbar__btn--stop:hover:not(:disabled) {
+    border-color: rgba(200, 100, 100, 0.8);
+    background: rgba(200, 100, 100, 0.2);
+    color: #ff6b6b;
+}
+
 /* Responsive: apila un poco para pantallas chicas */
 @media (max-width: 520px) {
     .playerbar {
         flex-direction: column;
         align-items: stretch;
+        gap: 8px;
+    }
+
+    .playerbar__thumbnail {
+        width: 40px;
+        height: 40px;
+        align-self: center;
     }
 
     .playerbar__right {
-        justify-content: space-between;
+        justify-content: center;
     }
 }
