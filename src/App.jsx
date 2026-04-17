@@ -166,6 +166,7 @@ function App() {
 
     localStorage.setItem("autenticado", "true");
     localStorage.setItem("accessVersion", ACCESS_VERSION);
+    window.dispatchEvent(new Event("bawax-auth-changed"));
   };
 
   const totalCantidad = getTotalQuantity();

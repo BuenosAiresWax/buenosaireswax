@@ -112,16 +112,19 @@
   width: 100%;
   margin-bottom: 10px;
   padding: 10px;
-  background: #00ff88;
-  color: #000;
-  border: none;
-  border-radius: 5px;
+  background: var(--color-fondo);
+  border: 2px dashed #00ff88;
+  color: var(--color-letra);
   cursor: pointer;
   font-family: var(--text-font);
+  transition: .3s;
 }
 
 .cart-actions button:hover {
   background: #00cc66;
+  color: var(--color-fondo);
+  border: 2px dashed var(--color-fondo);
+  transition: .3s;
 }
 
 /* RESPONSIVE */

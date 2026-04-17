@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { Outlet } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import Footer from "./Footer";
 import PlayerBar from "../player/PlayerBar";
@@ -8,9 +8,33 @@ import logo from "../../assets/logo/header-logo.png";
 import carritoVacio from "../../assets/icons/carrito-vacio.svg";
 import carritoLleno from "../../assets/icons/carrito-lleno.svg";
 
+const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
+
+function hasValidAccess() {
+  const isAuth = localStorage.getItem("autenticado") === "true";
+  const savedVersion = localStorage.getItem("accessVersion");
+  return isAuth && savedVersion === ACCESS_VERSION;
+}
+
 function AppLayout() {
   const { getTotalQuantity } = useContext(CartContext);
   const totalCantidad = getTotalQuantity();
+  const location = useLocation();
+  const [autenticado, setAutenticado] = useState(() => hasValidAccess());
+
+  useEffect(() => {
+    const syncAuthState = () => setAutenticado(hasValidAccess());
+
+    window.addEventListener("storage", syncAuthState);
+    window.addEventListener("bawax-auth-changed", syncAuthState);
+
+    return () => {
+      window.removeEventListener("storage", syncAuthState);
+      window.removeEventListener("bawax-auth-changed", syncAuthState);
+    };
+  }, []);
+
+  const isDropAccessActive = location.pathname === "/" && !autenticado;
 
   return (
     <div className="app-container" style={{ paddingBottom: "84px" }}>
@@ -52,7 +76,7 @@ function AppLayout() {
       <Footer />
 
       {/* Player global persistente */}
-      <PlayerBar />
+      {!isDropAccessActive && <PlayerBar />}
     </div>
   );
 }

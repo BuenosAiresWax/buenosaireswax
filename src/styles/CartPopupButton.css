@@ -7,8 +7,8 @@
     background: rgba(37, 37, 37, 0.747);
     /* fondo translúcido tipo vidrio */
     border: none;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     cursor: pointer;
 
@@ -79,7 +79,6 @@
     max-height: 450px;
     background: rgba(128, 128, 128, 0.3);
     backdrop-filter: blur(4px);
-    backdrop-filter: blur(10px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     z-index: 10000;
     display: flex;
@@ -243,18 +242,20 @@
 .checkout-button {
     width: 100%;
     padding: 12px;
-    background: rgba(128, 128, 128, 0.3);
+    background: rgba(128, 128, 128, 0);
     color: var(--color-letra);
     border: none;
+    border-top: 2px dashed #00ff88;
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: 0.3s;
     flex-shrink: 0;
 }
 
 .checkout-button:hover {
     background: #00cc66;
     color: var(--color-fondo);
-    transition: .5s;
+    border-top: 2px dashed var(--color-fondo);
+    transition: 0.3s;
 }
