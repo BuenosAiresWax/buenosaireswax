@@ -2,16 +2,18 @@ import { useContext } from "react";
 import { Outlet } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import Footer from "./Footer";
+import PlayerBar from "../player/PlayerBar";
+
 import logo from "../../assets/logo/header-logo.png";
 import carritoVacio from "../../assets/icons/carrito-vacio.svg";
 import carritoLleno from "../../assets/icons/carrito-lleno.svg";
 
-function Layout() {
+function AppLayout() {
   const { getTotalQuantity } = useContext(CartContext);
   const totalCantidad = getTotalQuantity();
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ paddingBottom: "84px" }}>
       <div className="headerContainer">
         <img src={logo} alt="bawax" className="logo" />
 
@@ -40,7 +42,6 @@ function Layout() {
               alt="Carrito"
               className="cartSVG"
             />
-
             <span className="cartCount">{totalCantidad}</span>
           </div>
         </div>
@@ -49,8 +50,11 @@ function Layout() {
       <Outlet />
 
       <Footer />
+
+      {/* Player global persistente */}
+      <PlayerBar />
     </div>
   );
 }
 
-export default Layout;
+export default AppLayout;

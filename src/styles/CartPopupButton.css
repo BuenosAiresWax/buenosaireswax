@@ -1,3 +1,4 @@
+
 .cart-popup-button {
     position: fixed;
     bottom: 20px;
@@ -77,7 +78,7 @@
     right: 20px;
     width: 300px;
     max-height: 450px;
-    background: rgba(37, 37, 37, 0.95);
+    background: #282322;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     z-index: 10000;
@@ -241,8 +242,8 @@
 .checkout-button {
     width: 100%;
     padding: 12px;
-    background: #00ff88;
-    color: #000;
+    background: rgba(128, 128, 128, 0.3);
+    color: var(--color-letra);
     border: none;
     font-size: 14px;
     font-weight: bold;
@@ -253,4 +254,6 @@
 
 .checkout-button:hover {
     background: #00cc66;
+    color: var(--color-fondo);
+    transition: .5s;
 }

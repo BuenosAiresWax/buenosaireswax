@@ -1,14 +1,18 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
+import { PlayerContext } from "../player/PlayerContext"; // <-- NUEVO
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 
 import FaqModal from "./FaqModal";
 import "../styles/ProductItem.css";
 
+const HARDCODED_SC_URL = "https://soundcloud.com/forss/flickermood"; // <-- NUEVO (válido)
+
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
+  const { setTrack } = useContext(PlayerContext); // <-- NUEVO
   const navigate = useNavigate();
 
   const [producto, setProducto] = useState(productoProp);
@@ -16,10 +20,6 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
   const [showTooltip, setShowTooltip] = useState(false);
   const [hidingTooltip, setHidingTooltip] = useState(false);
-
-  /* ================================
-       FIRESTORE LIVE UPDATE
-    ================================= */
 
   useEffect(() => {
     const ref = doc(db, "productos", productoProp.id);
@@ -33,20 +33,12 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     return () => unsubscribe();
   }, [productoProp.id]);
 
-  /* ================================
-       STOCK
-    ================================= */
-
   const cantidadTotal = producto.cantidad ?? 0;
   const reservados = producto.reservados ?? 0;
   const stockDisponible = Math.max(0, cantidadTotal - reservados);
 
   const carritoItem = cartItems.find((item) => item.id === productoProp.id);
   const cantidadEnCarrito = carritoItem ? carritoItem.cantidad : 0;
-
-  /* ================================
-       CART
-    ================================= */
 
   const handleAdd = () => {
     if (cantidadEnCarrito >= stockDisponible) {
@@ -55,32 +47,27 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     }
 
     addToCart(productoProp);
-
     mostrarMensaje("Producto añadido al carrito");
   };
 
   const handleRemove = () => {
     removeFromCart(productoProp.id);
-
     mostrarMensaje("Producto eliminado del carrito");
   };
 
   const handleCardClick = (e) => {
-    // No navegar si se hace click en botones o elementos exluidos
-    if (e.target.closest('.add-button') || e.target.closest('.faq-button') || e.target.closest('.play-button')) {
+    if (
+      e.target.closest(".add-button") ||
+      e.target.closest(".faq-button") ||
+      e.target.closest(".play-button")
+    ) {
       return;
     }
     navigate(`/producto/${productoProp.id}`);
   };
 
-  /* ================================
-       DESCRIPTION
-    ================================= */
-
   const fullDescription = `${producto.descripcion || ""} - ${producto.estilo || ""}`;
-
   const shortDescription = fullDescription.slice(0, 150);
-
   const isLong = fullDescription.length > 150;
 
   const handleDescriptionClick = () => {
@@ -98,6 +85,8 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
       }, 4000);
     }
   };
+
+  // ... tu useEffect del schema queda igual ...
 
   /* ================================
    SCHEMA PRODUCT + MUSIC
@@ -187,10 +176,6 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     };
   }, [producto, stockDisponible, productoProp.id]);
 
-  /* ================================
-       UI
-    ================================= */
-
   return (
     <div className="product-card" onClick={handleCardClick}>
       <div className="image">
@@ -200,18 +185,19 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
           className={stockDisponible <= 0 ? "agotadoImagen" : ""}
         />
 
-        {producto.escucha && (
-          <div
-            onClick={(e) => {
-              e.preventDefault();
-              window.open(producto.escucha, '_blank');
-            }}
-            className="play-button"
-            title="Escuchar"
-          >
-            ▶
-          </div>
-        )}
+        {/* Botón ESCUCHAR (player global) */}
+        <button
+          type="button"
+          className="play-button"
+          title="Escuchar"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setTrack(HARDCODED_SC_URL, true);
+          }}
+        >
+          🔊
+        </button>
       </div>
 
       <div className="info">
@@ -222,7 +208,10 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
           <button
             className="add-button"
-            onClick={(e) => { e.preventDefault(); handleAdd(); }}
+            onClick={(e) => {
+              e.preventDefault();
+              handleAdd();
+            }}
             title="Agregar al carrito"
             disabled={stockDisponible <= 0}
           >
@@ -245,9 +234,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
           </p>
 
           {showTooltip && (
-            <div
-              className={`tooltip-mobile ${hidingTooltip ? "fade-out" : ""}`}
-            >
+            <div className={`tooltip-mobile ${hidingTooltip ? "fade-out" : ""}`}>
               {fullDescription}
             </div>
           )}
@@ -256,8 +243,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
         <h4 className="sello">Label: {producto.sello}</h4>
 
         <div className={`stock ${stockDisponible <= 0 ? "agotadoStock" : ""}`}>
-          Stock:
-          {stockDisponible > 0 ? stockDisponible : "AGOTADO"}
+          Stock: {stockDisponible > 0 ? stockDisponible : "AGOTADO"}
           {cantidadEnCarrito > 0 && (
             <span> (En carrito: {cantidadEnCarrito})</span>
           )}
@@ -266,7 +252,10 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
       <div
         className="faq-button"
-        onClick={(e) => { e.preventDefault(); setMostrarFaq(true); }}
+        onClick={(e) => {
+          e.preventDefault();
+          setMostrarFaq(true);
+        }}
         title="Preguntas frecuentes"
       >
         i

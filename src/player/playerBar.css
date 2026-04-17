@@ -1,0 +1,108 @@
+/* Iframe del widget: lo usamos como “motor” pero lo ocultamos */
+.sc-hidden-iframe {
+    position: absolute;
+    left: -99999px;
+    top: -99999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Barra fija inferior */
+.playerbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background: var(--color-fondo, #282322);
+    color: var(--color-letra, #e4e4e4);
+
+    border-top: 1px solid color-mix(in srgb, var(--color-letra, #e4e4e4) 25%, transparent);
+    padding: 10px 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    z-index: 9999;
+}
+
+.playerbar__left {
+    min-width: 0;
+    flex: 1;
+}
+
+.playerbar__status {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+}
+
+.playerbar__meta {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    min-width: 0;
+}
+
+.playerbar__label {
+    font-size: 12px;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.playerbar__url {
+    font-size: 12px;
+    opacity: 0.9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playerbar__hint {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.playerbar__right {
+    display: flex;
+    gap: 8px;
+}
+
+.playerbar__btn {
+    background: transparent;
+    color: var(--color-letra, #e4e4e4);
+    border: 1px solid var(--color-letra, #e4e4e4);
+
+    padding: 8px 10px;
+    border-radius: 10px;
+
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.playerbar__btn:hover {
+    background: var(--color-letra, #e4e4e4);
+    color: var(--color-fondo, #282322);
+}
+
+.playerbar__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive: apila un poco para pantallas chicas */
+@media (max-width: 520px) {
+    .playerbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .playerbar__right {
+        justify-content: space-between;
+    }
+}

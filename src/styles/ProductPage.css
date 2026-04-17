@@ -80,10 +80,10 @@
 }
 
 .tags span {
-  background: #111;
+  background: #282322;
   padding: 6px 10px;
   margin-right: 8px;
-  border-radius: 20px;
+  border: 2px dashed rgba(128, 128, 128, 0.3);
   font-size: 12px;
 }
 
@@ -134,4 +134,19 @@
   .detail-container {
     padding: 20px;
   }
+}
+
+.detail-play-btn {
+  background: transparent;
+  border: 2px dashed rgba(128, 128, 128, 0.3);
+  color: var(--color-letra);
+  padding: 10px 12px;
+  cursor: pointer;
+  margin: 12px 0;
+  font-family: var(--text-font);
+}
+
+.detail-play-btn:hover {
+  background: var(--color-letra, #e4e4e4);
+  color: var(--color-fondo, #282322);
 }

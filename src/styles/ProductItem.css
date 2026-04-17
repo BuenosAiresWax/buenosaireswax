@@ -26,12 +26,8 @@
 /* Botón ▶ flotante */
 .product-card .play-button {
     position: absolute;
-    bottom: 8px;
+    bottom: 0;
     left: 8px;
-    background: var(--color-letra);
-    color: var(--color-fondo);
-    padding: 4px 6px 1px 8px;
-    border-radius: 50%;
     font-size: 1rem;
     cursor: pointer;
     text-decoration: none;
@@ -255,6 +251,22 @@
 .product-card-link {
     text-decoration: none;
     color: inherit;
+}
+
+.play-button {
+    background: #282322;
+    border: 2px dashed rgba(128, 128, 128, 0.3);
+    color: var(--color-letra);
+    padding: 8px 10px;
+    cursor: pointer;
+    margin: 12px 0;
+    font-family: var(--text-font);
+}
+
+.play-button:hover {
+    color: var(--color-fondo, #282322);
+    border: 2px dashed rgba(214, 213, 213, 0.844);
+
 }
 
 @media (max-width: 768px) {

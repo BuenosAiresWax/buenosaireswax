@@ -21,20 +21,61 @@ import "../styles/ProductList.css";
 
 const BATCH_SIZE = 15;
 const MIN_LOADING_TIME = 800;
+const FILTERS_STORAGE_KEY = "bawax:product-list-filters";
+
+const DEFAULT_FILTERS = {
+  filtroTexto: "",
+  generoSeleccionado: "",
+  estiloSeleccionado: "",
+  selloSeleccionado: "",
+  autorSeleccionado: "",
+  verDisponibles: false,
+};
+
+const getSavedFilters = () => {
+  if (typeof window === "undefined") return DEFAULT_FILTERS;
+
+  try {
+    const raw = window.sessionStorage.getItem(FILTERS_STORAGE_KEY);
+
+    if (!raw) return DEFAULT_FILTERS;
+
+    const parsed = JSON.parse(raw);
+
+    return {
+      ...DEFAULT_FILTERS,
+      ...parsed,
+      verDisponibles: Boolean(parsed?.verDisponibles),
+    };
+  } catch {
+    return DEFAULT_FILTERS;
+  }
+};
 
 const ProductList = () => {
   const { cartItems } = useContext(CartContext);
+  const initialFilters = useMemo(() => getSavedFilters(), []);
 
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [limit, setLimit] = useState(BATCH_SIZE);
 
-  const [filtroTexto, setFiltroTexto] = useState("");
-  const [generoSeleccionado, setGeneroSeleccionado] = useState("");
-  const [estiloSeleccionado, setEstiloSeleccionado] = useState("");
-  const [selloSeleccionado, setSelloSeleccionado] = useState("");
-  const [autorSeleccionado, setAutorSeleccionado] = useState("");
-  const [verDisponibles, setVerDisponibles] = useState(false);
+  const [filtroTexto, setFiltroTexto] = useState(initialFilters.filtroTexto);
+  const [generoSeleccionado, setGeneroSeleccionado] = useState(
+    initialFilters.generoSeleccionado,
+  );
+  const [estiloSeleccionado, setEstiloSeleccionado] = useState(
+    initialFilters.estiloSeleccionado,
+  );
+  const [selloSeleccionado, setSelloSeleccionado] = useState(
+    initialFilters.selloSeleccionado,
+  );
+  const [autorSeleccionado, setAutorSeleccionado] = useState(
+    initialFilters.autorSeleccionado,
+  );
+  const [verDisponibles, setVerDisponibles] = useState(
+    initialFilters.verDisponibles,
+  );
 
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
@@ -92,6 +133,29 @@ const ProductList = () => {
       mostrarMensaje("Carrito vacío");
     }
   }, [cartItems, mostrarMensaje]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.sessionStorage.setItem(
+      FILTERS_STORAGE_KEY,
+      JSON.stringify({
+        filtroTexto,
+        generoSeleccionado,
+        estiloSeleccionado,
+        selloSeleccionado,
+        autorSeleccionado,
+        verDisponibles,
+      }),
+    );
+  }, [
+    filtroTexto,
+    generoSeleccionado,
+    estiloSeleccionado,
+    selloSeleccionado,
+    autorSeleccionado,
+    verDisponibles,
+  ]);
 
   /* -------------------------------
     FILTROS OPCIONES
