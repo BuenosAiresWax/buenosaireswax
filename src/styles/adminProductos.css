@@ -380,7 +380,7 @@
     animation: fadeOut 0.25s forwards;
 }
 
-.search-input {
+.search-input-admin {
     padding: 8px 10px;
     border-radius: 5px;
     border: 1px solid #cccccc44;
@@ -390,7 +390,7 @@
     margin-right: auto;
 }
 
-.search-input:focus {
+.search-input-admin:focus {
     border-color: #666;
 }
 

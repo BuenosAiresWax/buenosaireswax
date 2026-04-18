@@ -3,6 +3,46 @@ import "../styles/styles.css";
 import '../styles/Filters.css'
 import searchIcon from "../../assets/icons/lupa.png";
 
+const iconProps = {
+    viewBox: "0 0 24 24",
+    width: 18,
+    height: 18,
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+};
+
+function CheckIcon() {
+    return (
+        <svg {...iconProps}>
+            <path d="M20 6 9 17l-5-5" />
+        </svg>
+    );
+}
+
+function GridIcon() {
+    return (
+        <svg {...iconProps}>
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+    );
+}
+
+function ClearIcon() {
+    return (
+        <svg {...iconProps}>
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+        </svg>
+    );
+}
+
 function Filters({
     filtroTexto,
     setFiltroTexto,
@@ -67,18 +107,27 @@ function Filters({
                     />
                 </div>
 
-                {/* Botón ver disponibles */}
-                <button
-                    className={`filters-item ${verDisponibles ? "activo" : ""}`}
-                    onClick={() => setVerDisponibles(!verDisponibles)}
-                >
-                    {verDisponibles ? "Ver Todos" : "Ver Disponibles"}
-                </button>
+                <div className="filters-actions">
+                    {/* Botón ver disponibles */}
+                    <button
+                        className={`filters-action-btn availability-btn ${verDisponibles ? "is-active" : ""}`}
+                        onClick={() => setVerDisponibles(!verDisponibles)}
+                        aria-pressed={verDisponibles}
+                    >
+                        <span className="btn-icon">
+                            {verDisponibles ? <GridIcon /> : <CheckIcon />}
+                        </span>
+                        <span className="btn-label">{verDisponibles ? "Ver todo" : "Disponibles"}</span>
+                    </button>
 
-                {/* Botón limpiar */}
-                <button className="filters-clear-btn filters-item" onClick={limpiarFiltros}>
-                    Limpiar filtros
-                </button>
+                    {/* Botón limpiar */}
+                    <button className="filters-action-btn clear-btn" onClick={limpiarFiltros}>
+                        <span className="btn-icon">
+                            <ClearIcon />
+                        </span>
+                        <span className="btn-label">Limpiar</span>
+                    </button>
+                </div>
             </div>
         </div>
     );
