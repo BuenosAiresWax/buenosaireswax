@@ -200,7 +200,7 @@
 .cart-item-remove {
     background: none;
     border: none;
-    color: #ff4444;
+    color: var(--color-letra);
     font-size: 18px;
     cursor: pointer;
     padding: 4px 8px;

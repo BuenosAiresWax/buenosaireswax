@@ -1,12 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { CartContext } from "../context/CartContext";
 import Footer from "./Footer";
 import PlayerBar from "../player/PlayerBar";
 
 import logo from "../../assets/logo/header-logo.png";
-import carritoVacio from "../../assets/icons/carrito-vacio.svg";
-import carritoLleno from "../../assets/icons/carrito-lleno.svg";
 
 const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
 
@@ -17,8 +14,6 @@ function hasValidAccess() {
 }
 
 function AppLayout() {
-  const { getTotalQuantity } = useContext(CartContext);
-  const totalCantidad = getTotalQuantity();
   const location = useLocation();
   const [autenticado, setAutenticado] = useState(() => hasValidAccess());
 
@@ -50,24 +45,6 @@ function AppLayout() {
           >
             CONTACTO
           </a>
-
-          <div
-            className="cartIcon"
-            onClick={() => {
-              if (totalCantidad > 0) {
-                // Aquí podrías abrir el modal del carrito si es necesario
-              }
-            }}
-            style={{ cursor: totalCantidad > 0 ? "pointer" : "default" }}
-            title={totalCantidad > 0 ? "Ver carrito" : "Carrito vacío"}
-          >
-            <img
-              src={totalCantidad > 0 ? carritoLleno : carritoVacio}
-              alt="Carrito"
-              className="cartSVG"
-            />
-            <span className="cartCount">{totalCantidad}</span>
-          </div>
         </div>
       </div>
 
