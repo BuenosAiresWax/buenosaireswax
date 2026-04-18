@@ -75,7 +75,6 @@
     position: fixed;
     bottom: 90px;
     right: 0px;
-    width: 300px;
     max-height: 450px;
     background: rgba(128, 128, 128, 0.3);
     backdrop-filter: blur(4px);
@@ -158,7 +157,7 @@
 
 .cart-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 10px;
     padding-bottom: 10px;
 }
@@ -176,6 +175,7 @@
 
 .cart-item-info {
     flex: 1;
+    margin: 0 2rem;
 }
 
 .cart-item-name {

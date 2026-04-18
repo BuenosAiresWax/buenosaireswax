@@ -34,6 +34,16 @@ function GridIcon() {
     );
 }
 
+function FilterIcon() {
+    return (
+        <svg {...iconProps}>
+            <path d="M4 6h16" />
+            <path d="M7 12h10" />
+            <path d="M10 18h4" />
+        </svg>
+    );
+}
+
 function ClearIcon() {
     return (
         <svg {...iconProps}>
@@ -91,7 +101,10 @@ function Filters({
                         className="mobile-filter-btn filters-item"
                         onClick={() => setSidebarVisible(!sidebarVisible)}
                     >
-                        Filtros {sidebarVisible ? '−' : '+'}
+                        <span className="btn-icon">
+                            <FilterIcon />
+                        </span>
+                        <span className="btn-label">Filtros</span>
                     </button>
                 )}
 
