@@ -22,7 +22,7 @@
   display: grid;
   grid-template-columns: 300px 1fr 250px;
   gap: 40px;
-  padding: 40px 15%;
+  padding: 5% 15%;
   font-family: var(--text-font);
 }
 
