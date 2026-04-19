@@ -2,6 +2,20 @@
   color: #fff;
 }
 
+.detail-loading-space {
+  min-height: 74vh;
+}
+
+.detail-loading {
+  min-height: 50vh;
+  display: grid;
+  place-items: center;
+  font-family: var(--text-font);
+  color: #ccc;
+  font-size: 1rem;
+  padding: 2rem;
+}
+
 .breadcrumb {
   grid-column: 1 / -1;
   margin-bottom: 20px;
@@ -132,6 +146,14 @@
   .detail-grid {
     grid-template-columns: 1fr;
     padding: 10px;
+  }
+
+  .detail-loading-space {
+    min-height: 60vh;
+  }
+
+  .detail-loading {
+    min-height: 40vh;
   }
 
   .detail-container {

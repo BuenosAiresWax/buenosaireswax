@@ -6,6 +6,7 @@ import { CartContext } from "../context/CartContext";
 import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
 import PurchaseModal from "./PurchaseModal";
 import CartPopupButton from "./CartPopupButton";
+import LoaderOverlay from "./LoaderOverlay";
 
 import "../styles/ProductPage.css";
 
@@ -19,20 +20,40 @@ function ProductPage() {
 
   const [producto, setProducto] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const ref = doc(db, "productos", id);
+    setIsLoading(true);
 
     const unsubscribe = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
         setProducto({ id: snap.id, ...snap.data() });
+      } else {
+        setProducto(null);
       }
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
   }, [id]);
 
-  if (!producto) return <p className="detail-loading">Cargando...</p>;
+  if (isLoading) {
+    return (
+      <>
+        <LoaderOverlay visible={true} />
+        <div className="detail-loading-space" aria-hidden="true" />
+      </>
+    );
+  }
+
+  if (!producto && !isLoading) {
+    return (
+      <>
+        <p className="detail-loading">Producto no encontrado.</p>
+      </>
+    );
+  }
 
   const stockDisponible = (producto.cantidad ?? 0) - (producto.reservados ?? 0);
 
@@ -59,6 +80,7 @@ function ProductPage() {
 
   return (
     <>
+      <LoaderOverlay visible={isLoading} />
       <div className="detail-grid">
         <div className="breadcrumb">
           <Link to="/">Inicio</Link> &gt; <span>{producto.titulo}</span>
