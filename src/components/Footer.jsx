@@ -4,6 +4,7 @@ import FaqModal from "./FaqModal";
 
 import logo from "../../assets/logo/header-logo.png";
 import instagramIcon from "../../assets/icons/instagram.svg";
+import youtubeIcon from "../../assets/icons/youtube.svg";
 
 import "../styles/Footer.css";
 
@@ -15,17 +16,35 @@ function Footer() {
             <div className="footer-left">
                 <img src={logo} alt="BAWAX Logo" className="footer-logo" />
                 <p className="footer-description">Online Vinyl Record Store</p>
-                <a
-                    href="https://www.instagram.com/buenosaireswax/"
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    <img
-                        src={instagramIcon}
-                        alt="Instagram"
-                        className="footer-instagram"
-                    />
-                </a>
+                <div className="footer-socials">
+                    <a
+                        href="https://www.instagram.com/buenosaireswax/"
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Seguinos en Instagram"
+                    >
+                        <img
+                            src={instagramIcon}
+                            alt="Instagram"
+                            className="footer-instagram"
+                        />
+                    </a>
+
+                    <a
+                        href="https://www.youtube.com/@BuenosAiresWax"
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Mira nuestros videos en YouTube"
+                    >
+                        <img
+                            src={youtubeIcon}
+                            alt="YouTube"
+                            className="footer-instagram"
+                        />
+                    </a>
+                </div>
+
+                <p className="footer-youtube-callout">Reseñas reales de vinilos - Suscribite 🎧</p>
             </div>
 
             <div className="footer-right">

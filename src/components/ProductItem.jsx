@@ -7,10 +7,12 @@ import { db } from "../firebase/config";
 
 import FaqModal from "./FaqModal";
 import "../styles/ProductItem.css";
+import { attachCatalogMeta, getCartItemKey, getCatalogConfig } from "../utils/catalog";
 
 const HARDCODED_SC_URL = "https://soundcloud.com/forss/flickermood"; // <-- NUEVO (válido)
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
+  const showQuickButtons = false;
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
   const player = useContext(PlayerContext);
   const setTrack = player?.setTrack ?? (() => {}); // <-- NUEVO
@@ -23,22 +25,32 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const [hidingTooltip, setHidingTooltip] = useState(false);
 
   useEffect(() => {
-    const ref = doc(db, "productos", productoProp.id);
+    const ref = doc(
+      db,
+      productoProp.collectionName || "productos",
+      productoProp.id,
+    );
 
     const unsubscribe = onSnapshot(ref, (docSnap) => {
       if (docSnap.exists()) {
-        setProducto(docSnap.data());
+        setProducto(
+          attachCatalogMeta(
+            { id: docSnap.id, ...docSnap.data() },
+            productoProp.catalogKey,
+          ),
+        );
       }
     });
 
     return () => unsubscribe();
-  }, [productoProp.id]);
+  }, [productoProp.catalogKey, productoProp.collectionName, productoProp.id]);
 
   const cantidadTotal = producto.cantidad ?? 0;
   const reservados = producto.reservados ?? 0;
   const stockDisponible = Math.max(0, cantidadTotal - reservados);
 
-  const carritoItem = cartItems.find((item) => item.id === productoProp.id);
+  const cartKey = getCartItemKey(productoProp);
+  const carritoItem = cartItems.find((item) => getCartItemKey(item) === cartKey);
   const cantidadEnCarrito = carritoItem ? carritoItem.cantidad : 0;
 
   const handleAdd = () => {
@@ -47,12 +59,17 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
       return;
     }
 
-    addToCart(productoProp);
+    addToCart(
+      attachCatalogMeta(
+        { ...productoProp, ...producto, id: productoProp.id },
+        productoProp.catalogKey,
+      ),
+    );
     mostrarMensaje("Producto añadido al carrito");
   };
 
   const handleRemove = () => {
-    removeFromCart(productoProp.id);
+    removeFromCart(productoProp);
     mostrarMensaje("Producto eliminado del carrito");
   };
 
@@ -60,11 +77,15 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     if (
       e.target.closest(".add-button") ||
       e.target.closest(".faq-button") ||
-      e.target.closest(".play-button")
+      e.target.closest(".play-button") ||
+      e.target.closest(".action-button")
     ) {
       return;
     }
-    navigate(`/producto/${productoProp.id}`);
+    navigate(
+      productoProp.detailPath ||
+        getCatalogConfig(productoProp.catalogKey).buildDetailPath(productoProp.id),
+    );
   };
 
   const fullDescription = `${producto.descripcion || ""} - ${producto.estilo || ""}`;
@@ -186,24 +207,26 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
           className={stockDisponible <= 0 ? "agotadoImagen" : ""}
         />
 
-        {/* Botón ESCUCHAR (player global) */}
-        <button
-          type="button"
-          className="play-button"
-          title="Escuchar"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setTrack(HARDCODED_SC_URL, true, {
-              titulo: producto.titulo,
-              autor: producto.autor,
-              imagen: producto.imagen,
-              sello: producto.sello,
-            });
-          }}
-        >
-          🔊
-        </button>
+        {/* Botón rápido ESCUCHAR (oculto temporalmente) */}
+        {showQuickButtons && (
+          <button
+            type="button"
+            className="play-button"
+            title="Escuchar"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setTrack(HARDCODED_SC_URL, true, {
+                titulo: producto.titulo,
+                autor: producto.autor,
+                imagen: producto.imagen,
+                sello: producto.sello,
+              });
+            }}
+          >
+            🔊
+          </button>
+        )}
       </div>
 
       <div className="info">
@@ -212,17 +235,19 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
             {producto.titulo}
           </h3>
 
-          <button
-            className="add-button"
-            onClick={(e) => {
-              e.preventDefault();
-              handleAdd();
-            }}
-            title="Agregar al carrito"
-            disabled={stockDisponible <= 0}
-          >
-            {stockDisponible <= 0 ? "×" : "+"}
-          </button>
+          {showQuickButtons && (
+            <button
+              className="add-button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleAdd();
+              }}
+              title="Agregar al carrito"
+              disabled={stockDisponible <= 0}
+            >
+              🛒
+            </button>
+          )}
         </div>
 
         <p className="autor">{producto.autor}</p>
@@ -247,6 +272,42 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
         </div>
 
         <h4 className="sello">Label: {producto.sello}</h4>
+
+        <div className="product-actions">
+          <button
+            type="button"
+            className="action-button action-play-button"
+            title="Reproducir"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setTrack(HARDCODED_SC_URL, true, {
+                titulo: producto.titulo,
+                autor: producto.autor,
+                imagen: producto.imagen,
+                sello: producto.sello,
+              });
+            }}
+          >
+            <span aria-hidden="true">🔊</span>
+            <span>Reproducir</span>
+          </button>
+
+          <button
+            type="button"
+            className="action-button action-cart-button"
+            title="Agregar al carrito"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleAdd();
+            }}
+            disabled={stockDisponible <= 0}
+          >
+            <span aria-hidden="true">🛒</span>
+            <span>Agregar al carrito</span>
+          </button>
+        </div>
 
         <div className={`stock ${stockDisponible <= 0 ? "agotadoStock" : ""}`}>
           Stock: {stockDisponible > 0 ? stockDisponible : "AGOTADO"}

@@ -99,6 +99,68 @@ body {
     padding: 0 5%;
     background-color: var(--color-fondo);
     margin-top: 1rem;
+    gap: 1.25rem;
+}
+
+.logoLink {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.centerNav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    flex: 1;
+}
+
+.centerNavLink {
+    position: relative;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--color-letra) 72%, transparent);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    transition: color 180ms ease, background-color 180ms ease, box-shadow 180ms ease, opacity 180ms ease, filter 180ms ease;
+    opacity: 0.8;
+}
+
+.centerNavLink::after {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 7px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0;
+    transform: scaleX(0.7);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.centerNavLink:hover {
+    color: var(--color-letra);
+    opacity: 1;
+    filter: brightness(1.08);
+}
+
+.centerNavLink.active {
+    color: var(--color-letra);
+    opacity: 1;
+    background: color-mix(in srgb, var(--color-letra) 10%, transparent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--color-letra) 10%, transparent);
+    filter: brightness(1.12);
+}
+
+.centerNavLink.active::after {
+    opacity: 0.65;
+    transform: scaleX(1);
 }
 
 .rightNav {
@@ -215,6 +277,27 @@ body {
 
     body {
         padding: 0;
+    }
+
+    .headerContainer {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 5% 0;
+    }
+
+    .centerNav {
+        grid-column: 1 / -1;
+        justify-content: center;
+        gap: 0.5rem;
+        order: 3;
+        flex-wrap: wrap;
+    }
+
+    .centerNavLink {
+        font-size: 0.74rem;
+        padding: 0.4rem 0.7rem;
     }
 
     .contactoNav {

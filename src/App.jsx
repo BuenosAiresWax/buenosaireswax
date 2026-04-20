@@ -181,19 +181,13 @@ function App() {
           onAccesoPermitido={manejarAutenticacion}
         />
       ) : (
-        <ProductList
-          productos={productos}
-          refetchProductos={() => {}} // No needed anymore
-        />
+        <ProductList catalogKey="drop" />
       )}
 
       <CartPopupButton onOpen={() => setMostrarModal(true)} />
 
       {mostrarModal && (
-        <PurchaseModal
-          onClose={() => setMostrarModal(false)}
-          refetchProductos={() => {}} // No needed
-        />
+        <PurchaseModal onClose={() => setMostrarModal(false)} />
       )}
     </>
   );

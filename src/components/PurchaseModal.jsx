@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
+import { getCartItemKey, getProductCollectionName } from "../utils/catalog";
 import '../styles/PurchaseModal.css'
 
 function PurchaseModal({ onClose }) {
@@ -46,19 +47,22 @@ function PurchaseModal({ onClose }) {
     const normalizarNombre = (nombre) =>
         nombre.trim().toLowerCase().replace(/\s+/g, "-");
 
+    const getProductRef = (item) =>
+        doc(db, getProductCollectionName(item), normalizarNombre(item.titulo));
+
     const checkStockAgotado = async () => {
         const agotados = [];
         for (const item of cartItems) {
-            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            const ref = getProductRef(item);
             const snap = await getDoc(ref);
             if (snap.exists()) {
                 const { cantidad = 0, reservados = 0 } = snap.data();
                 const stockDisponible = cantidad - reservados;
                 if (stockDisponible <= 0 || stockDisponible < item.cantidad) {
-                    agotados.push(item.id);
+                    agotados.push(getCartItemKey(item));
                 }
             } else {
-                agotados.push(item.id);
+                agotados.push(getCartItemKey(item));
             }
         }
         setProductosAgotados(agotados);
@@ -67,26 +71,29 @@ function PurchaseModal({ onClose }) {
     const eliminarProductosAgotados = async () => {
         const nuevosAgotados = [];
         for (const item of cartItems) {
-            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            const ref = getProductRef(item);
             const snap = await getDoc(ref);
             if (snap.exists()) {
                 const { cantidad = 0, reservados = 0 } = snap.data();
                 const stockDisponible = cantidad - reservados;
                 if (stockDisponible <= 0 || stockDisponible < item.cantidad) {
-                    nuevosAgotados.push(item.id);
+                    nuevosAgotados.push(getCartItemKey(item));
                 }
             } else {
-                nuevosAgotados.push(item.id);
+                nuevosAgotados.push(getCartItemKey(item));
             }
         }
-        nuevosAgotados.forEach((id) => removeFromCart(id));
+        nuevosAgotados.forEach((cartKey) => {
+            const producto = cartItems.find((item) => getCartItemKey(item) === cartKey);
+            if (producto) removeFromCart(producto);
+        });
         setProductosAgotados(nuevosAgotados);
         setError(null);
     };
 
     const validarStock = async () => {
         for (const item of cartItems) {
-            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            const ref = getProductRef(item);
             const snap = await getDoc(ref);
             if (!snap.exists()) return `El producto "${item.titulo}" ya no existe.`;
             const { cantidad = 0, reservados = 0 } = snap.data();
@@ -100,7 +107,7 @@ function PurchaseModal({ onClose }) {
 
     const reservarProductos = async () => {
         for (const item of cartItems) {
-            const ref = doc(db, "productos", normalizarNombre(item.titulo));
+            const ref = getProductRef(item);
             await updateDoc(ref, { reservados: increment(item.cantidad) });
         }
     };
@@ -120,6 +127,7 @@ function PurchaseModal({ onClose }) {
             productos: cartItems.map((p) => ({
                 titulo: p.titulo,
                 categoria: p.categoria,
+                coleccion: getProductCollectionName(p),
                 cantidad: p.cantidad,
                 precioUnitario: p.precio,
                 subtotal: p.precio * p.cantidad,
@@ -268,7 +276,7 @@ function PurchaseModal({ onClose }) {
 📦 Método de entrega: ${metodoEntrega}
 ${!esRetiro ? `🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})` : ""}
 🛒 Productos:
-${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`).join("\n")}
+${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} [${getProductCollectionName(p)}] ($${p.precio * p.cantidad})`).join("\n")}
 💰 Total: $${total}
 👉 Adjuntar el comprobante de pago.
         `.trim();
@@ -378,8 +386,8 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                             <ul className="modal-product-list">
                                 {cartItems.map((item) => (
                                     <li
-                                        key={item.id}
-                                        className={`modal-product-item ${productosAgotados.includes(item.id) ? "agotado" : ""}`}
+                                        key={item.cartKey || getCartItemKey(item)}
+                                        className={`modal-product-item ${productosAgotados.includes(getCartItemKey(item)) ? "agotado" : ""}`}
                                     >
                                         <div className="pedidoCarrito">
                                             <img className="imagenCarrito" src={item.imagen} alt="" />
@@ -389,7 +397,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} ($${p.precio * p.cantidad})`
                                             </div>
                                         </div>
                                         <button
-                                            onClick={() => removeFromCart(item.id)}
+                                            onClick={() => removeFromCart(item)}
                                             className="delete-btn"
                                             title="Quitar del carrito"
                                         >

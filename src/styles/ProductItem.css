@@ -73,10 +73,10 @@
     border: 2px dashed var(--color-letra);
     border-radius: 50%;
     font-family: var(--text-font);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 300;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     text-align: center;
     line-height: 26px;
     cursor: pointer;
@@ -143,6 +143,46 @@
     border-bottom: 2px solid rgba(128, 128, 128, 0.3);
     padding: 0.6rem 0;
     margin: 0.8rem 0;
+}
+
+.product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.8rem 0;
+}
+
+.product-actions .action-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.8rem;
+    font-family: var(--text-font);
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border: 2px dashed rgba(128, 128, 128, 0.45);
+    background: rgba(40, 35, 34, 0.65);
+    color: var(--color-letra);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.product-actions .action-button:hover {
+    background: var(--color-letra);
+    color: var(--color-fondo);
+    border-color: rgba(128, 128, 128, 1);
+}
+
+.product-actions .action-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.product-actions .action-button span:first-child {
+    font-size: 14px;
 }
 
 /* Stock */

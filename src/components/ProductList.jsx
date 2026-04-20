@@ -16,6 +16,7 @@ import Filters from "./Filters";
 import Notificacion from "./Notificacion";
 import Spinner from "./Spinner";
 import YouTubePopup from "./YouTubePopup";
+import { attachCatalogMeta, getCatalogConfig } from "../utils/catalog";
 
 import "../styles/ProductList.css";
 
@@ -32,11 +33,11 @@ const DEFAULT_FILTERS = {
   verDisponibles: false,
 };
 
-const getSavedFilters = () => {
+const getSavedFilters = (storageKey) => {
   if (typeof window === "undefined") return DEFAULT_FILTERS;
 
   try {
-    const raw = window.sessionStorage.getItem(FILTERS_STORAGE_KEY);
+    const raw = window.sessionStorage.getItem(storageKey);
 
     if (!raw) return DEFAULT_FILTERS;
 
@@ -52,9 +53,14 @@ const getSavedFilters = () => {
   }
 };
 
-const ProductList = () => {
+const ProductList = ({ catalogKey = "drop" }) => {
   const { cartItems } = useContext(CartContext);
-  const initialFilters = useMemo(() => getSavedFilters(), []);
+  const catalog = useMemo(() => getCatalogConfig(catalogKey), [catalogKey]);
+  const filtersStorageKey = `${FILTERS_STORAGE_KEY}:${catalog.key}`;
+  const initialFilters = useMemo(
+    () => getSavedFilters(filtersStorageKey),
+    [filtersStorageKey],
+  );
 
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +93,19 @@ const ProductList = () => {
   const [autoresOpen, setAutoresOpen] = useState(false);
 
   useEffect(() => {
+    const savedFilters = getSavedFilters(filtersStorageKey);
+
+    setFiltroTexto(savedFilters.filtroTexto);
+    setGeneroSeleccionado(savedFilters.generoSeleccionado);
+    setEstiloSeleccionado(savedFilters.estiloSeleccionado);
+    setSelloSeleccionado(savedFilters.selloSeleccionado);
+    setAutorSeleccionado(savedFilters.autorSeleccionado);
+    setVerDisponibles(savedFilters.verDisponibles);
+    setLimit(BATCH_SIZE);
+    setSidebarVisible(false);
+  }, [filtersStorageKey]);
+
+  useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -115,18 +134,20 @@ const ProductList = () => {
     --------------------------------*/
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "productos"), (snapshot) => {
+    setLoading(true);
+
+    const unsubscribe = onSnapshot(collection(db, catalog.collectionName), (snapshot) => {
       const productosActualizados = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })).map((producto) => attachCatalogMeta(producto, catalog.key));
 
       setProductos(productosActualizados);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [catalog.collectionName, catalog.key]);
 
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -138,7 +159,7 @@ const ProductList = () => {
     if (typeof window === "undefined") return;
 
     window.sessionStorage.setItem(
-      FILTERS_STORAGE_KEY,
+      filtersStorageKey,
       JSON.stringify({
         filtroTexto,
         generoSeleccionado,
@@ -155,6 +176,7 @@ const ProductList = () => {
     selloSeleccionado,
     autorSeleccionado,
     verDisponibles,
+    filtersStorageKey,
   ]);
 
   /* -------------------------------
@@ -295,7 +317,7 @@ const ProductList = () => {
 
             position: index + 1,
 
-            url: `${window.location.origin}/#producto-${producto.id}`,
+            url: `${window.location.origin}/#${producto.detailPath}`,
 
             item: {
               "@type": "Product",
@@ -352,7 +374,7 @@ const ProductList = () => {
                   ? "https://schema.org/InStock"
                   : "https://schema.org/OutOfStock",
 
-                url: `${window.location.origin}/#producto-${producto.id}`,
+                url: `${window.location.origin}/#${producto.detailPath}`,
               },
             },
           };

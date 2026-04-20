@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import PlayerBar from "../player/PlayerBar";
 
@@ -16,6 +16,11 @@ function hasValidAccess() {
 function AppLayout() {
   const location = useLocation();
   const [autenticado, setAutenticado] = useState(() => hasValidAccess());
+
+  const navItems = [
+    { to: "/tienda", label: "Tienda" },
+    { to: "/equipamiento", label: "Equipamiento" },
+  ];
 
   useEffect(() => {
     const syncAuthState = () => setAutenticado(hasValidAccess());
@@ -34,7 +39,23 @@ function AppLayout() {
   return (
     <div className="app-container" style={{ paddingBottom: "84px" }}>
       <div className="headerContainer">
-        <img src={logo} alt="bawax" className="logo" />
+        <NavLink to="/" className="logoLink" aria-label="Ir al inicio de BAWAX">
+          <img src={logo} alt="bawax" className="logo" />
+        </NavLink>
+
+        <nav className="centerNav" aria-label="Navegacion principal">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `centerNavLink${isActive ? " active" : ""}`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
         <div className="rightNav">
           <a

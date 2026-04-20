@@ -22,18 +22,13 @@
 }
 
 .modal {
-    background: var(--color-fondo);
-    /* fondo translúcido */
+    background: rgba(128, 128, 128, 0.3);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);    /* fondo translúcido */
     border: 1px solid rgba(255, 255, 255, 0.1);
     /* borde difuso */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(4px);
     /* compatibilidad Safari */
-    box-shadow:
-        0 2px 4px rgba(255, 255, 255, 0.05),
-        0 8px 20px rgba(255, 255, 255, 0.08),
-        0 0 4px rgba(255, 255, 255, 0.03);
-
     padding: 1.5rem;
     border-radius: 8px;
     min-width: 25%;

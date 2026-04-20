@@ -1,5 +1,6 @@
 import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
+import { getCartItemKey } from "../utils/catalog";
 
 import "../styles/CartPopupButton.css";
 
@@ -13,8 +14,8 @@ export default function CartPopupButton({ onOpen }) {
     onOpen();
   };
 
-  const handleRemoveItem = (productId) => {
-    removeFromCart(productId);
+  const handleRemoveItem = (producto) => {
+    removeFromCart(producto);
   };
 
   if (totalQuantity === 0) {
@@ -37,7 +38,7 @@ export default function CartPopupButton({ onOpen }) {
         <>
           <div className="cart-items">
             {cartItems.map((item) => (
-              <div key={item.id} className="cart-item">
+              <div key={item.cartKey || getCartItemKey(item)} className="cart-item">
                 <img src={item.imagen} alt={item.titulo} className="cart-item-image" />
                 <div className="cart-item-info">
                   <p className="cart-item-name">{item.titulo}</p>
@@ -45,7 +46,7 @@ export default function CartPopupButton({ onOpen }) {
                   <p className="cart-item-quantity">Cant: {item.cantidad}</p>
                 </div>
                 <button
-                  onClick={() => handleRemoveItem(item.id)}
+                  onClick={() => handleRemoveItem(item)}
                   className="cart-item-remove"
                   aria-label={`Eliminar ${item.titulo} del carrito`}
                   title="Eliminar del carrito"

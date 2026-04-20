@@ -7,28 +7,32 @@ import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
 import PurchaseModal from "./PurchaseModal";
 import CartPopupButton from "./CartPopupButton";
 import LoaderOverlay from "./LoaderOverlay";
+import { attachCatalogMeta, getCartItemKey, getCatalogConfig } from "../utils/catalog";
 
 import "../styles/ProductPage.css";
 
 // Hardcode (válido) para pruebas:
 const HARDCODED_SC_URL = "https://soundcloud.com/forss/flickermood";
 
-function ProductPage() {
+function ProductPage({ catalogKey = "drop" }) {
   const { id } = useParams();
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
   const { setTrack } = useContext(PlayerContext); // <-- NUEVO
+  const catalog = getCatalogConfig(catalogKey);
 
   const [producto, setProducto] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const ref = doc(db, "productos", id);
+    const ref = doc(db, catalog.collectionName, id);
     setIsLoading(true);
 
     const unsubscribe = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
-        setProducto({ id: snap.id, ...snap.data() });
+        setProducto(
+          attachCatalogMeta({ id: snap.id, ...snap.data() }, catalog.key),
+        );
       } else {
         setProducto(null);
       }
@@ -36,7 +40,7 @@ function ProductPage() {
     });
 
     return () => unsubscribe();
-  }, [id]);
+  }, [catalog.collectionName, catalog.key, id]);
 
   if (isLoading) {
     return (
@@ -57,16 +61,17 @@ function ProductPage() {
 
   const stockDisponible = (producto.cantidad ?? 0) - (producto.reservados ?? 0);
 
-  const carritoItem = cartItems.find((item) => item.id === id);
+  const cartKey = getCartItemKey({ id, collectionName: catalog.collectionName });
+  const carritoItem = cartItems.find((item) => getCartItemKey(item) === cartKey);
   const cantidadEnCarrito = carritoItem ? carritoItem.cantidad : 0;
 
   const handleAdd = () => {
     if (cantidadEnCarrito >= stockDisponible) return;
-    addToCart(producto);
+    addToCart(attachCatalogMeta({ ...producto, id }, catalog.key));
   };
 
   const handleRemove = () => {
-    removeFromCart(id);
+    removeFromCart({ id, collectionName: catalog.collectionName });
   };
 
   const handlePlay = () => {
@@ -83,7 +88,7 @@ function ProductPage() {
       <LoaderOverlay visible={isLoading} />
       <div className="detail-grid">
         <div className="breadcrumb">
-          <Link to="/">Inicio</Link> &gt; <span>{producto.titulo}</span>
+          <Link to={catalog.listPath}>Inicio</Link> &gt; <span>{producto.titulo}</span>
         </div>
 
         {/* LEFT - IMAGEN */}
@@ -147,7 +152,7 @@ function ProductPage() {
 
           {stockDisponible > 0 && (
             <div className="cart-actions">
-              <button onClick={handleAdd}>Añadir al carrito</button>
+              <button onClick={handleAdd}>🛒 Añadir al carrito</button>
               {cantidadEnCarrito > 0 && (
                 <button onClick={handleRemove}>Remover</button>
               )}

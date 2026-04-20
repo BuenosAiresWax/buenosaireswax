@@ -1,12 +1,24 @@
 // src/context/CartContext.js
 import { createContext, useState, useEffect } from "react";
+import { getCartItemKey, getProductCollectionName } from "../utils/catalog";
 
 export const CartContext = createContext();
+
+const hydrateCartItems = (items = []) =>
+    items.map((item) => {
+        const collectionName = getProductCollectionName(item);
+
+        return {
+            ...item,
+            collectionName,
+            cartKey: `${collectionName}:${item.id}`,
+        };
+    });
 
 export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState(() => {
         const stored = localStorage.getItem("cart");
-        return stored ? JSON.parse(stored) : [];
+        return stored ? hydrateCartItems(JSON.parse(stored)) : [];
     });
 
     useEffect(() => {
@@ -14,30 +26,42 @@ export function CartProvider({ children }) {
     }, [cartItems]);
 
     const addToCart = (producto) => {
+        const collectionName = getProductCollectionName(producto);
+        const cartKey = getCartItemKey(producto);
+        const productWithMeta = {
+            ...producto,
+            collectionName,
+            cartKey,
+        };
+
         setCartItems(prev => {
-            const existing = prev.find(item => item.id === producto.id);
+            const existing = prev.find(item => getCartItemKey(item) === cartKey);
             if (existing) {
                 return prev.map(item =>
-                    item.id === producto.id
+                    getCartItemKey(item) === cartKey
                         ? { ...item, cantidad: item.cantidad + 1 }
                         : item
                 );
             }
-            return [...prev, { ...producto, cantidad: 1 }];
+            return [...prev, { ...productWithMeta, cantidad: 1 }];
         });
     };
 
-    const removeFromCart = (productId) => {
+    const removeFromCart = (producto) => {
+        const cartKey = typeof producto === "string"
+            ? `productos:${producto}`
+            : getCartItemKey(producto);
+
         setCartItems(prevItems => {
-            const item = prevItems.find(item => item.id === productId);
+            const item = prevItems.find(item => getCartItemKey(item) === cartKey);
             if (item && item.cantidad > 1) {
-                // Resta 1 unidad
                 return prevItems.map(item =>
-                    item.id === productId ? { ...item, cantidad: item.cantidad - 1 } : item
+                    getCartItemKey(item) === cartKey
+                        ? { ...item, cantidad: item.cantidad - 1 }
+                        : item
                 );
             } else {
-                // Elimina completamente si solo queda una
-                return prevItems.filter(item => item.id !== productId);
+                return prevItems.filter(item => getCartItemKey(item) !== cartKey);
             }
         });
     };
