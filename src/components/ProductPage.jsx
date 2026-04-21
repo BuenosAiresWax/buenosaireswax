@@ -42,6 +42,49 @@ function ProductPage({ catalogKey = "drop" }) {
     return () => unsubscribe();
   }, [catalog.collectionName, catalog.key, id]);
 
+  useEffect(() => {
+    if (!producto) return;
+
+    const stockDisponible = (producto.cantidad ?? 0) - (producto.reservados ?? 0);
+    const productUrl =
+      typeof window !== "undefined"
+        ? window.location.href
+        : `${catalog.listPath}/${id}`;
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      sku: id,
+      url: productUrl,
+      name: producto.titulo,
+      image: producto.imagen,
+      description: producto.descripcion,
+      brand: {
+        "@type": "Brand",
+        name: producto.sello || producto.autor || "Bawax",
+      },
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "ARS",
+        price: producto.precio,
+        itemCondition: "https://schema.org/NewCondition",
+        availability:
+          stockDisponible > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+      },
+    };
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.innerHTML = JSON.stringify(schema);
+
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, [producto]);
+
   if (isLoading) {
     return (
       <>

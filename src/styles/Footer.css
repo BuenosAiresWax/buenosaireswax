@@ -60,7 +60,6 @@
     color: var(--color-letra);
     opacity: 0.85;
     border: 2px dashed rgba(231, 231, 231, 0.3);
-    border-radius: 999px;
     padding: 0.3rem 0.65rem;
 }
 

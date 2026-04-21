@@ -18,7 +18,8 @@ function AppLayout() {
   const [autenticado, setAutenticado] = useState(() => hasValidAccess());
 
   const navItems = [
-    { to: "/tienda", label: "Tienda" },
+    { to: "/", label: "Ultimo Drop" },
+    { to: "/tienda", label: "Tienda Fisica" },
     { to: "/equipamiento", label: "Equipamiento" },
   ];
 
