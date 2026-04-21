@@ -120,6 +120,27 @@
     white-space: nowrap;
 }
 
+.filters-container-placeholder {
+    min-height: 88px;
+}
+
+.filters-placeholder-block {
+    pointer-events: none;
+    border: 2px dashed rgba(128, 128, 128, 0.3);
+    background: rgba(128, 128, 128, 0.08);
+}
+
+.filters-placeholder-search {
+    width: 100%;
+    min-height: 40px;
+    border-radius: 14px;
+}
+
+.filters-container-placeholder .filters-action-btn {
+    min-width: 120px;
+    min-height: 40px;
+}
+
 @media (max-width: 767px) {
 
     .filters-container {
@@ -200,6 +221,10 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+    .filters-container-placeholder {
+        min-height: 0;
+    }
 }
 
 @media (max-width: 420px) {
@@ -225,6 +250,17 @@
     padding: 1rem;
     padding-left: 8%;
     z-index: 10;
+}
+
+.filters-sidebar-placeholder {
+    min-height: 420px;
+}
+
+.sidebar-placeholder-row {
+    height: 34px;
+    margin-bottom: 0.7rem;
+    border-bottom: 2px solid rgba(128, 128, 128, 0.22);
+    opacity: 0.7;
 }
 
 .sidebar-filter {
@@ -325,5 +361,9 @@
 
     .sidebar-filter h3 {
         display: block;
+    }
+
+    .filters-sidebar-placeholder {
+        display: none;
     }
 }

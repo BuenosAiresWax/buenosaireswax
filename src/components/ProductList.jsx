@@ -23,6 +23,7 @@ import "../styles/ProductList.css";
 const BATCH_SIZE = 15;
 const MIN_LOADING_TIME = 800;
 const FILTERS_STORAGE_KEY = "bawax:product-list-filters";
+const FILTER_PLACEHOLDER_COUNT = 4;
 
 const DEFAULT_FILTERS = {
   filtroTexto: "",
@@ -437,10 +438,31 @@ const ProductList = ({ catalogKey = "drop" }) => {
 
   if (loading) {
     return (
-      <div className="product-list">
-        {[1, 2, 3].map((_, i) => (
-          <ProductSkeleton key={i} />
-        ))}
+      <div>
+        <div className="filters-container filters-container-placeholder" aria-hidden="true">
+          <div className="filters-group">
+            <div className="search-input-container filters-item filters-placeholder-block filters-placeholder-search" />
+
+            <div className="filters-actions">
+              <div className="filters-action-btn filters-placeholder-block" />
+              <div className="filters-action-btn filters-placeholder-block" />
+            </div>
+          </div>
+        </div>
+
+        <div className="product-list-container">
+          <div className="filters-sidebar filters-sidebar-placeholder" aria-hidden="true">
+            {Array.from({ length: FILTER_PLACEHOLDER_COUNT }).map((_, index) => (
+              <div key={index} className="sidebar-placeholder-row" />
+            ))}
+          </div>
+
+          <div className="product-list">
+            {[1, 2, 3].map((_, i) => (
+              <ProductSkeleton key={i} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
