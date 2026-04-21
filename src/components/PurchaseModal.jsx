@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext, useMemo } from "react";
 import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
-import { getCartItemKey, getProductCollectionName } from "../utils/catalog";
+import { getCartItemKey, getCatalogConfig, getProductCollectionName } from "../utils/catalog";
 import '../styles/PurchaseModal.css'
 
-function PurchaseModal({ onClose }) {
+function PurchaseModal({ onClose, catalogKey = "drop" }) {
     const backdropRef = useRef(null);
     const [visible, setVisible] = useState(false);
     const [nombre, setNombre] = useState("");
@@ -28,31 +28,47 @@ function PurchaseModal({ onClose }) {
     const [mensajeWsp, setMensajeWsp] = useState("");
     const [ultimoTotal, setUltimoTotal] = useState(0);
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-    const [animateCloseConfirm, setAnimateCloseConfirm] = useState(false);
     const [metodoEntrega, setMetodoEntrega] = useState("");
 
     const modalContentRef = useRef(null);
     const modalRef = useRef(null);
 
-    const { cartItems, clearCart, removeFromCart } = useContext(CartContext);
-    const total = cartItems.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+    const { cartItems, clearCartByCollection, removeFromCart } = useContext(CartContext);
+    const catalog = getCatalogConfig(catalogKey);
+    const cartItemsByCatalog = useMemo(
+        () => cartItems.filter(
+            (item) => getProductCollectionName(item) === catalog.collectionName,
+        ),
+        [cartItems, catalog.collectionName],
+    );
+    const total = cartItemsByCatalog.reduce((acc, item) => {
+        const precio = Number(item?.precio) || 0;
+        const cantidad = Number(item?.cantidad) || 0;
+        return acc + precio * cantidad;
+    }, 0);
 
     useEffect(() => {
         setTimeout(() => setVisible(true), 10);
-        checkStockAgotado();
+        if (cartItemsByCatalog.length > 0) {
+            checkStockAgotado();
+        } else {
+            setProductosAgotados([]);
+        }
         const totalGuardado = localStorage.getItem("ultimoTotalPedido");
         if (totalGuardado) setUltimoTotal(Number(totalGuardado));
-    }, [pedidoEnviado]);
+    }, [pedidoEnviado, cartItemsByCatalog]);
 
     const normalizarNombre = (nombre) =>
         nombre.trim().toLowerCase().replace(/\s+/g, "-");
 
-    const getProductRef = (item) =>
-        doc(db, getProductCollectionName(item), normalizarNombre(item.titulo));
+    const getProductRef = (item) => {
+        const docId = item?.id ? String(item.id) : normalizarNombre(item?.titulo || "");
+        return doc(db, getProductCollectionName(item), docId);
+    };
 
     const checkStockAgotado = async () => {
         const agotados = [];
-        for (const item of cartItems) {
+        for (const item of cartItemsByCatalog) {
             const ref = getProductRef(item);
             const snap = await getDoc(ref);
             if (snap.exists()) {
@@ -70,7 +86,7 @@ function PurchaseModal({ onClose }) {
 
     const eliminarProductosAgotados = async () => {
         const nuevosAgotados = [];
-        for (const item of cartItems) {
+        for (const item of cartItemsByCatalog) {
             const ref = getProductRef(item);
             const snap = await getDoc(ref);
             if (snap.exists()) {
@@ -84,15 +100,19 @@ function PurchaseModal({ onClose }) {
             }
         }
         nuevosAgotados.forEach((cartKey) => {
-            const producto = cartItems.find((item) => getCartItemKey(item) === cartKey);
-            if (producto) removeFromCart(producto);
+            const producto = cartItemsByCatalog.find((item) => getCartItemKey(item) === cartKey);
+            if (!producto) return;
+
+            for (let i = 0; i < producto.cantidad; i += 1) {
+                removeFromCart(producto);
+            }
         });
         setProductosAgotados(nuevosAgotados);
         setError(null);
     };
 
     const validarStock = async () => {
-        for (const item of cartItems) {
+        for (const item of cartItemsByCatalog) {
             const ref = getProductRef(item);
             const snap = await getDoc(ref);
             if (!snap.exists()) return `El producto "${item.titulo}" ya no existe.`;
@@ -106,7 +126,7 @@ function PurchaseModal({ onClose }) {
     };
 
     const reservarProductos = async () => {
-        for (const item of cartItems) {
+        for (const item of cartItemsByCatalog) {
             const ref = getProductRef(item);
             await updateDoc(ref, { reservados: increment(item.cantidad) });
         }
@@ -124,18 +144,19 @@ function PurchaseModal({ onClose }) {
             ciudad,
             codigoPostal,
             metodoEntrega, // << nuevo campo agregado
-            productos: cartItems.map((p) => ({
-                titulo: p.titulo,
+            catalogo: catalog.key,
+            productos: cartItemsByCatalog.map((p) => ({
+                titulo: p.titulo || "Producto sin nombre",
                 categoria: p.categoria,
                 coleccion: getProductCollectionName(p),
-                cantidad: p.cantidad,
-                precioUnitario: p.precio,
-                subtotal: p.precio * p.cantidad,
+                cantidad: Number(p.cantidad) || 0,
+                precioUnitario: Number(p.precio) || 0,
+                subtotal: (Number(p.precio) || 0) * (Number(p.cantidad) || 0),
             })),
             total,
             fecha,
         };
-        await setDoc(doc(db, "pedidos", docId), pedido);
+        await setDoc(doc(db, catalog.orderCollectionName, docId), pedido);
     };
 
     const generarDocId = (nombre) => {
@@ -230,6 +251,12 @@ function PurchaseModal({ onClose }) {
             return;
         }
 
+        if (cartItemsByCatalog.length === 0) {
+            setError("No hay productos en el carrito para esta tienda.");
+            setLoading(false);
+            return;
+        }
+
         const esRetiro = metodoEntrega.includes("Retiro");
 
         if (!esRetiro && (!direccion.trim() || !ciudad.trim() || !codigoPostal.trim())) {
@@ -264,10 +291,11 @@ function PurchaseModal({ onClose }) {
             await guardarPedido(docId, fecha);
             await reservarProductos();
             localStorage.setItem("ultimoTotalPedido", total.toString());
-            clearCart();
+            clearCartByCollection(catalog.collectionName);
 
             const mensajeWhatsApp = `
 ¡Hola BAWAX! Realicé un pedido.
+🏪 Tienda: ${catalog.label}
 🧾 ID del Pedido: ${docId}
 📌 Fecha: ${fecha}
 👤 Nombre: ${nombre} - ${dni}
@@ -276,7 +304,7 @@ function PurchaseModal({ onClose }) {
 📦 Método de entrega: ${metodoEntrega}
 ${!esRetiro ? `🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})` : ""}
 🛒 Productos:
-${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} [${getProductCollectionName(p)}] ($${p.precio * p.cantidad})`).join("\n")}
+${cartItemsByCatalog.map((p) => `- ${Number(p?.cantidad) || 0} x ${p?.titulo || "Producto sin nombre"} [${getProductCollectionName(p)}] ($${(Number(p?.precio) || 0) * (Number(p?.cantidad) || 0)})`).join("\n")}
 💰 Total: $${total}
 👉 Adjuntar el comprobante de pago.
         `.trim();
@@ -384,7 +412,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} [${getProductCollectionName(
                             <h2 className="modalTitle">Resumen del pedido</h2>
 
                             <ul className="modal-product-list">
-                                {cartItems.map((item) => (
+                                {cartItemsByCatalog.map((item) => (
                                     <li
                                         key={item.cartKey || getCartItemKey(item)}
                                         className={`modal-product-item ${productosAgotados.includes(getCartItemKey(item)) ? "agotado" : ""}`}
@@ -392,8 +420,8 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} [${getProductCollectionName(
                                         <div className="pedidoCarrito">
                                             <img className="imagenCarrito" src={item.imagen} alt="" />
                                             <div>
-                                                <strong>{item.titulo}</strong> <br />
-                                                {item.cantidad}u  <strong>${item.precio * item.cantidad}</strong>
+                                                <strong>{item?.titulo || "Producto sin nombre"}</strong> <br />
+                                                {Number(item?.cantidad) || 0}u  <strong>${(Number(item?.precio) || 0) * (Number(item?.cantidad) || 0)}</strong>
                                             </div>
                                         </div>
                                         <button
@@ -545,7 +573,7 @@ ${cartItems.map(p => `- ${p.cantidad} x ${p.titulo} [${getProductCollectionName(
                                 <button
                                     className="btn-crear-orden"
                                     type="submit"
-                                    disabled={loading || productosAgotados.length > 0}
+                                    disabled={loading || productosAgotados.length > 0 || cartItemsByCatalog.length === 0}
                                 >
                                     {loading ? "Procesando..." : "Crear orden"}
                                 </button>

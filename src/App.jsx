@@ -184,10 +184,10 @@ function App() {
         <ProductList catalogKey="drop" />
       )}
 
-      <CartPopupButton onOpen={() => setMostrarModal(true)} />
+      <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="drop" />
 
       {mostrarModal && (
-        <PurchaseModal onClose={() => setMostrarModal(false)} />
+        <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="drop" />
       )}
     </>
   );

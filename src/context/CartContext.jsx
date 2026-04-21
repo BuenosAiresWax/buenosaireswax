@@ -68,6 +68,14 @@ export function CartProvider({ children }) {
 
     const clearCart = () => setCartItems([]);
 
+    const clearCartByCollection = (collectionName) => {
+        setCartItems((prevItems) =>
+            prevItems.filter(
+                (item) => getProductCollectionName(item) !== collectionName,
+            ),
+        );
+    };
+
     const getTotalQuantity = () =>
         cartItems.reduce((total, item) => total + item.cantidad, 0);
 
@@ -77,6 +85,7 @@ export function CartProvider({ children }) {
             addToCart,
             removeFromCart,
             clearCart,
+            clearCartByCollection,
             getTotalQuantity
         }}>
             {children}

@@ -206,11 +206,12 @@ function ProductPage({ catalogKey = "drop" }) {
         </div>
       </div>
 
-      <CartPopupButton onOpen={() => setMostrarModal(true)} />
+      <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey={catalog.key} />
 
       {mostrarModal && (
         <PurchaseModal
           onClose={() => setMostrarModal(false)}
+          catalogKey={catalog.key}
           refetchProductos={() => { }}
         />
       )}

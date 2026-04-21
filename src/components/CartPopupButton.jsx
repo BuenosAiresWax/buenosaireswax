@@ -1,14 +1,25 @@
 import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
-import { getCartItemKey } from "../utils/catalog";
+import { getCartItemKey, getCatalogConfig, getProductCollectionName } from "../utils/catalog";
 
 import "../styles/CartPopupButton.css";
 
-export default function CartPopupButton({ onOpen }) {
+export default function CartPopupButton({ onOpen, catalogKey = "drop" }) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const { cartItems, removeFromCart, getTotalQuantity } = useContext(CartContext);
-  const total = cartItems.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
-  const totalQuantity = getTotalQuantity();
+  const { cartItems, removeFromCart } = useContext(CartContext);
+  const catalog = getCatalogConfig(catalogKey);
+  const cartItemsByCatalog = cartItems.filter(
+    (item) => getProductCollectionName(item) === catalog.collectionName,
+  );
+  const total = cartItemsByCatalog.reduce((sum, item) => {
+    const precio = Number(item?.precio) || 0;
+    const cantidad = Number(item?.cantidad) || 0;
+    return sum + precio * cantidad;
+  }, 0);
+  const totalQuantity = cartItemsByCatalog.reduce(
+    (sum, item) => sum + (Number(item?.cantidad) || 0),
+    0,
+  );
 
   const handleCheckout = () => {
     onOpen();
@@ -37,18 +48,26 @@ export default function CartPopupButton({ onOpen }) {
       {isExpanded && (
         <>
           <div className="cart-items">
-            {cartItems.map((item) => (
+            {cartItemsByCatalog.map((item) => (
               <div key={item.cartKey || getCartItemKey(item)} className="cart-item">
-                <img src={item.imagen} alt={item.titulo} className="cart-item-image" />
+                {item?.imagen ? (
+                  <img
+                    src={item.imagen}
+                    alt={item?.titulo || "Producto sin nombre"}
+                    className="cart-item-image"
+                  />
+                ) : null}
                 <div className="cart-item-info">
-                  <p className="cart-item-name">{item.titulo}</p>
-                  <p className="cart-item-price">${item.precio.toLocaleString('es-AR')}</p>
-                  <p className="cart-item-quantity">Cant: {item.cantidad}</p>
+                  <p className="cart-item-name">{item?.titulo || "Producto sin nombre"}</p>
+                  <p className="cart-item-price">
+                    ${(Number(item?.precio) || 0).toLocaleString("es-AR")}
+                  </p>
+                  <p className="cart-item-quantity">Cant: {Number(item?.cantidad) || 0}</p>
                 </div>
                 <button
                   onClick={() => handleRemoveItem(item)}
                   className="cart-item-remove"
-                  aria-label={`Eliminar ${item.titulo} del carrito`}
+                  aria-label={`Eliminar ${item?.titulo || "producto"} del carrito`}
                   title="Eliminar del carrito"
                 >
                   ✕
