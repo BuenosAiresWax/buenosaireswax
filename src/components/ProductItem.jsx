@@ -91,6 +91,13 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const fullDescription = `${producto.descripcion || ""} - ${producto.estilo || ""}`;
   const shortDescription = fullDescription.slice(0, 150);
   const isLong = fullDescription.length > 150;
+  const isEquipamientoCatalog =
+    productoProp.catalogKey === "equipamiento" ||
+    producto.catalogKey === "equipamiento" ||
+    producto.collectionName === "equipamiento";
+  const cartActionLabel = isEquipamientoCatalog
+    ? "Consultar disponibilidad"
+    : "Agregar al carrito";
 
   const handleDescriptionClick = () => {
     if (window.innerWidth <= 768) {
@@ -253,10 +260,11 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
         <p className="autor">{producto.autor}</p>
 
         <p className={`price ${stockDisponible <= 0 ? "agotado" : ""}`}>
-          $
-          {(producto?.precio ?? 0).toLocaleString("es-AR", {
-            minimumFractionDigits: 0,
-          })}
+          {isEquipamientoCatalog
+            ? "Consultar precio"
+            : `$${(producto?.precio ?? 0).toLocaleString("es-AR", {
+                minimumFractionDigits: 0,
+              })}`}
         </p>
 
         <div className="description-container" onClick={handleDescriptionClick}>
@@ -296,7 +304,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
           <button
             type="button"
             className="action-button action-cart-button"
-            title="Agregar al carrito"
+            title={cartActionLabel}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -305,7 +313,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
             disabled={stockDisponible <= 0}
           >
             <span aria-hidden="true">🛒</span>
-            <span>Agregar al carrito</span>
+            <span>{cartActionLabel}</span>
           </button>
         </div>
 

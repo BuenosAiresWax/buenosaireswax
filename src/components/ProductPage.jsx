@@ -103,6 +103,13 @@ function ProductPage({ catalogKey = "drop" }) {
   }
 
   const stockDisponible = (producto.cantidad ?? 0) - (producto.reservados ?? 0);
+  const isEquipamientoCatalog =
+    catalog.key === "equipamiento" ||
+    producto.catalogKey === "equipamiento" ||
+    producto.collectionName === "equipamiento";
+  const cartActionLabel = isEquipamientoCatalog
+    ? "Consultar disponibilidad"
+    : "Añadir al carrito";
 
   const cartKey = getCartItemKey({ id, collectionName: catalog.collectionName });
   const carritoItem = cartItems.find((item) => getCartItemKey(item) === cartKey);
@@ -185,8 +192,10 @@ function ProductPage({ catalogKey = "drop" }) {
             <strong>Formato:</strong> 12" Vinyl
           </p>
           <p className="detail-right-price">
-            <strong>Precio:</strong> $
-            {producto.precio ? producto.precio.toLocaleString("es-AR") : "-"}
+            <strong>Precio:</strong>{" "}
+            {isEquipamientoCatalog
+              ? "Consultar"
+              : `$${producto.precio ? producto.precio.toLocaleString("es-AR") : "-"}`}
           </p>
 
           <p className={stockDisponible > 0 ? "stock-ok" : "stock-off"}>
@@ -195,7 +204,7 @@ function ProductPage({ catalogKey = "drop" }) {
 
           {stockDisponible > 0 && (
             <div className="cart-actions">
-              <button onClick={handleAdd}>🛒 Añadir al carrito</button>
+              <button onClick={handleAdd}>{`🛒 ${cartActionLabel}`}</button>
               {cantidadEnCarrito > 0 && (
                 <button onClick={handleRemove}>Remover</button>
               )}
