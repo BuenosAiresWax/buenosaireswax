@@ -7,7 +7,13 @@ import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
 import PurchaseModal from "./PurchaseModal";
 import CartPopupButton from "./CartPopupButton";
 import LoaderOverlay from "./LoaderOverlay";
-import { attachCatalogMeta, getCartItemKey, getCatalogConfig } from "../utils/catalog";
+import {
+  attachCatalogMeta,
+  getCartItemKey,
+  getCatalogBreadcrumbLabel,
+  getCatalogConfig,
+  getCatalogKeyByCollectionName,
+} from "../utils/catalog";
 
 import "../styles/ProductPage.css";
 
@@ -107,6 +113,10 @@ function ProductPage({ catalogKey = "drop" }) {
     catalog.key === "equipamiento" ||
     producto.catalogKey === "equipamiento" ||
     producto.collectionName === "equipamiento";
+  const breadcrumbCatalogKey =
+    producto.catalogKey ||
+    getCatalogKeyByCollectionName(producto.collectionName || catalog.collectionName);
+  const breadcrumbRootLabel = getCatalogBreadcrumbLabel(breadcrumbCatalogKey);
   const cartActionLabel = isEquipamientoCatalog
     ? "Consultar disponibilidad"
     : "Añadir al carrito";
@@ -138,7 +148,7 @@ function ProductPage({ catalogKey = "drop" }) {
       <LoaderOverlay visible={isLoading} />
       <div className="detail-grid">
         <div className="breadcrumb">
-          <Link to={catalog.listPath}>Inicio</Link> &gt; <span>{producto.titulo}</span>
+          <Link to={catalog.listPath}>{breadcrumbRootLabel}</Link> &gt; <span>{producto.titulo}</span>
         </div>
 
         {/* LEFT - IMAGEN */}

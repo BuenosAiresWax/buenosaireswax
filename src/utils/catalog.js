@@ -2,6 +2,7 @@ export const CATALOGS = {
   drop: {
     key: "drop",
     label: "Drops",
+    breadcrumbLabel: "Drop",
     description: "Lanzamientos mensuales con acceso exclusivo.",
     collectionName: "productos",
     orderCollectionName: "pedidos",
@@ -11,6 +12,7 @@ export const CATALOGS = {
   tienda: {
     key: "tienda",
     label: "Tienda",
+    breadcrumbLabel: "Tienda fisica",
     description: "Catalogo abierto con discos disponibles todo el tiempo.",
     collectionName: "productosTienda",
     orderCollectionName: "pedidosTienda",
@@ -20,6 +22,7 @@ export const CATALOGS = {
   equipamiento: {
     key: "equipamiento",
     label: "Equipamiento",
+    breadcrumbLabel: "Equipamiento",
     description: "Hardware, accesorios y herramientas para tu setup.",
     collectionName: "equipamiento",
     orderCollectionName: "pedidosEquipamiento",
@@ -30,6 +33,19 @@ export const CATALOGS = {
 
 export function getCatalogConfig(catalogKey = "drop") {
   return CATALOGS[catalogKey] ?? CATALOGS.drop;
+}
+
+export function getCatalogKeyByCollectionName(collectionName) {
+  if (collectionName === CATALOGS.tienda.collectionName) return CATALOGS.tienda.key;
+  if (collectionName === CATALOGS.equipamiento.collectionName) {
+    return CATALOGS.equipamiento.key;
+  }
+  return CATALOGS.drop.key;
+}
+
+export function getCatalogBreadcrumbLabel(catalogKey = "drop") {
+  const catalog = getCatalogConfig(catalogKey);
+  return catalog.breadcrumbLabel || "Drop";
 }
 
 export function getProductCollectionName(producto) {
