@@ -124,6 +124,14 @@ const ProductList = ({ catalogKey = "drop" }) => {
     };
   }, [sidebarVisible, isMobile]);
 
+  const applySidebarFilter = useCallback((setter, value) => {
+    setter(value);
+
+    if (isMobile) {
+      setSidebarVisible(false);
+    }
+  }, [isMobile]);
+
   const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
 
   const sentinelRef = useRef();
@@ -505,7 +513,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
               {estilosOpen && (
                 <div className="filter-options">
                   <button
-                    onClick={() => setEstiloSeleccionado("")}
+                    onClick={() => applySidebarFilter(setEstiloSeleccionado, "")}
                     className={estiloSeleccionado === "" ? "active" : ""}
                   >
                     Todos
@@ -513,7 +521,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                   {estilos.map((e) => (
                     <button
                       key={e}
-                      onClick={() => setEstiloSeleccionado(e)}
+                      onClick={() => applySidebarFilter(setEstiloSeleccionado, e)}
                       className={estiloSeleccionado === e ? "active" : ""}
                     >
                       {e}
@@ -530,7 +538,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
               {generosOpen && (
                 <div className="filter-options">
                   <button
-                    onClick={() => setGeneroSeleccionado("")}
+                    onClick={() => applySidebarFilter(setGeneroSeleccionado, "")}
                     className={generoSeleccionado === "" ? "active" : ""}
                   >
                     Todos
@@ -538,7 +546,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                   {generos.map((g) => (
                     <button
                       key={g}
-                      onClick={() => setGeneroSeleccionado(g)}
+                      onClick={() => applySidebarFilter(setGeneroSeleccionado, g)}
                       className={generoSeleccionado === g ? "active" : ""}
                     >
                       {g}
@@ -555,7 +563,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
               {sellosOpen && (
                 <div className="filter-options">
                   <button
-                    onClick={() => setSelloSeleccionado("")}
+                    onClick={() => applySidebarFilter(setSelloSeleccionado, "")}
                     className={selloSeleccionado === "" ? "active" : ""}
                   >
                     Todos
@@ -563,7 +571,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                   {sellos.map((s) => (
                     <button
                       key={s}
-                      onClick={() => setSelloSeleccionado(s)}
+                      onClick={() => applySidebarFilter(setSelloSeleccionado, s)}
                       className={selloSeleccionado === s ? "active" : ""}
                     >
                       {s}
@@ -580,7 +588,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
               {autoresOpen && (
                 <div className="filter-options">
                   <button
-                    onClick={() => setAutorSeleccionado("")}
+                    onClick={() => applySidebarFilter(setAutorSeleccionado, "")}
                     className={autorSeleccionado === "" ? "active" : ""}
                   >
                     Todos
@@ -588,7 +596,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                   {autores.map((a) => (
                     <button
                       key={a}
-                      onClick={() => setAutorSeleccionado(a)}
+                      onClick={() => applySidebarFilter(setAutorSeleccionado, a)}
                       className={autorSeleccionado === a ? "active" : ""}
                     >
                       {a}
