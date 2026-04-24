@@ -150,28 +150,23 @@
 
     .filters-group {
         width: 100%;
-        flex-direction: column;
-        align-items: stretch;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
         gap: 0.75rem;
     }
 
     .filters-actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.6rem;
-        order: 3;
+        display: contents;
     }
 
     .filters-action-btn {
         justify-content: center;
         min-width: 0;
-        width: 100%;
-        padding: 0.75rem 0.9rem;
+        padding: 1rem 0.2rem;
     }
 
     .search-input-container {
-        order: 1;
+        grid-column: 1 / -1;
         width: 100%;
         min-width: 0;
         max-width: none;
@@ -189,15 +184,13 @@
     }
 
     .mobile-filter-btn {
-        order: 2;
-        width: 100%;
-        min-width: 0;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 0.55rem;
         box-sizing: border-box;
         padding: 0.75rem 0.9rem;
+        background-color: rgba(128, 128, 128, 0);
         border: 2px dashed rgba(128, 128, 128, 0.3);
         border-radius: 999px;
         font-size: 13px;

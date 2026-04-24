@@ -95,19 +95,6 @@ function Filters({
     return (
         <div className="filters-container">
             <div className="filters-group">
-                {/* Botón móvil para filtros */}
-                {isMobile && (
-                    <button
-                        className="mobile-filter-btn filters-item"
-                        onClick={() => setSidebarVisible(!sidebarVisible)}
-                    >
-                        <span className="btn-icon">
-                            <FilterIcon />
-                        </span>
-                        <span className="btn-label">Filtros</span>
-                    </button>
-                )}
-
                 {/* Campo de búsqueda */}
                 <div className="search-input-container filters-item">
                     <img src={searchIcon} alt="Buscar" className="search-icon" />
@@ -121,6 +108,19 @@ function Filters({
                 </div>
 
                 <div className="filters-actions">
+                    {/* Botón móvil para filtros */}
+                    {isMobile && (
+                        <button
+                            className="mobile-filter-btn"
+                            onClick={() => setSidebarVisible(!sidebarVisible)}
+                        >
+                            <span className="btn-icon">
+                                <FilterIcon />
+                            </span>
+                            <span className="btn-label">FILTROS</span>
+                        </button>
+                    )}
+
                     {/* Botón ver disponibles */}
                     <button
                         className={`filters-action-btn availability-btn ${verDisponibles ? "is-active" : ""}`}
@@ -130,7 +130,7 @@ function Filters({
                         <span className="btn-icon">
                             {verDisponibles ? <GridIcon /> : <CheckIcon />}
                         </span>
-                        <span className="btn-label">{verDisponibles ? "Ver todo" : "Disponibles"}</span>
+                        <span className="btn-label">{verDisponibles ? "Todo" : "Disponibles"}</span>
                     </button>
 
                     {/* Botón limpiar */}
