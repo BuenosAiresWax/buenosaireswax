@@ -159,7 +159,7 @@ export default function PlayerBar() {
                             </>
                         ) : (
                             <span className="playerbar__hint">
-                                Elegí un disco y tocá "🔊" para escucharlo.
+                                Elegí un disco y tocá "🔊 Reproducir".
                             </span>
                         )}
                     </div>
