@@ -29,6 +29,17 @@ export default function PlayerBar() {
 
     const [ready, setReady] = useState(false);
     const iframeSrc = useMemo(() => DEFAULT_EMBED, []);
+    const normalizedTrackValue = (currentTrackUrl || "").trim().toLowerCase();
+    const hasNoTrackPlaceholder =
+        normalizedTrackValue === "sin escucha" ||
+        normalizedTrackValue === "sin audio" ||
+        normalizedTrackValue === "no disponible" ||
+        normalizedTrackValue === "sin track" ||
+        normalizedTrackValue === "sin tema";
+    const hasPlayableTrack =
+        !!currentTrackUrl &&
+        !hasNoTrackPlaceholder &&
+        /^https?:\/\//i.test((currentTrackUrl || "").trim());
 
     // Crear widget una vez
     useEffect(() => {
@@ -69,7 +80,11 @@ export default function PlayerBar() {
     useEffect(() => {
         const widget = widgetRef.current;
         if (!widget) return;
-        if (!currentTrackUrl) return;
+        if (!currentTrackUrl || !hasPlayableTrack) {
+            widget.pause();
+            setIsPlaying(false);
+            return;
+        }
 
         const autoplay = autoplayRef.current;
 
@@ -97,7 +112,7 @@ export default function PlayerBar() {
         } else {
             setIsPlaying(false);
         }
-    }, [currentTrackUrl, trackRequestId]);
+    }, [currentTrackUrl, hasPlayableTrack, trackRequestId, autoplayRef, setIsPlaying]);
 
     const statusText = error
         ? "Error cargando SoundCloud"
@@ -105,7 +120,9 @@ export default function PlayerBar() {
             ? "Cargando player…"
             : !ready
                 ? "Inicializando…"
-                : !currentTrackUrl
+                : hasNoTrackPlaceholder
+                    ? "Este disco no tiene temas disponibles"
+                    : !hasPlayableTrack
                     ? "Sin reproducción"
                     : isPlaying
                         ? "Reproduciendo"
@@ -124,13 +141,13 @@ export default function PlayerBar() {
             <div className="playerbar">
                 {/* Thumbnail del track */}
                 <div className="playerbar__thumbnail">
-                    {currentTrackUrl && currentTrackMetadata?.imagen ? (
+                    {hasPlayableTrack && currentTrackMetadata?.imagen ? (
                         <img 
                             src={currentTrackMetadata.imagen} 
                             alt={currentTrackMetadata.titulo || "Track"}
                             className="playerbar__image"
                         />
-                    ) : currentTrackUrl ? (
+                    ) : hasPlayableTrack ? (
                         <svg className="playerbar__placeholder" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <rect width="100" height="100" fill="currentColor" opacity="0.2"/>
                             <circle cx="50" cy="40" r="15" fill="currentColor" opacity="0.5"/>
@@ -149,7 +166,7 @@ export default function PlayerBar() {
                 <div className="playerbar__left">
                     <div className="playerbar__status">{statusText}</div>
                     <div className="playerbar__meta">
-                        {currentTrackUrl ? (
+                        {hasPlayableTrack ? (
                             <>
                                 <span className="playerbar__label">♪</span>
                                 <span className="playerbar__info">
@@ -157,6 +174,10 @@ export default function PlayerBar() {
                                     <div className="playerbar__artist">{currentTrackMetadata?.autor}</div>
                                 </span>
                             </>
+                        ) : hasNoTrackPlaceholder ? (
+                            <span className="playerbar__hint">
+                                Este disco no tiene track o tema disponible.
+                            </span>
                         ) : (
                             <span className="playerbar__hint">
                                 Elegí un disco y tocá "🔊 Reproducir".
@@ -169,7 +190,7 @@ export default function PlayerBar() {
                     <button
                         className="playerbar__btn playerbar__btn--play"
                         onClick={toggle}
-                        disabled={!loaded || !!error || !currentTrackUrl}
+                        disabled={!loaded || !!error || !hasPlayableTrack}
                         title={isPlaying ? "Pausar" : "Reproducir"}
                     >
                         {isPlaying ? (
@@ -187,7 +208,7 @@ export default function PlayerBar() {
                     <button
                         className="playerbar__btn playerbar__btn--stop"
                         onClick={stop}
-                        disabled={!loaded || !!error || !currentTrackUrl}
+                        disabled={!loaded || !!error || !hasPlayableTrack}
                         title="Detener"
                     >
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">

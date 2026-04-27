@@ -282,24 +282,26 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
         <h4 className="sello">Label: {producto.sello}</h4>
 
         <div className="product-actions">
-          <button
-            type="button"
-            className="action-button action-play-button"
-            title="Reproducir"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setTrack(HARDCODED_SC_URL, true, {
-                titulo: producto.titulo,
-                autor: producto.autor,
-                imagen: producto.imagen,
-                sello: producto.sello,
-              });
-            }}
-          >
-            <span aria-hidden="true">🔊</span>
-            <span>Reproducir</span>
-          </button>
+          {!isEquipamientoCatalog && (
+            <button
+              type="button"
+              className="action-button action-play-button"
+              title="Reproducir"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setTrack(HARDCODED_SC_URL, true, {
+                  titulo: producto.titulo,
+                  autor: producto.autor,
+                  imagen: producto.imagen,
+                  sello: producto.sello,
+                });
+              }}
+            >
+              <span aria-hidden="true">🔊</span>
+              <span>Reproducir</span>
+            </button>
+          )}
 
           <button
             type="button"

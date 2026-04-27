@@ -188,9 +188,11 @@ function ProductPage({ catalogKey = "drop" }) {
           </div>
 
           {/* Botón que controla el PLAYER GLOBAL */}
-          <button className="detail-play-btn" onClick={handlePlay}>
-            🔊 Reproducir
-          </button>
+          {!isEquipamientoCatalog && (
+            <button className="detail-play-btn" onClick={handlePlay}>
+              🔊 Reproducir
+            </button>
+          )}
         </div>
 
         {/* RIGHT - META */}
