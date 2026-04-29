@@ -22,7 +22,7 @@ const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
 const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-04-28T15:20:00";
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
-function App() {
+function App({ forceDrop = false }) {
   const [autenticado, setAutenticado] = useState(() => {
     const isAuth = localStorage.getItem("autenticado") === "true";
     const savedVersion = localStorage.getItem("accessVersion");
@@ -183,7 +183,7 @@ function App() {
     window.dispatchEvent(new Event("bawax-auth-changed"));
   };
 
-  if (!ventanaDropActiva) {
+  if (!ventanaDropActiva && !forceDrop) {
     return (
       <>
         <CatalogPage catalogKey="tienda" />

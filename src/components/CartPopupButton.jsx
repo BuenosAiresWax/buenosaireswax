@@ -1,6 +1,11 @@
 import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext";
-import { getCartItemKey, getCatalogConfig, getProductCollectionName } from "../utils/catalog";
+import {
+  getCartItemKey,
+  getCatalogConfig,
+  getProductCollectionName,
+  isCollectionIncludedInCheckout,
+} from "../utils/catalog";
 
 import "../styles/CartPopupButton.css";
 
@@ -9,7 +14,8 @@ export default function CartPopupButton({ onOpen, catalogKey = "drop" }) {
   const { cartItems, removeFromCart } = useContext(CartContext);
   const catalog = getCatalogConfig(catalogKey);
   const cartItemsByCatalog = cartItems.filter(
-    (item) => getProductCollectionName(item) === catalog.collectionName,
+    (item) =>
+      isCollectionIncludedInCheckout(getProductCollectionName(item), catalogKey),
   );
   const total = cartItemsByCatalog.reduce((sum, item) => {
     const precio = Number(item?.precio) || 0;

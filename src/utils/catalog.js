@@ -31,8 +31,25 @@ export const CATALOGS = {
   },
 };
 
+const MIXED_CHECKOUT_COLLECTIONS = [
+  CATALOGS.tienda.collectionName,
+  CATALOGS.equipamiento.collectionName,
+];
+
 export function getCatalogConfig(catalogKey = "drop") {
   return CATALOGS[catalogKey] ?? CATALOGS.drop;
+}
+
+export function getCheckoutCollectionNames(catalogKey = "drop") {
+  if (catalogKey === CATALOGS.drop.key) {
+    return [CATALOGS.drop.collectionName];
+  }
+
+  return MIXED_CHECKOUT_COLLECTIONS;
+}
+
+export function isCollectionIncludedInCheckout(collectionName, catalogKey = "drop") {
+  return getCheckoutCollectionNames(catalogKey).includes(collectionName);
 }
 
 export function getCatalogKeyByCollectionName(collectionName) {

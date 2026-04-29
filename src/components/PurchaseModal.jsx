@@ -2,7 +2,14 @@ import { useEffect, useRef, useState, useContext, useMemo } from "react";
 import { doc, setDoc, updateDoc, increment, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
-import { getCartItemKey, getCatalogConfig, getProductCollectionName } from "../utils/catalog";
+import {
+    getCartItemKey,
+    getCatalogConfig,
+    getCatalogKeyByCollectionName,
+    getCheckoutCollectionNames,
+    getProductCollectionName,
+    isCollectionIncludedInCheckout,
+} from "../utils/catalog";
 import '../styles/PurchaseModal.css'
 
 function PurchaseModal({ onClose, catalogKey = "drop" }) {
@@ -35,11 +42,16 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
 
     const { cartItems, clearCartByCollection, removeFromCart } = useContext(CartContext);
     const catalog = getCatalogConfig(catalogKey);
+    const checkoutCollectionNames = useMemo(
+        () => getCheckoutCollectionNames(catalogKey),
+        [catalogKey],
+    );
     const cartItemsByCatalog = useMemo(
         () => cartItems.filter(
-            (item) => getProductCollectionName(item) === catalog.collectionName,
+            (item) =>
+                isCollectionIncludedInCheckout(getProductCollectionName(item), catalogKey),
         ),
-        [cartItems, catalog.collectionName],
+        [cartItems, catalogKey],
     );
     const total = cartItemsByCatalog.reduce((acc, item) => {
         const precio = Number(item?.precio) || 0;
@@ -133,30 +145,52 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
     };
 
     const guardarPedido = async (docId, fecha) => {
-        const pedido = {
-            cliente: nombre,
-            instagram: nombreInstagram,
-            dni,
-            telefono,
-            correo,
-            direccion: metodoEntrega.includes("Retiro") ? "" : direccion,
-            departamento,
-            ciudad,
-            codigoPostal,
-            metodoEntrega, // << nuevo campo agregado
-            catalogo: catalog.key,
-            productos: cartItemsByCatalog.map((p) => ({
-                titulo: p.titulo || "Producto sin nombre",
-                categoria: p.categoria,
-                coleccion: getProductCollectionName(p),
-                cantidad: Number(p.cantidad) || 0,
-                precioUnitario: Number(p.precio) || 0,
-                subtotal: (Number(p.precio) || 0) * (Number(p.cantidad) || 0),
-            })),
-            total,
-            fecha,
-        };
-        await setDoc(doc(db, catalog.orderCollectionName, docId), pedido);
+        const groupedItems = cartItemsByCatalog.reduce((acc, item) => {
+            const collectionName = getProductCollectionName(item);
+
+            if (!acc[collectionName]) {
+                acc[collectionName] = [];
+            }
+
+            acc[collectionName].push(item);
+            return acc;
+        }, {});
+
+        const saveTasks = Object.entries(groupedItems).map(([collectionName, items]) => {
+            const catalogKeyFromCollection = getCatalogKeyByCollectionName(collectionName);
+            const catalogConfig = getCatalogConfig(catalogKeyFromCollection);
+            const groupTotal = items.reduce(
+                (acc, p) => acc + (Number(p.precio) || 0) * (Number(p.cantidad) || 0),
+                0,
+            );
+            const pedido = {
+                cliente: nombre,
+                instagram: nombreInstagram,
+                dni,
+                telefono,
+                correo,
+                direccion: metodoEntrega.includes("Retiro") ? "" : direccion,
+                departamento,
+                ciudad,
+                codigoPostal,
+                metodoEntrega,
+                catalogo: catalogKeyFromCollection,
+                productos: items.map((p) => ({
+                    titulo: p.titulo || "Producto sin nombre",
+                    categoria: p.categoria,
+                    coleccion: getProductCollectionName(p),
+                    cantidad: Number(p.cantidad) || 0,
+                    precioUnitario: Number(p.precio) || 0,
+                    subtotal: (Number(p.precio) || 0) * (Number(p.cantidad) || 0),
+                })),
+                total: groupTotal,
+                fecha,
+            };
+
+            return setDoc(doc(db, catalogConfig.orderCollectionName, docId), pedido);
+        });
+
+        await Promise.all(saveTasks);
     };
 
     const generarDocId = (nombre) => {
@@ -252,7 +286,7 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
         }
 
         if (cartItemsByCatalog.length === 0) {
-            setError("No hay productos en el carrito para esta tienda.");
+            setError("No hay productos en el carrito para este pedido.");
             setLoading(false);
             return;
         }
@@ -291,22 +325,65 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
             await guardarPedido(docId, fecha);
             await reservarProductos();
             localStorage.setItem("ultimoTotalPedido", total.toString());
-            clearCartByCollection(catalog.collectionName);
+            checkoutCollectionNames.forEach((collectionName) => {
+                clearCartByCollection(collectionName);
+            });
+
+            const formatPrice = (value) =>
+                `$${(Number(value) || 0).toLocaleString("es-AR", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                })}`;
+
+            const groupedByCollection = cartItemsByCatalog.reduce((acc, item) => {
+                const collectionName = getProductCollectionName(item);
+
+                if (!acc[collectionName]) {
+                    acc[collectionName] = [];
+                }
+
+                acc[collectionName].push(item);
+                return acc;
+            }, {});
+
+            const groupedProductLines = Object.entries(groupedByCollection)
+                .map(([collectionName, items]) => {
+                    const itemCatalog = getCatalogConfig(getCatalogKeyByCollectionName(collectionName));
+                    const sectionTitle = `\n${itemCatalog.label}:`;
+                    const lines = items.map((p) => {
+                        const quantity = Number(p?.cantidad) || 0;
+                        const unitPrice = Number(p?.precio) || 0;
+                        const subtotal = quantity * unitPrice;
+                        const title = p?.titulo || "Producto sin nombre";
+                        return `- ${quantity} x ${title} | Unitario: ${formatPrice(unitPrice)} | Subtotal: ${formatPrice(subtotal)}`;
+                    });
+                    const sectionTotal = items.reduce(
+                        (acc, p) => acc + (Number(p?.precio) || 0) * (Number(p?.cantidad) || 0),
+                        0,
+                    );
+
+                    return [sectionTitle, ...lines, `Subtotal ${itemCatalog.label}: ${formatPrice(sectionTotal)}`].join("\n");
+                })
+                .join("\n");
 
             const mensajeWhatsApp = `
-¡Hola BAWAX! Realicé un pedido.
-🏪 Tienda: ${catalog.label}
-🧾 ID del Pedido: ${docId}
-📌 Fecha: ${fecha}
-👤 Nombre: ${nombre} - ${dni}
+¡Hola BAWAX! Quiero confirmar este pedido.
+
+🧾 Pedido: ${docId}
+📅 Fecha: ${fecha}
+
+👤 Cliente: ${nombre} - DNI ${dni}
 📧 Email: ${correo}
 📱 Teléfono: ${telefono}
-📦 Método de entrega: ${metodoEntrega}
-${!esRetiro ? `🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : " (casa)"}, ${ciudad} (${codigoPostal})` : ""}
-🛒 Productos:
-${cartItemsByCatalog.map((p) => `- ${Number(p?.cantidad) || 0} x ${p?.titulo || "Producto sin nombre"} [${getProductCollectionName(p)}] ($${(Number(p?.precio) || 0) * (Number(p?.cantidad) || 0)})`).join("\n")}
-💰 Total: $${total}
-👉 Adjuntar el comprobante de pago.
+
+📦 Entrega: ${metodoEntrega}
+${!esRetiro ? `🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : ""}, ${ciudad} (${codigoPostal})` : ""}
+
+🛒 Detalle del pedido:${groupedProductLines}
+
+💰 Total general: ${formatPrice(total)}
+
+✅ En este mensaje adjunto el comprobante de pago.
         `.trim();
 
             setPedidoEnviado(true);
