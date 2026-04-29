@@ -256,3 +256,28 @@
     border-top: 2px dashed var(--color-fondo);
     transition: 0.3s;
 }
+
+@media (min-width: 768px) and (max-width: 1100px) {
+    .cart-popup-button {
+        right: 16px;
+        bottom: 16px;
+        width: 56px;
+        height: 56px;
+    }
+
+    .cart-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .cart-popup {
+        right: 16px;
+        bottom: 82px;
+        width: min(360px, calc(100vw - 32px));
+        max-height: 70vh;
+    }
+
+    .cart-items {
+        max-height: 220px;
+    }
+}

@@ -1,5 +1,6 @@
 .product-card {
     width: 300px;
+    max-width: 100%;
     height: max-content;
     display: flex;
     flex-direction: column;
@@ -456,5 +457,39 @@
         -webkit-line-clamp: 2;
         line-clamp: 2;
         /* mobile: menos líneas */
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+    .product-card {
+        width: min(100%, 320px);
+    }
+
+    .product-card .info {
+        padding: 0.95rem 0.75rem 1.1rem;
+    }
+
+    .product-card .info h3 {
+        font-size: 17px;
+    }
+
+    .product-card .autor,
+    .description,
+    .product-card .stock {
+        font-size: 12px;
+    }
+
+    .product-card .info .price {
+        font-size: 24px;
+        margin: 0.55rem 0 0.9rem;
+    }
+
+    .product-actions {
+        margin: 0.7rem 0;
+    }
+
+    .product-actions .action-button {
+        padding: 0.65rem 0.75rem;
+        font-size: 11px;
     }
 }

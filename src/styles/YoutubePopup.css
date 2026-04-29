@@ -89,3 +89,16 @@
         transform: translateY(100%);
     }
 }
+
+@media (min-width: 768px) and (max-width: 1100px) {
+    .popup-container {
+        left: 16px;
+        bottom: 84px;
+        width: min(280px, calc(100vw - 32px));
+        padding-top: 1.6rem;
+    }
+
+    .popup-video iframe {
+        height: 165px;
+    }
+}
