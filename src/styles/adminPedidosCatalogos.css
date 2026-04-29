@@ -1,0 +1,352 @@
+.apc-container {
+    min-height: 100vh;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 1rem;
+    color: #eaeaea;
+}
+
+.apc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.apc-header h1 {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #9b6bff, #5fd6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: auto;
+}
+
+.apc-back-btn {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #202020;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.apc-back-btn:hover {
+    background: #2a2a2a;
+}
+
+.apc-toolbar {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.apc-accion-msg {
+    margin: 0 0 1rem;
+    color: #8fe3a2;
+    font-weight: 600;
+}
+
+.apc-search,
+.apc-select {
+    border: 1px solid #333;
+    background: #1b1b1b;
+    color: #f2f2f2;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.apc-search {
+    min-width: 260px;
+    flex: 1 1 280px;
+}
+
+.apc-select {
+    flex: 0 0 auto;
+}
+
+.apc-download-wrap {
+    position: relative;
+    margin-left: auto;
+}
+
+.apc-download-icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(95, 214, 255, 0.4);
+    background: rgba(95, 214, 255, 0.12);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 1.05rem;
+}
+
+.apc-download-icon-btn:hover {
+    background: rgba(95, 214, 255, 0.22);
+}
+
+.apc-download-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 210px;
+    background: #171717;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 30;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+.apc-download-menu button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #242424;
+    color: #f4f4f4;
+    border-radius: 8px;
+    padding: 8px 10px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.87rem;
+}
+
+.apc-download-menu button:hover {
+    background: #2f2f2f;
+}
+
+.apc-alerta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem;
+    border: 1px solid rgba(255, 95, 95, 0.5);
+    background: rgba(255, 95, 95, 0.12);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 1rem;
+}
+
+.apc-alerta p {
+    margin: 0;
+    font-weight: 600;
+}
+
+.apc-alerta button {
+    border: none;
+    background: #ff5f5f;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.apc-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.apc-box {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 12px;
+    max-height: calc(100vh - 220px);
+    display: flex;
+    flex-direction: column;
+}
+
+.apc-box-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.apc-box-head h2 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.apc-box-head span {
+    color: #9ec8ff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.apc-list {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding-right: 4px;
+}
+
+.apc-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.apc-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 8px;
+}
+
+.apc-card-head-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.apc-card-head h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.apc-card-head span {
+    color: #b8b8b8;
+    font-size: 0.8rem;
+}
+
+.apc-cancelado-badge {
+    border: 1px solid rgba(255, 120, 120, 0.45);
+    background: rgba(255, 80, 80, 0.18);
+    color: #ffd2d2;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.apc-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+}
+
+.apc-card-grid p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #dedede;
+    word-break: break-word;
+}
+
+.apc-productos {
+    margin-top: 10px;
+}
+
+.apc-productos h5 {
+    margin: 0 0 6px;
+    font-size: 0.92rem;
+    color: #9ec8ff;
+}
+
+.apc-producto-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    font-size: 0.84rem;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding: 4px 0;
+}
+
+.apc-total {
+    margin-top: 8px;
+    text-align: right;
+    color: #fff;
+}
+
+.apc-card-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.apc-btn-cancelar-pedido {
+    border: 1px solid rgba(255, 80, 80, 0.4);
+    background: rgba(255, 80, 80, 0.15);
+    color: #ffe3e3;
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.2s ease;
+}
+
+.apc-btn-cancelar-pedido:hover:not(:disabled) {
+    background: rgba(255, 80, 80, 0.3);
+}
+
+.apc-btn-cancelar-pedido:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.apc-empty {
+    color: #adadad;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+@media (max-width: 980px) {
+    .apc-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .apc-box {
+        max-height: none;
+    }
+}
+
+@media (max-width: 680px) {
+    .apc-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .apc-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .apc-producto-row {
+        flex-direction: column;
+    }
+
+    .apc-alerta {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .apc-download-wrap {
+        margin-left: 0;
+    }
+
+    .apc-download-icon-btn {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .apc-download-menu {
+        left: 0;
+        right: auto;
+        width: 100%;
+        min-width: 0;
+    }
+}

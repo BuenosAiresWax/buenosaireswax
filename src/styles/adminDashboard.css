@@ -45,6 +45,15 @@
     background-color: #ffffff00;
 }
 
+.tab-btn-realtime {
+    border-color: rgba(95, 214, 255, 0.35);
+    color: #bdefff;
+}
+
+.tab-btn-realtime:hover {
+    background-color: rgba(95, 214, 255, 0.08);
+}
+
 
 .admin-header {
     display: flex;

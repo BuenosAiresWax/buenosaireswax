@@ -62,6 +62,14 @@ function AdminDashboardContent() {
                         <span className="tab-icon">🆕</span>
                         <span>Crear Producto</span>
                     </button>
+
+                    <button
+                        className="tab-btn tab-btn-realtime"
+                        onClick={() => navigate("/admin/pedidos-catalogos")}
+                    >
+                        <span className="tab-icon">🔔</span>
+                        <span>Pedidos Tienda + Equipamiento</span>
+                    </button>
                 </div>
 
                 <button className="logout-btn" onClick={handleLogout}>

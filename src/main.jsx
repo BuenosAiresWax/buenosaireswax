@@ -6,6 +6,7 @@ import App from "./App.jsx";
 import { CartProvider } from "./context/CartContext";
 import { PlayerProvider } from "./player/PlayerContext.jsx"; // <-- NUEVO
 import AdminRoute from "./components/AdminRoute.jsx";
+import AdminPedidosRealtimeRoute from "./components/AdminPedidosRealtimeRoute.jsx";
 import ProductPage from "./components/ProductPage.jsx";
 import AppLayout from "./components/AppLayout.jsx";
 import CatalogPage from "./components/CatalogPage.jsx";
@@ -35,6 +36,10 @@ createRoot(document.getElementById("root")).render(
               />
             </Route>
             <Route path="/admin" element={<AdminRoute />} />
+            <Route
+              path="/admin/pedidos-catalogos"
+              element={<AdminPedidosRealtimeRoute />}
+            />
           </Routes>
         </HashRouter>
       </PlayerProvider>
