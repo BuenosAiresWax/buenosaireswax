@@ -301,7 +301,7 @@ body {
 
     .centerNavLink {
         font-size: 0.72rem;
-        padding: 0.4rem 0.62rem;
+        padding: 0.4rem 0.2rem;
         white-space: nowrap;
         flex: 0 0 auto;
         margin-top: 2rem;
