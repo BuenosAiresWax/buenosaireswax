@@ -10,7 +10,7 @@ import {
 import "../styles/CartPopupButton.css";
 
 export default function CartPopupButton({ onOpen, catalogKey = "drop" }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { cartItems, removeFromCart } = useContext(CartContext);
   const catalog = getCatalogConfig(catalogKey);
   const cartItemsByCatalog = cartItems.filter(
