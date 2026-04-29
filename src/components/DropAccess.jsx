@@ -2,11 +2,12 @@ import { useEffect, useState, useRef } from "react";
 import "../styles/DropAccess.css";
 import dropTitleImg from "../../assets/img/countdown.png";
 
-function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = false }) {
+function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = false, onTiempoEnCero }) {
     const [tiempoRestante, setTiempoRestante] = useState("00:00:00:00");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [animando, setAnimando] = useState(true);
+    const [tiempoEnCero, setTiempoEnCero] = useState(false);
 
     const animacionRef = useRef(null);
     const countdownRef = useRef(null);
@@ -31,7 +32,9 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
         if (diferenciaTotal <= 0) {
             // Fecha pasada: mostrar todo 0 y no animar
             setTiempoRestante("00:00:00:00");
+            setTiempoEnCero(true);
             setAnimando(false);
+            if (onTiempoEnCero) onTiempoEnCero();
             return;
         }
 
@@ -57,6 +60,8 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
                     const diff = fechaObj - ahora2;
                     if (diff <= 0) {
                         setTiempoRestante("00:00:00:00");
+                        setTiempoEnCero(true);
+                        if (onTiempoEnCero) onTiempoEnCero();
                         clearInterval(countdownRef.current);
                     } else {
                         setTiempoRestante(formatearTiempo(diff));
@@ -89,6 +94,14 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
         <div className="drop-access">
             <img src={dropTitleImg} alt="Drop #006" className="drop-title-image" />
             <div className="countdown">{tiempoRestante}</div>
+
+            <div className="drop-message">
+                {tiempoEnCero ? (
+                    <p className="mensaje-drop-disponible">🎶 ¡Drop Disponible! No te lo pierdas 🎶</p>
+                ) : (
+                    <p className="mensaje-drop-proximo">Falta poco... ¡No te lo pierdas!</p>
+                )}
+            </div>
 
             {!ocultarFormulario && (
                 <form onSubmit={manejarSubmit} className="formulario-acceso">

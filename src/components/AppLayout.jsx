@@ -6,6 +6,7 @@ import PlayerBar from "../player/PlayerBar";
 import logo from "../../assets/logo/header-logo.png";
 
 const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
+const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-04-24T15:20:00";
 
 function hasValidAccess() {
   const isAuth = localStorage.getItem("autenticado") === "true";
@@ -13,12 +14,21 @@ function hasValidAccess() {
   return isAuth && savedVersion === ACCESS_VERSION;
 }
 
+function isDropAccessWindowActive() {
+  const fechaObj = new Date(DROP_DATE);
+  const ahora = new Date();
+  const diferenciaMs = fechaObj - ahora;
+  const tresDiasMs = 3 * 24 * 60 * 60 * 1000;
+
+  return diferenciaMs > 0 && diferenciaMs < tresDiasMs;
+}
+
 function AppLayout() {
   const location = useLocation();
   const [autenticado, setAutenticado] = useState(() => hasValidAccess());
 
   const navItems = [
-    { to: "/", label: "Próximo Drop" },
+    { to: "/drop", label: "Próximo Drop" },
     { to: "/tienda", label: "Tienda de Vinilos" },
     { to: "/equipamiento", label: "Equipamiento" },
   ];
@@ -35,7 +45,11 @@ function AppLayout() {
     };
   }, []);
 
-  const isDropAccessActive = location.pathname === "/" && !autenticado;
+  const isDropAccessActive =
+    location.pathname === "/" && !autenticado && isDropAccessWindowActive();
+  const isEquipamientoRoute =
+    location.pathname === "/equipamiento" ||
+    location.pathname.startsWith("/equipamiento/");
 
   return (
     <div className="app-container" style={{ paddingBottom: "84px" }}>
@@ -75,7 +89,7 @@ function AppLayout() {
       <Footer />
 
       {/* Player global persistente */}
-      {!isDropAccessActive && <PlayerBar />}
+      {!isDropAccessActive && !isEquipamientoRoute && <PlayerBar />}
     </div>
   );
 }

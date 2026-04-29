@@ -1,12 +1,12 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase/config";
-import { CartContext } from "./context/CartContext";
 import ProductList from "./components/ProductList";
 import PurchaseModal from "./components/PurchaseModal";
 import CartPopupButton from "./components/CartPopupButton";
 import DropAccess from "./components/DropAccess";
 import HeroSlider from "./components/HeroSlider";
+import CatalogPage from "./components/CatalogPage";
 
 import "./styles/styles.css";
 
@@ -19,7 +19,8 @@ const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
    (solo cambias esto cada mes)
 ================================ */
 
-const DROP_DATE = "2026-04-14T20:00:00";
+const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-04-28T15:20:00";
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 function App() {
   const [autenticado, setAutenticado] = useState(() => {
@@ -30,8 +31,21 @@ function App() {
 
   const [productos, setProductos] = useState([]);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [ventanaDropActiva, setVentanaDropActiva] = useState(false);
 
-  const { getTotalQuantity } = useContext(CartContext);
+  useEffect(() => {
+    const actualizarVentanaDrop = () => {
+      const fechaDrop = new Date(DROP_DATE);
+      const ahora = new Date();
+      const diferenciaMs = fechaDrop - ahora;
+      setVentanaDropActiva(diferenciaMs > 0 && diferenciaMs < THREE_DAYS_MS);
+    };
+
+    actualizarVentanaDrop();
+    const intervalId = setInterval(actualizarVentanaDrop, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   /* --------------------------------
      STRUCTURED DATA (SEO)
@@ -169,23 +183,35 @@ function App() {
     window.dispatchEvent(new Event("bawax-auth-changed"));
   };
 
-  const totalCantidad = getTotalQuantity();
+  if (!ventanaDropActiva) {
+    return (
+      <>
+        <CatalogPage catalogKey="tienda" />
+        <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="tienda" />
+        {mostrarModal && (
+          <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="tienda" />
+        )}
+      </>
+    );
+  }
 
-  return (
-    <>
-      <HeroSlider />
-
-      {!autenticado ? (
+  if (!autenticado) {
+    return (
+      <>
+        <HeroSlider />
         <DropAccess
           fechaObjetivo={DROP_DATE}
           onAccesoPermitido={manejarAutenticacion}
         />
-      ) : (
-        <ProductList catalogKey="drop" />
-      )}
+      </>
+    );
+  }
 
+  return (
+    <>
+      <HeroSlider />
+      <ProductList catalogKey="drop" />
       <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="drop" />
-
       {mostrarModal && (
         <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="drop" />
       )}

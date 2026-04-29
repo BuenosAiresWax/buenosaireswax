@@ -18,6 +18,7 @@ createRoot(document.getElementById("root")).render(
           <Routes>
             <Route path="/" element={<AppLayout />}>
               <Route index element={<App />} />
+              <Route path="drop" element={<App forceDrop />} />
               <Route path="producto/:id" element={<ProductPage catalogKey="drop" />} />
               <Route path="tienda" element={<CatalogPage catalogKey="tienda" />} />
               <Route
