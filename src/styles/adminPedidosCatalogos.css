@@ -69,8 +69,8 @@
 }
 
 .apc-toolbar-group-filters {
-    flex: 1 1 360px;
-    max-width: 520px;
+    flex: 1 1 700px;
+    max-width: none;
 }
 
 .apc-toolbar-group-actions {
@@ -106,6 +106,7 @@
     cursor: pointer;
     white-space: nowrap;
     max-width: 100%;
+    display: none;
 }
 
 .apc-toggle-filters-btn:hover {
@@ -123,20 +124,20 @@
 
 .apc-filters-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(5, minmax(140px, 1fr));
     gap: 8px;
-    overflow: hidden;
-    max-height: 500px;
+    overflow: visible;
+    max-height: none;
     opacity: 1;
     transform: translateY(0);
     transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .apc-filters-grid.collapsed {
-    max-height: 0;
-    opacity: 0;
-    transform: translateY(-4px);
-    pointer-events: none;
+    max-height: none;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .apc-accion-msg {
@@ -417,6 +418,21 @@
 
     .apc-filters-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: hidden;
+        max-height: 500px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .apc-filters-grid.collapsed {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-4px);
+        pointer-events: none;
+    }
+
+    .apc-toggle-filters-btn {
+        display: inline-flex;
     }
 
     .apc-columns {
