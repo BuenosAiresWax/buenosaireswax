@@ -97,7 +97,7 @@
   background: #282322;
   padding: 6px 10px;
   margin-right: 8px;
-  border: 2px dashed rgba(128, 128, 128, 0.3);
+  border: 2px solid rgba(128, 128, 128, 0.3);
   font-size: 12px;
 }
 
@@ -127,7 +127,7 @@
   margin-bottom: 10px;
   padding: 10px;
   background: var(--color-fondo);
-  border: 2px dashed #00ff88;
+  border: 2px solid #00ff88;
   color: var(--color-letra);
   cursor: pointer;
   font-family: var(--text-font);
@@ -137,7 +137,7 @@
 .cart-actions button:hover {
   background: #00cc66;
   color: var(--color-fondo);
-  border: 2px dashed var(--color-fondo);
+  border: 2px solid var(--color-fondo);
   transition: .3s;
 }
 
@@ -168,7 +168,7 @@
 
 .detail-play-btn {
   background: transparent;
-  border: 2px dashed rgba(128, 128, 128, 0.3);
+  border: 2px solid rgba(128, 128, 128, 0.3);
   color: var(--color-letra);
   padding: 10px 12px;
   cursor: pointer;
