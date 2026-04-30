@@ -216,6 +216,7 @@ export default function AdminPedidosCatalogos() {
     const [filtroEntrega, setFiltroEntrega] = useState("todos");
     const [filtroFecha, setFiltroFecha] = useState("todos");
     const [orden, setOrden] = useState("masReciente");
+    const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
     const [alertaActiva, setAlertaActiva] = useState(false);
     const [nuevosPedidos, setNuevosPedidos] = useState(0);
     const [cancelandoId, setCancelandoId] = useState(null);
@@ -596,67 +597,90 @@ export default function AdminPedidosCatalogos() {
             </div>
 
             <div className="apc-toolbar">
-                <input
-                    type="text"
-                    className="apc-search"
-                    placeholder="Buscar cliente, correo, tel, ciudad, producto..."
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                />
+                <div className="apc-toolbar-group apc-toolbar-group-search">
+                    <label className="apc-filter-label" htmlFor="apc-search-input">🔎 Buscar</label>
+                    <input
+                        id="apc-search-input"
+                        type="text"
+                        className="apc-search"
+                        placeholder="Cliente, correo, tel, ciudad, producto..."
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                    />
+                </div>
 
-                <select value={filtroColeccion} onChange={(e) => setFiltroColeccion(e.target.value)} className="apc-select">
-                    <option value="todos">Ver ambos</option>
-                    <option value="tienda">Solo Tienda</option>
-                    <option value="equipamiento">Solo Equipamiento</option>
-                </select>
+                <div className="apc-toolbar-group apc-toolbar-group-filters">
+                    <div className="apc-filter-header">
+                        <label className="apc-filter-label">🧩 Filtros</label>
+                        <button
+                            type="button"
+                            className={`apc-toggle-filters-btn ${filtrosAbiertos ? "open" : ""}`}
+                            onClick={() => setFiltrosAbiertos((prev) => !prev)}
+                        >
+                            <span>{filtrosAbiertos ? "Ocultar" : "Mostrar"}</span>
+                            <span className="apc-toggle-filters-icon">▾</span>
+                        </button>
+                    </div>
 
-                <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} className="apc-select">
-                    <option value="todos">Estado: todos</option>
-                    <option value="activos">Estado: activos</option>
-                    <option value="cancelados">Estado: cancelados</option>
-                </select>
+                    <div className={`apc-filters-grid ${filtrosAbiertos ? "open" : "collapsed"}`}>
+                        <select value={filtroColeccion} onChange={(e) => setFiltroColeccion(e.target.value)} className="apc-select">
+                            <option value="todos">📦 Coleccion: ambas</option>
+                            <option value="tienda">📦 Solo Tienda</option>
+                            <option value="equipamiento">📦 Solo Equipamiento</option>
+                        </select>
 
-                <select value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} className="apc-select">
-                    <option value="todos">Fecha: todo</option>
-                    <option value="hoy">Fecha: hoy</option>
-                    <option value="ultimos7">Fecha: ultimos 7 dias</option>
-                    <option value="ultimos30">Fecha: ultimos 30 dias</option>
-                    <option value="mesActual">Fecha: mes actual</option>
-                </select>
+                        <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} className="apc-select">
+                            <option value="todos">🟢 Estado: todos</option>
+                            <option value="activos">🟢 Estado: activos</option>
+                            <option value="cancelados">🟢 Estado: cancelados</option>
+                        </select>
 
-                <select value={filtroEntrega} onChange={(e) => setFiltroEntrega(e.target.value)} className="apc-select">
-                    <option value="todos">Entrega: todos</option>
-                    {metodosEntregaDisponibles.map((metodo) => (
-                        <option key={metodo} value={metodo}>{metodo}</option>
-                    ))}
-                </select>
+                        <select value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} className="apc-select">
+                            <option value="todos">📅 Fecha: todo</option>
+                            <option value="hoy">📅 Fecha: hoy</option>
+                            <option value="ultimos7">📅 Ultimos 7 dias</option>
+                            <option value="ultimos30">📅 Ultimos 30 dias</option>
+                            <option value="mesActual">📅 Mes actual</option>
+                        </select>
 
-                <select value={orden} onChange={(e) => setOrden(e.target.value)} className="apc-select">
-                    <option value="masReciente">Orden: mas reciente</option>
-                    <option value="menosReciente">Orden: menos reciente</option>
-                    <option value="mayorTotal">Orden: mayor total</option>
-                    <option value="menorTotal">Orden: menor total</option>
-                </select>
+                        <select value={filtroEntrega} onChange={(e) => setFiltroEntrega(e.target.value)} className="apc-select">
+                            <option value="todos">🚚 Entrega: todos</option>
+                            {metodosEntregaDisponibles.map((metodo) => (
+                                <option key={metodo} value={metodo}>{`🚚 ${metodo}`}</option>
+                            ))}
+                        </select>
 
-                <div className="apc-download-wrap" ref={menuDescargaRef}>
-                    <button
-                        className="apc-download-icon-btn"
-                        title="Descargar en Excel"
-                        onClick={() => setMostrarMenuDescarga((prev) => !prev)}
-                    >
-                        ⬇️
-                    </button>
+                        <select value={orden} onChange={(e) => setOrden(e.target.value)} className="apc-select">
+                            <option value="masReciente">↕️ Orden: mas reciente</option>
+                            <option value="menosReciente">↕️ Orden: menos reciente</option>
+                            <option value="mayorTotal">↕️ Orden: mayor total</option>
+                            <option value="menorTotal">↕️ Orden: menor total</option>
+                        </select>
+                    </div>
+                </div>
 
-                    {mostrarMenuDescarga && (
-                        <div className="apc-download-menu">
-                            <button onClick={() => handleDescargarExcel("visibles")}>Excel visibles</button>
-                            <button onClick={() => handleDescargarExcel("tienda")}>Excel tienda</button>
-                            <button onClick={() => handleDescargarExcel("equipamiento")}>Excel equipamiento</button>
-                            <button onClick={() => handleDescargarExcel("activos")}>Excel activos</button>
-                            <button onClick={() => handleDescargarExcel("cancelados")}>Excel cancelados</button>
-                            <button onClick={() => handleDescargarExcel("todos")}>Excel todos</button>
-                        </div>
-                    )}
+                <div className="apc-toolbar-group apc-toolbar-group-actions">
+                    <label className="apc-filter-label">📥 Exportar</label>
+                    <div className="apc-download-wrap" ref={menuDescargaRef}>
+                        <button
+                            className="apc-download-icon-btn"
+                            title="Descargar en Excel"
+                            onClick={() => setMostrarMenuDescarga((prev) => !prev)}
+                        >
+                            ⬇️
+                        </button>
+
+                        {mostrarMenuDescarga && (
+                            <div className="apc-download-menu">
+                                <button onClick={() => handleDescargarExcel("visibles")}>Excel visibles</button>
+                                <button onClick={() => handleDescargarExcel("tienda")}>Excel tienda</button>
+                                <button onClick={() => handleDescargarExcel("equipamiento")}>Excel equipamiento</button>
+                                <button onClick={() => handleDescargarExcel("activos")}>Excel activos</button>
+                                <button onClick={() => handleDescargarExcel("cancelados")}>Excel cancelados</button>
+                                <button onClick={() => handleDescargarExcel("todos")}>Excel todos</button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

@@ -4,6 +4,12 @@
     margin: 0 auto;
     padding: 1rem;
     color: #eaeaea;
+    overflow-x: hidden;
+}
+
+.apc-container,
+.apc-container * {
+    box-sizing: border-box;
 }
 
 .apc-header {
@@ -40,10 +46,97 @@
 
 .apc-toolbar {
     display: flex;
-    gap: 0.7rem;
+    gap: 0.9rem;
     flex-wrap: wrap;
     margin-bottom: 1rem;
+    align-items: stretch;
+}
+
+.apc-toolbar-group {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.apc-toolbar-group-search {
+    flex: 0 1 430px;
+    max-width: 460px;
+}
+
+.apc-toolbar-group-filters {
+    flex: 1 1 360px;
+    max-width: 520px;
+}
+
+.apc-toolbar-group-actions {
+    flex: 0 0 auto;
+    min-width: 92px;
+    align-items: stretch;
+}
+
+.apc-filter-label {
+    font-size: 0.8rem;
+    color: #cdd8ea;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.apc-filter-header {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.apc-toggle-filters-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #202020;
+    color: #f2f2f2;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.apc-toggle-filters-btn:hover {
+    background: #2a2a2a;
+}
+
+.apc-toggle-filters-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.apc-toggle-filters-btn.open .apc-toggle-filters-icon {
+    transform: rotate(180deg);
+}
+
+.apc-filters-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    overflow: hidden;
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.apc-filters-grid.collapsed {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
 }
 
 .apc-accion-msg {
@@ -59,26 +152,29 @@
     color: #f2f2f2;
     border-radius: 8px;
     padding: 10px 12px;
+    max-width: 100%;
 }
 
 .apc-search {
-    min-width: 260px;
-    flex: 1 1 280px;
+    min-width: 0;
+    width: 100%;
 }
 
 .apc-select {
-    flex: 0 0 auto;
+    width: 100%;
+    min-height: 42px;
 }
 
 .apc-download-wrap {
     position: relative;
-    margin-left: auto;
+    margin-left: 0;
+    width: 100%;
 }
 
 .apc-download-icon-btn {
-    width: 42px;
+    width: 100%;
     height: 42px;
-    border-radius: 50%;
+    border-radius: 8px;
     border: 1px solid rgba(95, 214, 255, 0.4);
     background: rgba(95, 214, 255, 0.12);
     color: #ffffff;
@@ -95,6 +191,7 @@
     top: calc(100% + 8px);
     right: 0;
     min-width: 210px;
+    max-width: min(92vw, 280px);
     background: #171717;
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
@@ -115,6 +212,9 @@
     text-align: left;
     cursor: pointer;
     font-size: 0.87rem;
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
 }
 
 .apc-download-menu button:hover {
@@ -146,6 +246,7 @@
     padding: 8px 12px;
     cursor: pointer;
     font-weight: 700;
+    max-width: 100%;
 }
 
 .apc-columns {
@@ -288,6 +389,8 @@
     cursor: pointer;
     font-weight: 700;
     transition: 0.2s ease;
+    max-width: 100%;
+    white-space: normal;
 }
 
 .apc-btn-cancelar-pedido:hover:not(:disabled) {
@@ -306,6 +409,16 @@
 }
 
 @media (max-width: 980px) {
+    .apc-toolbar-group-search,
+    .apc-toolbar-group-filters {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .apc-filters-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .apc-columns {
         grid-template-columns: 1fr;
     }
@@ -316,6 +429,32 @@
 }
 
 @media (max-width: 680px) {
+    .apc-toolbar {
+        gap: 0.7rem;
+    }
+
+    .apc-toolbar-group {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .apc-filter-header {
+        flex-wrap: wrap;
+    }
+
+    .apc-toolbar-group-actions {
+        min-width: 0;
+    }
+
+    .apc-filters-grid {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+
+    .apc-filter-label {
+        font-size: 0.78rem;
+    }
+
     .apc-header {
         flex-direction: column;
         align-items: stretch;
@@ -335,7 +474,7 @@
     }
 
     .apc-download-wrap {
-        margin-left: 0;
+        width: 100%;
     }
 
     .apc-download-icon-btn {
