@@ -2,9 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import {
+    doc,
+    runTransaction,
+    collection,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    limit,
+} from "firebase/firestore";
 
 import { useAdminData } from "../context/AdminDataContext";
 import { normalizarFecha } from "../utils/fechas";
+import { db } from "../firebase/config";
 
 import logo from "../../assets/logo/logo-sin-punto.png";
 import "../styles/admin.css";
@@ -19,6 +30,8 @@ export default function PedidosAdmin() {
 
     const [orden, setOrden] = useState("masReciente");
     const [busqueda, setBusqueda] = useState("");
+    const [cancelandoId, setCancelandoId] = useState(null);
+    const [accionMsg, setAccionMsg] = useState("");
 
     // -------------------------------------------------
     // Normalizar y ordenar pedidos (desde contexto)
@@ -116,6 +129,120 @@ export default function PedidosAdmin() {
         );
 
         setPedidosVisibles(ordenados);
+    };
+
+    // -------------------------------------------------
+    // Cancelar pedido (revertir stock)
+    // -------------------------------------------------
+    async function resolveProductDocRef(productoPedido) {
+        const candidateIds = [
+            productoPedido?.id,
+            productoPedido?.productoId,
+            productoPedido?.docId,
+            String(productoPedido?.titulo || "")
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, "-"),
+        ].filter(Boolean);
+
+        for (const id of candidateIds) {
+            const ref = doc(db, "productos", String(id));
+            const snap = await getDoc(ref);
+            if (snap.exists()) return ref;
+        }
+
+        if (productoPedido?.titulo) {
+            const byTitle = query(
+                collection(db, "productos"),
+                where("titulo", "==", productoPedido.titulo),
+                limit(1),
+            );
+            const result = await getDocs(byTitle);
+            if (!result.empty) return result.docs[0].ref;
+        }
+
+        return null;
+    }
+
+    const handleCancelarPedido = async (pedido) => {
+        if (pedido?.cancelado) {
+            setAccionMsg("Este pedido ya estaba cancelado.");
+            return;
+        }
+
+        const confirmacion = window.confirm(
+            "¿Se cancelará este pedido y se revertirá stock (reservados) de sus productos. Continuar?",
+        );
+        if (!confirmacion) return;
+
+        setCancelandoId(pedido.id);
+        setAccionMsg("");
+
+        try {
+            const orderRef = doc(db, "pedidos", pedido.id);
+            const ajustesStock = [];
+
+            for (const producto of pedido.productos || []) {
+                const cantidadComprada = Number(producto?.cantidad) || 0;
+                if (cantidadComprada <= 0) continue;
+
+                const productRef = await resolveProductDocRef(producto);
+                if (!productRef) {
+                    throw new Error(`No se encontró producto para "${producto?.titulo || "sin título"}".`);
+                }
+
+                ajustesStock.push({
+                    ref: productRef,
+                    cantidadComprada,
+                    titulo: producto?.titulo || "sin título",
+                });
+            }
+
+            await runTransaction(db, async (tx) => {
+                const pedidoSnap = await tx.get(orderRef);
+                if (!pedidoSnap.exists()) {
+                    throw new Error("El pedido no existe o fue eliminado.");
+                }
+
+                const dataPedido = pedidoSnap.data();
+                if (dataPedido?.cancelado) {
+                    throw new Error("already-cancelled");
+                }
+
+                for (const ajuste of ajustesStock) {
+                    const productSnap = await tx.get(ajuste.ref);
+                    if (!productSnap.exists()) {
+                        throw new Error(`El producto "${ajuste.titulo}" no existe.`);
+                    }
+
+                    const reservadosActual = Number(productSnap.data()?.reservados) || 0;
+                    const reservadosActualizados = Math.max(0, reservadosActual - ajuste.cantidadComprada);
+
+                    tx.update(ajuste.ref, { reservados: reservadosActualizados });
+                }
+
+                tx.update(orderRef, {
+                    cancelado: true,
+                    estado: "cancelado",
+                    canceladoAt: new Date().toISOString(),
+                });
+            });
+
+            setAccionMsg("✅ Pedido cancelado correctamente. Stock revertido y pedido bloqueado.");
+            setTimeout(() => {
+                refetch();
+                setAccionMsg("");
+            }, 2000);
+        } catch (error) {
+            console.error("Error al cancelar pedido:", error);
+            if (String(error?.message) === "already-cancelled") {
+                setAccionMsg("❌ Este pedido ya fue cancelado previamente.");
+            } else {
+                setAccionMsg("❌ No se pudo cancelar el pedido. Revisa los datos de productos.");
+            }
+        } finally {
+            setCancelandoId(null);
+        }
     };
 
     // -------------------------------------------------
@@ -376,6 +503,19 @@ export default function PedidosAdmin() {
                 <button onClick={refetch} className="refresh-btn">🔄 Refresh</button>
             </div>
 
+            {accionMsg && (
+                <div className="accion-mensaje" style={{
+                    padding: "12px 16px",
+                    margin: "12px 0",
+                    borderRadius: "8px",
+                    backgroundColor: accionMsg.includes("❌") ? "rgba(220, 38, 38, 0.1)" : "rgba(34, 197, 94, 0.1)",
+                    borderLeft: `4px solid ${accionMsg.includes("❌") ? "#dc2626" : "#22c55e"}`,
+                    color: accionMsg.includes("❌") ? "#fca5a5" : "#86efac",
+                }}>
+                    {accionMsg}
+                </div>
+            )}
+
             <div className="cards-container">
                 {pedidosFiltrados.map(pedido => (
                     <div key={pedido.id} className="pedido-card">
@@ -394,6 +534,15 @@ export default function PedidosAdmin() {
                             onClick={() => handleWhatsApp(pedido)}
                         >
                             💬
+                        </button>
+
+                        <button
+                            className="cancel-btn"
+                            title={pedido.cancelado ? "Pedido ya cancelado" : "Cancelar pedido y revertir stock"}
+                            onClick={() => handleCancelarPedido(pedido)}
+                            disabled={pedido.cancelado || cancelandoId === pedido.id}
+                        >
+                            {cancelandoId === pedido.id ? "⏳" : pedido.cancelado ? "❌" : "🗑️"}
                         </button>
 
                         <div className="pedido-header">

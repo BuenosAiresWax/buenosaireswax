@@ -238,6 +238,34 @@
     /* rojo más claro */
 }
 
+.cancel-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    background: #dc262680;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: #dc2626;
+}
+
+.cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .orden-selector {

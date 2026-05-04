@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAdminData } from "../context/AdminDataContext";
 
 import {
@@ -87,15 +87,38 @@ function agruparPorMes(pedidos) {
     return grupos;
 }
 
-export default function AdminOverview() {
-    const { pedidos: pedidosTodos, loading } = useAdminData();
+const FUENTES = [
+    { value: "dropActual", label: "Drop Actual" },
+    { value: "tienda", label: "Tienda Física" },
+    { value: "equipamiento", label: "Equipamiento" },
+];
 
-    const [mesesOrdenados, setMesesOrdenados] = useState([]); // ["2025-07", "2025-06", ...]
-    const [mesSeleccionado, setMesSeleccionado] = useState("ultimoMes"); // o "2025-07" o "general"
+export default function AdminOverview() {
+    const { pedidos, pedidosTienda, pedidosEquipamiento, loading } = useAdminData();
+
+    const [fuenteSeleccionada, setFuenteSeleccionada] = useState("dropActual");
+    const [mesesOrdenados, setMesesOrdenados] = useState([]);
+    const [mesSeleccionado, setMesSeleccionado] = useState("ultimoMes");
     const [mostrarTodos, setMostrarTodos] = useState(false);
 
+    // Seleccionar el array correcto según la fuente
+    const pedidosTodos = useMemo(() => {
+        if (fuenteSeleccionada === "tienda") return pedidosTienda;
+        if (fuenteSeleccionada === "equipamiento") return pedidosEquipamiento;
+        return pedidos;
+    }, [fuenteSeleccionada, pedidos, pedidosTienda, pedidosEquipamiento]);
+
     useEffect(() => {
-        if (!pedidosTodos || pedidosTodos.length === 0) return;
+        // Resetear mes al cambiar fuente
+        setMesSeleccionado("ultimoMes");
+        setMesesOrdenados([]);
+    }, [fuenteSeleccionada]);
+
+    useEffect(() => {
+        if (!pedidosTodos || pedidosTodos.length === 0) {
+            setMesesOrdenados([]);
+            return;
+        }
 
         const grupos = agruparPorMes(pedidosTodos);
         const keysOrdenadas = Object.keys(grupos).sort((a, b) =>
@@ -103,11 +126,7 @@ export default function AdminOverview() {
         );
 
         setMesesOrdenados(keysOrdenadas);
-
-        // setear último mes automáticamente
-        setMesSeleccionado(prev =>
-            prev === "ultimoMes" ? keysOrdenadas[0] : prev
-        );
+        setMesSeleccionado("ultimoMes");
     }, [pedidosTodos]);
 
 
@@ -147,17 +166,22 @@ export default function AdminOverview() {
     const pedidosFiltrados = obtenerPedidosFiltrados();
 
     // -------------------------
+    // Filtrar pedidos NO cancelados para cálculos
+    // -------------------------
+    const pedidosActivos = pedidosFiltrados.filter(p => !p.cancelado);
+
+    // -------------------------
     // Cálculos principales
     // -------------------------
-    const totalVendido = pedidosFiltrados.reduce((acc, p) => acc + (Number(p.total || 0)), 0);
-    const cantidadPedidos = pedidosFiltrados.length;
+    const totalVendido = pedidosActivos.reduce((acc, p) => acc + (Number(p.total || 0)), 0);
+    const cantidadPedidos = pedidosActivos.length;
     const ticketPromedio = cantidadPedidos ? (totalVendido / cantidadPedidos) : 0;
 
     // -------------------------
     // Ventas por día (para gráfico lineal)
     // -------------------------
     const ventasPorDiaMap = {};
-    pedidosFiltrados.forEach(p => {
+    pedidosActivos.forEach(p => {
         const d = p.fechaObj.getDate(); // ahora seguro es Date
         // usamos día como string para el eje x (p. ej. '1','2'..)
         const key = String(d).padStart(2, "0");
@@ -173,7 +197,7 @@ export default function AdminOverview() {
     // Productos más vendidos (soporta `productos` o `items`)
     // -------------------------
     const productosConteo = {};
-    pedidosFiltrados.forEach(p => {
+    pedidosActivos.forEach(p => {
         const lista = p.productos ?? p.items ?? p.itemsList ?? [];
         (Array.isArray(lista) ? lista : []).forEach(item => {
             // manejar distintos nombres de campo
@@ -200,18 +224,32 @@ export default function AdminOverview() {
                 <h2 className="ao-title">Overview - Pedidos</h2>
 
                 <div className="ao-controls">
-                    <label className="ao-label">Periodo</label>
-                    <select
-                        className="ao-select"
-                        value={mesSeleccionado}
-                        onChange={(e) => setMesSeleccionado(e.target.value)}
-                    >
-                        <option value="ultimoMes">Último mes</option>
-                        <option value="general">General</option>
-                        {mesesOrdenados.map(key => (
-                            <option key={key} value={key}>{key}</option>
+                    <div className="ao-source-tabs">
+                        {FUENTES.map(f => (
+                            <button
+                                key={f.value}
+                                className={`ao-source-tab ${fuenteSeleccionada === f.value ? "ao-source-tab--active" : ""}`}
+                                onClick={() => setFuenteSeleccionada(f.value)}
+                            >
+                                {f.label}
+                            </button>
                         ))}
-                    </select>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <label className="ao-label">Periodo</label>
+                        <select
+                            className="ao-select"
+                            value={mesSeleccionado}
+                            onChange={(e) => setMesSeleccionado(e.target.value)}
+                        >
+                            <option value="ultimoMes">Último mes</option>
+                            <option value="general">General</option>
+                            {mesesOrdenados.map(key => (
+                                <option key={key} value={key}>{key}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 
