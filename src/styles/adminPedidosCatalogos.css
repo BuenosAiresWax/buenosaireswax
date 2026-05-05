@@ -378,7 +378,34 @@
 .apc-card-actions {
     margin-top: 10px;
     display: flex;
+    gap: 8px;
     justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.apc-btn-whatsapp {
+    border: 1px solid rgba(37, 211, 102, 0.45);
+    background: rgba(37, 211, 102, 0.15);
+    color: #dfffe9;
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.apc-btn-whatsapp:hover {
+    background: rgba(37, 211, 102, 0.28);
+}
+
+.apc-btn-whatsapp.disabled,
+.apc-btn-whatsapp[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: auto;
 }
 
 .apc-btn-cancelar-pedido {

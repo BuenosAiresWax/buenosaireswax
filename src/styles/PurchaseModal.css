@@ -141,6 +141,47 @@
     color: #fff;
 }
 
+.pickup-info {
+    width: 100%;
+    margin: 0.25rem 0 1.25rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(215, 215, 215, 0.35);
+    background: rgba(255, 255, 255, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.pickup-info-title {
+    margin: 0;
+    font-family: var(--text-font);
+    font-size: 1rem;
+    letter-spacing: 0.4px;
+    color: #f1f1f1;
+}
+
+.pickup-info-row {
+    display: grid;
+    grid-template-columns: 82px 1fr;
+    gap: 0.6rem;
+    align-items: baseline;
+}
+
+.pickup-info-label {
+    font-family: var(--text-font);
+    font-size: 0.85rem;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #b8b8b8;
+}
+
+.pickup-info-value {
+    font-family: var(--text-font);
+    font-size: 0.95rem;
+    line-height: 1.35;
+    color: #efefef;
+}
+
 .modal-content form input,
 .modal-content form button {
     /* dos columnas con algo de espacio entre ellas */
@@ -526,6 +567,28 @@
 
     .modalText:last-of-type {
         margin-top: 4rem;
+    }
+
+    .pickup-info {
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .pickup-info-title {
+        font-size: 0.9rem;
+    }
+
+    .pickup-info-row {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+
+    .pickup-info-label {
+        font-size: 0.75rem;
+    }
+
+    .pickup-info-value {
+        font-size: 0.85rem;
     }
 
     .checkbox-confirmacion {

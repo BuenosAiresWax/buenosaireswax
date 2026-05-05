@@ -99,8 +99,29 @@ function beepOnce() {
     }
 }
 
+function normalizarTelefonoWhatsapp(telefono) {
+    const soloDigitos = String(telefono || "").replace(/\D/g, "");
+
+    if (!soloDigitos) return "";
+    if (soloDigitos.startsWith("00")) return soloDigitos.slice(2);
+
+    return soloDigitos;
+}
+
+function construirLinkWhatsapp(pedido) {
+    const telefono = normalizarTelefonoWhatsapp(pedido?.telefono);
+    if (!telefono) return "";
+
+    const nombreCliente = String(pedido?.cliente || "").trim() || "";
+    const saludo = nombreCliente ? `Hola ${nombreCliente},` : "Hola,";
+    const mensaje = `${saludo} tu paquete ya fue procesado y sera enviado en breve. Gracias por tu compra.`;
+
+    return `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+}
+
 function PedidoCard({ pedido, onCancel, cancelando }) {
     const isCancelado = Boolean(pedido?.cancelado);
+    const whatsappLink = construirLinkWhatsapp(pedido);
 
     return (
         <div className="apc-card">
@@ -136,6 +157,20 @@ function PedidoCard({ pedido, onCancel, cancelando }) {
             </div>
 
             <div className="apc-card-actions">
+                <a
+                    className={`apc-btn-whatsapp ${!whatsappLink ? "disabled" : ""}`}
+                    href={whatsappLink || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled={!whatsappLink}
+                    onClick={(event) => {
+                        if (!whatsappLink) event.preventDefault();
+                    }}
+                    title={whatsappLink ? "Contactar por WhatsApp" : "Telefono no disponible"}
+                >
+                    Contactar por WhatsApp
+                </a>
+
                 <button
                     className="apc-btn-cancelar-pedido"
                     onClick={() => onCancel(pedido)}
