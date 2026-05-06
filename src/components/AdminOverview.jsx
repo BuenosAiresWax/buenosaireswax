@@ -74,6 +74,20 @@ function normalizarFecha(campoFecha) {
     return new Date(0);
 }
 
+function esPedidoCancelado(valorCancelado) {
+    if (typeof valorCancelado === "boolean") return valorCancelado;
+    if (typeof valorCancelado === "number") return valorCancelado === 1;
+
+    if (typeof valorCancelado === "string") {
+        const v = valorCancelado.trim().toLowerCase();
+        if (v.includes("cancel")) return true;
+        if (["true", "1", "si", "sí", "cancelado", "cancelada"].includes(v)) return true;
+        if (["false", "0", "no", "activo", "activa"].includes(v)) return false;
+    }
+
+    return false;
+}
+
 /* ------- Helper: agrupar pedidos por clave año-mes "YYYY-MM" ------- */
 function agruparPorMes(pedidos) {
     const grupos = {};
@@ -98,19 +112,29 @@ export default function AdminOverview() {
 
     const [fuenteSeleccionada, setFuenteSeleccionada] = useState("dropActual");
     const [mesesOrdenados, setMesesOrdenados] = useState([]);
-    const [mesSeleccionado, setMesSeleccionado] = useState("ultimoMes");
+    const [mesSeleccionado, setMesSeleccionado] = useState("general");
     const [mostrarTodos, setMostrarTodos] = useState(false);
 
     // Seleccionar el array correcto según la fuente
     const pedidosTodos = useMemo(() => {
-        if (fuenteSeleccionada === "tienda") return pedidosTienda;
-        if (fuenteSeleccionada === "equipamiento") return pedidosEquipamiento;
-        return pedidos;
+        const origen =
+            fuenteSeleccionada === "tienda"
+                ? pedidosTienda
+                : fuenteSeleccionada === "equipamiento"
+                    ? pedidosEquipamiento
+                    : pedidos;
+
+        return (origen || []).map((p) => ({
+            ...p,
+            fechaObj: normalizarFecha(
+                p.fechaObj ?? p.fecha ?? p.createdAt ?? p.fechaCreacion ?? p.created_at ?? p.timestamp
+            ),
+        }));
     }, [fuenteSeleccionada, pedidos, pedidosTienda, pedidosEquipamiento]);
 
     useEffect(() => {
         // Resetear mes al cambiar fuente
-        setMesSeleccionado("ultimoMes");
+        setMesSeleccionado("general");
         setMesesOrdenados([]);
     }, [fuenteSeleccionada]);
 
@@ -126,7 +150,7 @@ export default function AdminOverview() {
         );
 
         setMesesOrdenados(keysOrdenadas);
-        setMesSeleccionado("ultimoMes");
+        setMesSeleccionado("general");
     }, [pedidosTodos]);
 
 
@@ -168,7 +192,10 @@ export default function AdminOverview() {
     // -------------------------
     // Filtrar pedidos NO cancelados para cálculos
     // -------------------------
-    const pedidosActivos = pedidosFiltrados.filter(p => !p.cancelado);
+    const pedidosActivos = pedidosFiltrados.filter(
+        (p) => !esPedidoCancelado(p.cancelado ?? p.cancelada ?? p.estado)
+    );
+    const cantidadCancelados = pedidosFiltrados.length - pedidosActivos.length;
 
     // -------------------------
     // Cálculos principales
@@ -267,9 +294,9 @@ export default function AdminOverview() {
                 </div>
 
                 <div className="ao-card">
-                    <div className="ao-card-title">Pedidos</div>
-                    <div className="ao-card-value">{cantidadPedidos}</div>
-                    <div className="ao-card-sub">Totales en periodo</div>
+                    <div className="ao-card-title">Pedidos del periodo</div>
+                    <div className="ao-card-value">{pedidosFiltrados.length}</div>
+                    <div className="ao-card-sub">Activos: {cantidadPedidos} | Cancelados: {cantidadCancelados}</div>
                 </div>
 
                 <div className="ao-card">
@@ -360,7 +387,7 @@ export default function AdminOverview() {
             {/* Lista compacta de pedidos del periodo (resumen) */}
             <div className="ao-list-card">
                 <div className="ao-list-title">
-                    Pedidos del periodo ({cantidadPedidos})
+                    Pedidos del periodo ({pedidosFiltrados.length})
                 </div>
 
                 <div className="ao-list-rows">

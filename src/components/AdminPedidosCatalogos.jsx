@@ -146,8 +146,16 @@ function PedidoCard({ pedido, onCancel, cancelando }) {
                 <h5>Productos</h5>
                 {pedido.productos?.map((prod, idx) => (
                     <div key={`${pedido.uniqueId}-${idx}`} className="apc-producto-row">
-                        <span>{prod.titulo}</span>
-                        <span>{prod.cantidad} x ${prod.precioUnitario} = ${prod.subtotal}</span>
+                        {prod.imagen && (
+                            <img src={prod.imagen} alt={prod.titulo} className="apc-producto-imagen" />
+                        )}
+                        <div className="apc-producto-info">
+                            <div className="apc-producto-titulo-autor">
+                                <span className="apc-producto-titulo">{prod.titulo}</span>
+                                {prod.autor && <span className="apc-producto-artista">por {prod.autor}</span>}
+                            </div>
+                            <span className="apc-producto-cantidad">{prod.cantidad} x ${prod.precioUnitario} = ${prod.subtotal}</span>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -482,6 +490,7 @@ export default function AdminPedidosCatalogos() {
                 pedido.metodoEntrega,
                 pedido.total,
                 ...(pedido.productos || []).map((prod) => prod.titulo),
+                ...(pedido.productos || []).map((prod) => prod.autor),
             ]
                 .map((valor) => normalizarTexto(valor))
                 .join(" ");
@@ -638,7 +647,7 @@ export default function AdminPedidosCatalogos() {
                         id="apc-search-input"
                         type="text"
                         className="apc-search"
-                        placeholder="Cliente, correo, tel, ciudad, producto..."
+                        placeholder="Cliente, correo, tel, ciudad, producto, artista..."
                         value={busqueda}
                         onChange={(e) => setBusqueda(e.target.value)}
                     />

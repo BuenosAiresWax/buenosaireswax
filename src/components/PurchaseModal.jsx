@@ -194,6 +194,8 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
             titulo: p.titulo || "Producto sin nombre",
             categoria: p.categoria,
             coleccion: getProductCollectionName(p),
+            imagen: p.imagen || "",
+            autor: p.autor || "",
             cantidad: Number(p.cantidad) || 0,
             precioUnitario: Number(p.precio) || 0,
             subtotal: (Number(p.precio) || 0) * (Number(p.cantidad) || 0),

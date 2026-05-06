@@ -362,11 +362,52 @@
 
 .apc-producto-row {
     display: flex;
-    justify-content: space-between;
-    gap: 0.6rem;
+    align-items: center;
+    gap: 0.8rem;
     font-size: 0.84rem;
     border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-    padding: 4px 0;
+    padding: 6px 0;
+}
+
+.apc-producto-imagen {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.apc-producto-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.apc-producto-titulo-autor {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.apc-producto-titulo {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.apc-producto-artista {
+    font-size: 0.8rem;
+    color: #a88bdc;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.apc-producto-cantidad {
+    font-size: 0.8rem;
+    color: #d0d0d0;
+    font-weight: 500;
 }
 
 .apc-total {
