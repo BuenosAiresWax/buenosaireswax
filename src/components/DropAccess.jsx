@@ -97,7 +97,7 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
 
             <div className="drop-message">
                 {tiempoEnCero ? (
-                    <p className="mensaje-drop-disponible">🎶 ¡Drop Disponible! No te lo pierdas 🎶</p>
+                    <p className="mensaje-drop-disponible">¡Drop Disponible! No te lo pierdas</p>
                 ) : (
                     <p className="mensaje-drop-proximo">Falta poco... ¡No te lo pierdas!</p>
                 )}

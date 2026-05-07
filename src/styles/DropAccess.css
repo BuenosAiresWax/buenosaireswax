@@ -1,5 +1,5 @@
 .drop-access {
-    background-color: var(--color-fondo);
+    background-color: transparent;
     color: var(--color-letra);
     display: flex;
     flex-direction: column;
@@ -89,7 +89,6 @@
 }
 
 .mensaje-drop-disponible {
-    color: #00ff00;
     font-size: 1.2rem;
     animation: pulse 1.5s ease-in-out infinite;
 }
