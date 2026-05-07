@@ -31,6 +31,7 @@ export default function AdminProductoNuevo({ onNuevo }) {
     const [loading, setLoading] = useState(false);
     const [statusMsg, setStatusMsg] = useState(null);
     const [selectedCollection, setSelectedCollection] = useState("productos");
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const handleChange = useCallback((e) => {
         const { name, value } = e.target;
@@ -57,10 +58,14 @@ export default function AdminProductoNuevo({ onNuevo }) {
         setPreview(null);
     }, []);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (loading) return;
+        setShowConfirm(true);
+    };
 
+    const handleConfirmedSubmit = async () => {
+        setShowConfirm(false);
         setLoading(true);
         setStatusMsg(null);
 
@@ -107,9 +112,40 @@ export default function AdminProductoNuevo({ onNuevo }) {
         setStatusMsg(null);
     };
 
+    const coleccionActual = COLECCIONES[selectedCollection];
+
     return (
         <div>
             <h2 className="np-title">Carga de Productos</h2>
+
+            {showConfirm && (
+                <div className="np-confirm-overlay">
+                    <div className="np-confirm-modal">
+                        <div className="np-confirm-icon">{coleccionActual.label.split(" ")[0]}</div>
+                        <h3 className="np-confirm-title">Confirmar creación</h3>
+                        <p className="np-confirm-desc">
+                            Estás por crear{" "}
+                            <strong className="np-confirm-producto">"{formData.titulo || "Sin título"}"</strong>
+                            {" "}en la colección
+                        </p>
+                        <span className="np-confirm-badge">{coleccionActual.label}</span>
+                        <div className="np-confirm-btns">
+                            <button
+                                className="np-btn np-btn-guardar"
+                                onClick={handleConfirmedSubmit}
+                            >
+                                Confirmar
+                            </button>
+                            <button
+                                className="np-btn np-btn-cancelar"
+                                onClick={() => setShowConfirm(false)}
+                            >
+                                Volver
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="np-container">
                 <form className="np-form" onSubmit={handleSubmit}>
