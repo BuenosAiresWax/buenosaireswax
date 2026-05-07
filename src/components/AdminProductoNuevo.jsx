@@ -1,6 +1,6 @@
 // AdminProductoNuevo.jsx
 import { useState, useCallback } from "react";
-import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebase/config";
 import "../styles/adminProductoNuevo.css";
@@ -18,12 +18,19 @@ const INITIAL_FORM = {
     reservados: 0,
 };
 
+const COLECCIONES = {
+    productos: { label: "🎵 Drops", key: "productos", firebaseCollection: "productos", catalogKey: "drop" },
+    productosTienda: { label: "🏪 Tienda", key: "productosTienda", firebaseCollection: "productosTienda", catalogKey: "tienda" },
+    equipamiento: { label: "🎛️ Equipamiento", key: "equipamiento", firebaseCollection: "equipamiento", catalogKey: "equipamiento" },
+};
+
 export default function AdminProductoNuevo({ onNuevo }) {
     const [formData, setFormData] = useState(INITIAL_FORM);
     const [imagenFile, setImagenFile] = useState(null);
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [statusMsg, setStatusMsg] = useState(null);
+    const [selectedCollection, setSelectedCollection] = useState("productos");
 
     const handleChange = useCallback((e) => {
         const { name, value } = e.target;
@@ -69,23 +76,22 @@ export default function AdminProductoNuevo({ onNuevo }) {
                 imagenUrl = await getDownloadURL(storageRef);
             }
 
-            const idProducto = formData.titulo
-                .toLowerCase()
-                .trim()
-                .replace(/\s+/g, "-");
-
+            const coleccionConfig = COLECCIONES[selectedCollection];
             const nuevoProducto = {
                 ...formData,
                 imagen: imagenUrl,
+                collectionName: coleccionConfig.firebaseCollection,
+                catalogKey: coleccionConfig.catalogKey,
                 createdAt: serverTimestamp(),
             };
 
-            await setDoc(doc(db, "productos", idProducto), nuevoProducto);
+            await addDoc(collection(db, coleccionConfig.firebaseCollection), nuevoProducto);
 
             if (onNuevo) onNuevo();
 
             resetForm();
-            setStatusMsg("✅ Producto creado correctamente.");
+            setSelectedCollection("productos");
+            setStatusMsg("✅ Producto creado correctamente en " + coleccionConfig.label);
 
         } catch (error) {
             console.error("Error creando producto:", error);
@@ -107,6 +113,26 @@ export default function AdminProductoNuevo({ onNuevo }) {
 
             <div className="np-container">
                 <form className="np-form" onSubmit={handleSubmit}>
+
+                    {/* Selector de Colección */}
+                    <fieldset className="np-fieldset np-coleccion">
+                        <legend className="np-legend">Selecciona la Colección</legend>
+
+                        <div className="np-colecciones-selector">
+                            {Object.entries(COLECCIONES).map(([key, coleccion]) => (
+                                <label key={key} className="np-coleccion-radio">
+                                    <input
+                                        type="radio"
+                                        name="coleccion"
+                                        value={key}
+                                        checked={selectedCollection === key}
+                                        onChange={(e) => setSelectedCollection(e.target.value)}
+                                    />
+                                    <span>{coleccion.label}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </fieldset>
 
                     <fieldset className="np-fieldset np-basic">
                         <legend className="np-legend">Información Básica</legend>

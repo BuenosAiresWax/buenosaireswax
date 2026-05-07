@@ -6,8 +6,14 @@ import { useAdminData } from "../context/AdminDataContext";
 import "../styles/adminProductos.css";
 import "../styles/admin.css";
 
+const COLECCIONES = {
+    productos: { label: "🎵 Drops", key: "productos", firebaseCollection: "productos" },
+    productosTienda: { label: "🏪 Tienda", key: "productosTienda", firebaseCollection: "productosTienda" },
+    equipamiento: { label: "🎛️ Equipamiento", key: "equipamiento", firebaseCollection: "equipamiento" },
+};
+
 export default function ProductosAdmin() {
-    const { productos, loading, refetch } = useAdminData();
+    const { productos, productosTienda, equipamiento, loading, refetch } = useAdminData();
 
     const [busqueda, setBusqueda] = useState("");
     const [error, setError] = useState(null);
@@ -16,20 +22,28 @@ export default function ProductosAdmin() {
     const [modal, setModal] = useState(null);
     const [processing, setProcessing] = useState(false);
     const [orden, setOrden] = useState("mayorPrecio");
+    const [coleccionSeleccionada, setColeccionSeleccionada] = useState("productos");
 
     // Infinite scroll (se mantiene aunque ahora cargue todo del contexto)
     const loaderRef = useRef(null);
 
-    /* -----------------------------
-       USE MEMO
-    ------------------------------ */
+    /* Mapear datos según colección seleccionada */
+    const productosMap = {
+        productos,
+        productosTienda,
+        equipamiento,
+    };
+
+    /* USE MEMO: Filtrar y ordenar productos */
     const productosFiltrados = useMemo(() => {
-        let lista = [...productos];
+        let lista = [...(productosMap[coleccionSeleccionada] || [])];
 
         // 🔍 búsqueda
         if (busqueda.trim() !== "") {
+            const q = busqueda.toLowerCase();
             lista = lista.filter((p) =>
-                p.titulo?.toLowerCase().includes(busqueda.toLowerCase())
+                [p.titulo, p.autor, p.genero, p.estilo, p.categoria, p.sello]
+                    .some((campo) => campo?.toLowerCase().includes(q))
             );
         }
 
@@ -41,7 +55,7 @@ export default function ProductosAdmin() {
         );
 
         return lista;
-    }, [productos, busqueda, orden]);
+    }, [productosMap[coleccionSeleccionada], busqueda, orden]);
     /* -----------------------------
        ORDEN
     ------------------------------ */
@@ -81,7 +95,8 @@ export default function ProductosAdmin() {
                 setModal({ type: "loading", message: "Guardando cambios..." });
 
                 try {
-                    await updateDoc(doc(db, "productos", id), formData);
+                    const firebaseCollection = COLECCIONES[coleccionSeleccionada].firebaseCollection;
+                    await updateDoc(doc(db, firebaseCollection, id), formData);
 
                     await refetch();
 
@@ -109,9 +124,7 @@ export default function ProductosAdmin() {
         });
     };
 
-    /* -----------------------------
-       ELIMINAR
-    ------------------------------ */
+    /* ELIMINAR */
     const handleDelete = (id, titulo) => {
         setModal({
             type: "confirm",
@@ -121,7 +134,8 @@ export default function ProductosAdmin() {
                 setModal({ type: "loading", message: "Eliminando producto..." });
 
                 try {
-                    await deleteDoc(doc(db, "productos", id));
+                    const firebaseCollection = COLECCIONES[coleccionSeleccionada].firebaseCollection;
+                    await deleteDoc(doc(db, firebaseCollection, id));
                     await refetch();
 
                     setTimeout(() => {
@@ -157,14 +171,43 @@ export default function ProductosAdmin() {
         <div className="productos-admin-container">
             <h2 className="productos-admin-title">Inventario de Productos</h2>
 
+            {/* Selector de Colecciones */}
+            <div className="colecciones-selector">
+                {Object.entries(COLECCIONES).map(([key, coleccion]) => (
+                    <button
+                        key={key}
+                        className={`coleccion-btn ${coleccionSeleccionada === key ? "activa" : ""}`}
+                        onClick={() => {
+                            setColeccionSeleccionada(key);
+                            setBusqueda("");
+                            setOrden("mayorPrecio");
+                        }}
+                    >
+                        {coleccion.label}
+                    </button>
+                ))}
+            </div>
+
             <div className="orden-selector">
-                <input
-                    type="text"
-                    placeholder="Buscar por título..."
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    className="search-input"
-                />
+                <div className="search-wrapper">
+                    <span className="search-icon">🔍</span>
+                    <input
+                        type="text"
+                        placeholder="Buscar por título, autor, género..."
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                        className="search-input"
+                    />
+                    {busqueda && (
+                        <button
+                            className="search-clear-btn"
+                            onClick={() => setBusqueda("")}
+                            title="Limpiar búsqueda"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
 
                 <select value={orden} onChange={handleOrdenChange}>
                     <option value="mayorPrecio">Mayor precio primero</option>
@@ -406,7 +449,7 @@ export default function ProductosAdmin() {
                                     className="cancel-btn"
                                     onClick={() => setModal(null)}
                                 >
-                                    Cancelar
+                                    X
                                 </button>
                             </div>
                         )}

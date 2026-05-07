@@ -49,6 +49,47 @@
     padding: 0 5px;
 }
 
+/* Selector de colecciones */
+.np-colecciones-selector {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.np-coleccion-radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.np-coleccion-radio:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.np-coleccion-radio input[type="radio"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.np-coleccion-radio input[type="radio"]:checked + span {
+    color: #fff;
+}
+
+.np-coleccion-radio input[type="radio"]:checked {
+    accent-color: #5fd6ff;
+}
+
 /* Labels e Inputs */
 .np-label {
     display: flex;

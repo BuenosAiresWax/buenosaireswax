@@ -93,6 +93,73 @@
     box-shadow: 0 0 16px rgba(0, 255, 153, 0.2);
 }
 
+/* ❌ Pedido Cancelado */
+.pedido-card.cancelado {
+    background: linear-gradient(180deg, rgba(220, 38, 38, 0.06), rgba(220, 38, 38, 0.02));
+    border-color: rgba(220, 38, 38, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.pedido-card.cancelado::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #dc2626, #991b1b);
+    z-index: 500;
+}
+
+.pedido-card.cancelado:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 16px rgba(220, 38, 38, 0.15);
+}
+
+.pedido-cancelado-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: auto;
+    width: auto;
+    height: auto;
+    background: linear-gradient(90deg, #dc2626, #991b1b);
+    border-radius: 0 8px 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    pointer-events: none;
+    padding: 0.6rem 1.2rem 0.8rem 1rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    z-index: 80000;
+}
+
+.cancelado-badge {
+    background: none;
+    color: #fff;
+    padding: 0;
+    border-radius: 0;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: none;
+    backdrop-filter: none;
+    line-height: 1.2;
+}
+
+.cancelado-fecha {
+    font-size: 0.7rem;
+    color: #fce8e8;
+    opacity: 0.9;
+    font-style: italic;
+    letter-spacing: 0.3px;
+}
+
 /* Encabezado de cada pedido */
 .pedido-header {
     display: flex;
@@ -105,6 +172,47 @@
     border-bottom: 1px solid #333;
     padding-bottom: 0.4rem;
     margin-bottom: 1rem;
+    position: relative;
+}
+
+.pedido-header h3 {
+    margin: 0;
+}
+
+.pedido-fecha {
+    font-size: 0.85rem;
+    color: #999;
+    margin-top: 0.2rem;
+}
+
+/* Badge de colección */
+.pedido-coleccion-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pedido-coleccion-badge.pedido-pedidos {
+    background: rgba(155, 107, 255, 0.2);
+    color: #b695ff;
+    border: 1px solid #9b6bff;
+}
+
+.pedido-coleccion-badge.pedido-pedidosTienda {
+    background: rgba(95, 214, 255, 0.2);
+    color: #5fd6ff;
+    border: 1px solid #5fd6ff;
+}
+
+.pedido-coleccion-badge.pedido-pedidosEquipamiento {
+    background: rgba(255, 159, 64, 0.2);
+    color: #ff9f40;
+    border: 1px solid #ff9f40;
 }
 
 /* Secciones dentro de la tarjeta */
@@ -188,6 +296,7 @@
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.2s ease;
     transition: .4s;
+    z-index: 10;
 }
 
 .download-btn:hover {
@@ -231,6 +340,7 @@
     height: 45px;
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.2s ease;
+    z-index: 10;
 }
 
 .whatsapp-btn:hover {
@@ -250,6 +360,7 @@
     color: white;
     border: none;
     border-radius: 50%;
+    z-index: 10;
     font-size: 1.3rem;
     width: 45px;
     height: 45px;

@@ -21,7 +21,7 @@ import logo from "../../assets/logo/logo-sin-punto.png";
 import "../styles/admin.css";
 
 export default function PedidosAdmin() {
-    const { pedidos, loading, refetch } = useAdminData();
+    const { pedidos, pedidosTienda, pedidosEquipamiento, loading, refetch } = useAdminData();
 
     const [pedidosVisibles, setPedidosVisibles] = useState([]);
     const [mesesOrdenados, setMesesOrdenados] = useState([]);
@@ -32,12 +32,15 @@ export default function PedidosAdmin() {
     const [busqueda, setBusqueda] = useState("");
     const [cancelandoId, setCancelandoId] = useState(null);
     const [accionMsg, setAccionMsg] = useState("");
+    const [filtroColeccion, setFiltroColeccion] = useState("todos");
 
     // -------------------------------------------------
-    // Normalizar y ordenar pedidos (desde contexto)
+    // Combinar todos los pedidos de todas las colecciones
     // -------------------------------------------------
-    const pedidosTodos = useMemo(() => {
-        return pedidos
+    const todosPedidosCombinados = useMemo(() => {
+        const combinados = [...pedidos, ...pedidosTienda, ...pedidosEquipamiento];
+        
+        return combinados
             .map(p => ({
                 ...p,
                 fechaObj: p.fechaObj ?? normalizarFecha(
@@ -45,7 +48,21 @@ export default function PedidosAdmin() {
                 ),
             }))
             .sort((a, b) => b.fechaObj - a.fechaObj);
-    }, [pedidos]);
+    }, [pedidos, pedidosTienda, pedidosEquipamiento]);
+
+    // -------------------------------------------------
+    // Normalizar y ordenar pedidos
+    // -------------------------------------------------
+    const pedidosTodos = useMemo(() => {
+        let lista = [...todosPedidosCombinados];
+        
+        // Filtrar por colección si es necesario
+        if (filtroColeccion !== "todos") {
+            lista = lista.filter(p => p.sourceCollection === filtroColeccion);
+        }
+        
+        return lista;
+    }, [todosPedidosCombinados, filtroColeccion]);
 
     // -------------------------------------------------
     // Agrupar por mes (primer render)
@@ -478,6 +495,34 @@ export default function PedidosAdmin() {
         <div>
             <h2 className="productos-admin-title">Lista de Pedidos</h2>
 
+            {/* Selector de Colecciones de Pedidos */}
+            <div className="colecciones-selector">
+                <button
+                    className={`coleccion-btn ${filtroColeccion === "todos" ? "activa" : ""}`}
+                    onClick={() => setFiltroColeccion("todos")}
+                >
+                    📋 Todos
+                </button>
+                <button
+                    className={`coleccion-btn ${filtroColeccion === "pedidos" ? "activa" : ""}`}
+                    onClick={() => setFiltroColeccion("pedidos")}
+                >
+                    🎵 Drops
+                </button>
+                <button
+                    className={`coleccion-btn ${filtroColeccion === "pedidosTienda" ? "activa" : ""}`}
+                    onClick={() => setFiltroColeccion("pedidosTienda")}
+                >
+                    🏪 Tienda
+                </button>
+                <button
+                    className={`coleccion-btn ${filtroColeccion === "pedidosEquipamiento" ? "activa" : ""}`}
+                    onClick={() => setFiltroColeccion("pedidosEquipamiento")}
+                >
+                    🎛️ Equipamiento
+                </button>
+            </div>
+
             <div className="orden-selector">
                 <input
                     type="text"
@@ -518,7 +563,18 @@ export default function PedidosAdmin() {
 
             <div className="cards-container">
                 {pedidosFiltrados.map(pedido => (
-                    <div key={pedido.id} className="pedido-card">
+                    <div key={pedido.id} className={`pedido-card ${pedido.cancelado ? "cancelado" : ""}`}>
+
+                        {pedido.cancelado && (
+                            <div className="pedido-cancelado-overlay">
+                                <span className="cancelado-badge">❌ CANCELADO</span>
+                                {pedido.canceladoAt && (
+                                    <span className="cancelado-fecha">
+                                        Cancelado: {new Date(pedido.canceladoAt).toLocaleDateString('es-AR')}
+                                    </span>
+                                )}
+                            </div>
+                        )}
 
                         <button
                             className="download-btn"
@@ -549,6 +605,11 @@ export default function PedidosAdmin() {
                             <h3>{pedido.cliente || "No disponible"}</h3>
                             <span className="pedido-fecha">
                                 {pedido.fecha || "No disponible"}
+                            </span>
+                            <span className={`pedido-coleccion-badge pedido-${pedido.sourceCollection}`}>
+                                {pedido.sourceCollection === "pedidos" && "🎵 Drop"}
+                                {pedido.sourceCollection === "pedidosTienda" && "🏪 Tienda"}
+                                {pedido.sourceCollection === "pedidosEquipamiento" && "🎛️ Equipamiento"}
                             </span>
                         </div>
 
