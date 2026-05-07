@@ -10,6 +10,7 @@ import AdminPedidosRealtimeRoute from "./components/AdminPedidosRealtimeRoute.js
 import ProductPage from "./components/ProductPage.jsx";
 import AppLayout from "./components/AppLayout.jsx";
 import CatalogPage from "./components/CatalogPage.jsx";
+import CatalogAccessGate from "./components/CatalogAccessGate.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -21,18 +22,37 @@ createRoot(document.getElementById("root")).render(
               <Route index element={<App />} />
               <Route path="drop" element={<App forceDrop />} />
               <Route path="producto/:id" element={<ProductPage catalogKey="drop" />} />
-              <Route path="tienda" element={<CatalogPage catalogKey="tienda" />} />
+              <Route
+                path="tienda"
+                element={
+                  <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
+                    <CatalogPage catalogKey="tienda" />
+                  </CatalogAccessGate>
+                }
+              />
               <Route
                 path="tienda/producto/:id"
-                element={<ProductPage catalogKey="tienda" />}
+                element={
+                  <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
+                    <ProductPage catalogKey="tienda" />
+                  </CatalogAccessGate>
+                }
               />
               <Route
                 path="equipamiento"
-                element={<CatalogPage catalogKey="equipamiento" />}
+                element={
+                  <CatalogAccessGate sectionKey="equipamiento" sectionLabel="Equipamiento">
+                    <CatalogPage catalogKey="equipamiento" />
+                  </CatalogAccessGate>
+                }
               />
               <Route
                 path="equipamiento/producto/:id"
-                element={<ProductPage catalogKey="equipamiento" />}
+                element={
+                  <CatalogAccessGate sectionKey="equipamiento" sectionLabel="Equipamiento">
+                    <ProductPage catalogKey="equipamiento" />
+                  </CatalogAccessGate>
+                }
               />
             </Route>
             <Route path="/admin" element={<AdminRoute />} />

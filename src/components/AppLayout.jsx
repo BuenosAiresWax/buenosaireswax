@@ -6,7 +6,7 @@ import PlayerBar from "../player/PlayerBar";
 import logo from "../../assets/logo/header-logo.png";
 
 const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
-const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-04-24T15:20:00";
+const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-05-09T20:00:00";
 
 function hasValidAccess() {
   const isAuth = localStorage.getItem("autenticado") === "true";
