@@ -43,7 +43,7 @@
 }
 
 .coleccion-btn.activa {
-    background: linear-gradient(90deg, #9b6bff, #5fd6ff);
+    background: linear-gradient(90deg, #9a6bff45, #5fd7ff4f);
     border-color: transparent;
     color: #fff;
     box-shadow: 0 4px 12px rgba(155, 107, 255, 0.3);
