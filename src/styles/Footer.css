@@ -1,5 +1,6 @@
 .footer {
-    background-color: var(--color-fondo);
+    background-color: transparent;
+    background-image: none;
     color: white;
     display: flex;
     justify-content: space-between;

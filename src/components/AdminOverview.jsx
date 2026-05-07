@@ -74,7 +74,7 @@ function normalizarFecha(campoFecha) {
     return new Date(0);
 }
 
-function esPedidoCancelado(valorCancelado) {
+function esValorCancelado(valorCancelado) {
     if (typeof valorCancelado === "boolean") return valorCancelado;
     if (typeof valorCancelado === "number") return valorCancelado === 1;
 
@@ -86,6 +86,18 @@ function esPedidoCancelado(valorCancelado) {
     }
 
     return false;
+}
+
+function esPedidoCancelado(pedido) {
+    if (!pedido || typeof pedido !== "object") return false;
+
+    return (
+        esValorCancelado(pedido.cancelado) ||
+        esValorCancelado(pedido.cancelada) ||
+        esValorCancelado(pedido.estado) ||
+        esValorCancelado(pedido.status) ||
+        Boolean(pedido.canceladoAt)
+    );
 }
 
 /* ------- Helper: agrupar pedidos por clave año-mes "YYYY-MM" ------- */
@@ -193,7 +205,7 @@ export default function AdminOverview() {
     // Filtrar pedidos NO cancelados para cálculos
     // -------------------------
     const pedidosActivos = pedidosFiltrados.filter(
-        (p) => !esPedidoCancelado(p.cancelado ?? p.cancelada ?? p.estado)
+        (p) => !esPedidoCancelado(p)
     );
     const cantidadCancelados = pedidosFiltrados.length - pedidosActivos.length;
 

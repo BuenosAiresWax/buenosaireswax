@@ -236,7 +236,8 @@
 .filters-sidebar {
     position: relative;
     width: 200px;
-    background-color: var(--color-fondo);
+    background-color: transparent;
+    background-image: none;
     padding: 1rem;
     padding-left: 8%;
     z-index: 10;
@@ -309,7 +310,8 @@
 .filters-sidebar {
     position: relative;
     width: 200px;
-    background-color: var(--color-fondo);
+    background-color: transparent;
+    background-image: none;
     padding: 1rem;
     padding-left: 8%;
     z-index: 10;
@@ -333,7 +335,8 @@
         top: 0;
         width: 200px;
         height: 100vh;
-        background-color: var(--color-fondo);
+        background-color: transparent;
+        background-image: none;
         padding: 1rem;
         z-index: 1001;
         display: none;
