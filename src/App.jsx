@@ -19,7 +19,7 @@ const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
    (solo cambias esto cada mes)
 ================================ */
 
-const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-04-28T15:20:00";
+const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-05-09T15:20:00";
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 function App({ forceDrop = false }) {

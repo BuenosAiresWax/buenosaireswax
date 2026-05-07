@@ -12,6 +12,43 @@ const COLECCIONES = {
     equipamiento: { label: "🎛️ Equipamiento", key: "equipamiento", firebaseCollection: "equipamiento" },
 };
 
+const EDITABLE_NUMERIC_FIELDS = ["precio", "cantidad", "reservados"];
+
+const DEFAULT_PRODUCT_VALUES = {
+    titulo: "",
+    precio: 0,
+    descripcion: "",
+    autor: "",
+    genero: "",
+    estilo: "",
+    categoria: "",
+    catalogo: "",
+    escucha: "",
+    sello: "",
+    cantidad: 0,
+    reservados: 0,
+    imagen: "",
+};
+
+const parseNumericValue = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const normalizeProductForEdit = (producto = {}) => ({
+    ...DEFAULT_PRODUCT_VALUES,
+    ...producto,
+    precio: parseNumericValue(producto?.precio),
+    cantidad: parseNumericValue(producto?.cantidad),
+    reservados: parseNumericValue(producto?.reservados),
+});
+
+const getTextOrFallback = (value, fallback = "Sin dato") => {
+    if (value === null || value === undefined) return fallback;
+    const text = String(value).trim();
+    return text === "" ? fallback : text;
+};
+
 export default function ProductosAdmin() {
     const { productos, productosTienda, equipamiento, loading, refetch } = useAdminData();
 
@@ -42,7 +79,7 @@ export default function ProductosAdmin() {
         if (busqueda.trim() !== "") {
             const q = busqueda.toLowerCase();
             lista = lista.filter((p) =>
-                [p.titulo, p.autor, p.genero, p.estilo, p.categoria, p.sello]
+                [p.titulo, p.autor, p.genero, p.estilo, p.categoria, p.catalogo, p.escucha, p.sello]
                     .some((campo) => campo?.toLowerCase().includes(q))
             );
         }
@@ -67,7 +104,7 @@ export default function ProductosAdmin() {
     ------------------------------ */
     const handleEdit = (producto) => {
         setEditando(producto.id);
-        setFormData({ ...producto });
+        setFormData(normalizeProductForEdit(producto));
     };
 
     const handleCancel = () => {
@@ -79,14 +116,20 @@ export default function ProductosAdmin() {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]:
-                name === "precio" || name === "cantidad" || name === "reservados"
-                    ? Number(value)
-                    : value,
+            [name]: EDITABLE_NUMERIC_FIELDS.includes(name) ? parseNumericValue(value) : value,
         }));
     };
 
     const handleSave = (id) => {
+        const { id: _omitId, ...restFormData } = formData;
+        const payload = {
+            ...DEFAULT_PRODUCT_VALUES,
+            ...restFormData,
+            precio: parseNumericValue(restFormData?.precio),
+            cantidad: parseNumericValue(restFormData?.cantidad),
+            reservados: parseNumericValue(restFormData?.reservados),
+        };
+
         setModal({
             type: "confirm",
             message: "¿Guardar los cambios realizados en este producto?",
@@ -96,7 +139,7 @@ export default function ProductosAdmin() {
 
                 try {
                     const firebaseCollection = COLECCIONES[coleccionSeleccionada].firebaseCollection;
-                    await updateDoc(doc(db, firebaseCollection, id), formData);
+                    await updateDoc(doc(db, firebaseCollection, id), payload);
 
                     await refetch();
 
@@ -273,75 +316,114 @@ export default function ProductosAdmin() {
                                     </div>
                                 )}
 
-                                {producto.imagen ? (
-                                    <img
-                                        src={producto.imagen}
-                                        alt={producto.titulo}
-                                        className="producto-imagen"
-                                    />
-                                ) : (
-                                    <div className="producto-imagen-placeholder" />
-                                )}
+                                <div className="producto-top">
+                                    {producto.imagen ? (
+                                        <img
+                                            src={producto.imagen}
+                                            alt={producto.titulo}
+                                            className="producto-imagen"
+                                        />
+                                    ) : (
+                                        <div className="producto-imagen-placeholder" />
+                                    )}
+
+                                    <div className="producto-main">
+                                        {isEditing ? (
+                                            <>
+                                                <label className="edit-field">
+                                                    <span>Titulo</span>
+                                                    <input
+                                                        name="titulo"
+                                                        value={formData.titulo ?? ""}
+                                                        onChange={handleChange}
+                                                        className="input-edit"
+                                                        placeholder="Titulo"
+                                                    />
+                                                </label>
+                                                <label className="edit-field">
+                                                    <span>Precio</span>
+                                                    <input
+                                                        name="precio"
+                                                        type="number"
+                                                        value={formData.precio ?? 0}
+                                                        onChange={handleChange}
+                                                        className="input-edit"
+                                                        placeholder="Precio"
+                                                    />
+                                                </label>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h3>{getTextOrFallback(producto.titulo, "Sin titulo")}</h3>
+                                                <p className="precio">
+                                                    <strong>Precio:</strong> $
+                                                    {parseNumericValue(producto.precio).toLocaleString("es-AR")}
+                                                </p>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
 
                                 <div className="producto-info">
                                     {isEditing ? (
                                         <>
-                                            <input
-                                                name="titulo"
-                                                value={formData.titulo}
-                                                onChange={handleChange}
-                                                className="input-edit"
-                                            />
-                                            <input
-                                                name="precio"
-                                                type="number"
-                                                value={formData.precio}
-                                                onChange={handleChange}
-                                                className="input-edit"
-                                            />
-                                            <textarea
-                                                name="descripcion"
-                                                value={formData.descripcion}
-                                                onChange={handleChange}
-                                                className="textarea-edit"
-                                            />
-
-                                            <div className="info-grid">
-                                                {[
-                                                    "autor",
-                                                    "genero",
-                                                    "estilo",
-                                                    "categoria",
-                                                    "sello",
-                                                ].map((campo) => (
-                                                    <input
-                                                        key={campo}
-                                                        name={campo}
-                                                        value={
-                                                            formData[campo] ||
-                                                            ""
-                                                        }
+                                            <div className="producto-body">
+                                                <label className="edit-field">
+                                                    <span>Descripcion</span>
+                                                    <textarea
+                                                        name="descripcion"
+                                                        value={formData.descripcion ?? ""}
                                                         onChange={handleChange}
-                                                        className="input-edit"
+                                                        className="textarea-edit"
+                                                        placeholder="Descripcion"
                                                     />
-                                                ))}
-                                            </div>
+                                                </label>
 
-                                            <div className="stock-info">
-                                                <input
-                                                    name="cantidad"
-                                                    type="number"
-                                                    value={formData.cantidad}
-                                                    onChange={handleChange}
-                                                    className="input-edit small"
-                                                />
-                                                <input
-                                                    name="reservados"
-                                                    type="number"
-                                                    value={formData.reservados}
-                                                    onChange={handleChange}
-                                                    className="input-edit small"
-                                                />
+                                                <div className="edit-grid">
+                                                    {[
+                                                        "autor",
+                                                        "genero",
+                                                        "estilo",
+                                                        "categoria",
+                                                        "catalogo",
+                                                        "escucha",
+                                                        "sello",
+                                                    ].map((campo) => (
+                                                        <label key={campo} className="edit-field">
+                                                            <span>{campo.charAt(0).toUpperCase() + campo.slice(1)}</span>
+                                                            <input
+                                                                name={campo}
+                                                                value={formData[campo] ?? ""}
+                                                                onChange={handleChange}
+                                                                className="input-edit"
+                                                                placeholder={campo}
+                                                            />
+                                                        </label>
+                                                    ))}
+                                                </div>
+
+                                                <div className="stock-info edit-stock">
+                                                    <label className="edit-field compact">
+                                                        <span>Cantidad</span>
+                                                        <input
+                                                            name="cantidad"
+                                                            type="number"
+                                                            value={formData.cantidad ?? 0}
+                                                            onChange={handleChange}
+                                                            className="input-edit small"
+                                                        />
+                                                    </label>
+                                                    <label className="edit-field compact">
+                                                        <span>Reservados</span>
+                                                        <input
+                                                            name="reservados"
+                                                            type="number"
+                                                            value={formData.reservados ?? 0}
+                                                            onChange={handleChange}
+                                                            className="input-edit small"
+                                                        />
+                                                    </label>
+                                                </div>
                                             </div>
 
                                             <div className="edit-actions">
@@ -366,48 +448,49 @@ export default function ProductosAdmin() {
                                             </div>
                                         </>
                                     ) : (
-                                        <>
-                                            <h3>{producto.titulo}</h3>
-                                            <p className="precio">
-                                                <strong>Precio:</strong> $
-                                                {producto.precio?.toLocaleString()}
-                                            </p>
-
+                                        <div className="producto-body">
                                             <div className="info-grid">
                                                 <p>
                                                     <strong>Autor:</strong>{" "}
-                                                    {producto.autor}
+                                                    {getTextOrFallback(producto.autor)}
                                                 </p>
                                                 <p>
                                                     <strong>Género:</strong>{" "}
-                                                    {producto.genero} —{" "}
-                                                    {producto.estilo}
+                                                    {getTextOrFallback(producto.genero)} / {getTextOrFallback(producto.estilo)}
                                                 </p>
                                                 <p>
                                                     <strong>Categoría:</strong>{" "}
-                                                    {producto.categoria}
+                                                    {getTextOrFallback(producto.categoria)}
+                                                </p>
+                                                <p>
+                                                    <strong>Catálogo:</strong>{" "}
+                                                    {getTextOrFallback(producto.catalogo)}
+                                                </p>
+                                                <p>
+                                                    <strong>Escucha:</strong>{" "}
+                                                    {getTextOrFallback(producto.escucha)}
                                                 </p>
                                                 <p>
                                                     <strong>Sello:</strong>{" "}
-                                                    {producto.sello}
+                                                    {getTextOrFallback(producto.sello)}
                                                 </p>
                                             </div>
 
                                             <p className="descripcion">
-                                                {producto.descripcion}
+                                                {getTextOrFallback(producto.descripcion, "Sin descripcion")}
                                             </p>
 
                                             <div className="stock-info">
                                                 <div className="stock-item total">
                                                     <span>Stock</span>
                                                     <strong>
-                                                        {producto.cantidad}
+                                                        {parseNumericValue(producto.cantidad)}
                                                     </strong>
                                                 </div>
                                                 <div className="stock-item reservados">
                                                     <span>Reservados</span>
                                                     <strong>
-                                                        {producto.reservados}
+                                                        {parseNumericValue(producto.reservados)}
                                                     </strong>
                                                 </div>
                                                 <div
@@ -422,7 +505,7 @@ export default function ProductosAdmin() {
                                                     </strong>
                                                 </div>
                                             </div>
-                                        </>
+                                        </div>
                                     )}
                                 </div>
                             </div>
