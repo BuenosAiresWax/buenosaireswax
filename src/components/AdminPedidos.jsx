@@ -20,6 +20,64 @@ import { db } from "../firebase/config";
 import logo from "../../assets/logo/logo-sin-punto.png";
 import "../styles/admin.css";
 
+function esValorCancelado(valorCancelado) {
+    if (typeof valorCancelado === "boolean") return valorCancelado;
+    if (typeof valorCancelado === "number") return valorCancelado === 1;
+
+    if (typeof valorCancelado === "string") {
+        const v = valorCancelado.trim().toLowerCase();
+        if (v.includes("cancel")) return true;
+        if (["true", "1", "si", "sí", "cancelado", "cancelada"].includes(v)) return true;
+        if (["false", "0", "no", "activo", "activa"].includes(v)) return false;
+    }
+
+    return false;
+}
+
+function esPedidoCancelado(pedido) {
+    if (!pedido || typeof pedido !== "object") return false;
+
+    return (
+        esValorCancelado(pedido.cancelado) ||
+        esValorCancelado(pedido.cancelada) ||
+        esValorCancelado(pedido.estado) ||
+        esValorCancelado(pedido.status) ||
+        Boolean(pedido.canceladoAt)
+    );
+}
+
+function formatearFecha(valor) {
+    const normalizada = normalizarFecha(valor);
+    if (normalizada instanceof Date && !isNaN(normalizada)) {
+        return normalizada.toLocaleString("es-AR");
+    }
+    return "No disponible";
+}
+
+function obtenerEstadoPedido(pedido) {
+    const cancelado = esPedidoCancelado(pedido);
+    return {
+        texto: cancelado ? "Cancelado" : "Activo",
+        cancelado,
+        fechaCancelacion: pedido?.canceladoAt ? formatearFecha(pedido.canceladoAt) : "—",
+    };
+}
+
+function obtenerNombreOrigen(sourceCollection) {
+    if (sourceCollection === "pedidos") return "Drop";
+    if (sourceCollection === "pedidosTienda") return "Tienda";
+    if (sourceCollection === "pedidosEquipamiento") return "Equipamiento";
+    return sourceCollection || "No disponible";
+}
+
+function obtenerDireccionResumida(pedido) {
+    const partes = [pedido?.direccion, pedido?.ciudad, pedido?.departamento, pedido?.codigoPostal]
+        .map((v) => (v || "").trim())
+        .filter(Boolean);
+
+    return partes.length ? partes.join(" | ") : "No disponible";
+}
+
 export default function PedidosAdmin() {
     const { pedidos, pedidosTienda, pedidosEquipamiento, loading, refetch } = useAdminData();
 
@@ -300,9 +358,9 @@ export default function PedidosAdmin() {
 
         // ---------- PDF ----------
         if (formato.includes("pdf")) {
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text(
+            const pdfDoc = new jsPDF();
+            pdfDoc.setFontSize(18);
+            pdfDoc.text(
                 formato.includes("UltimoMes")
                     ? "Pedidos del Último Mes"
                     : "Lista Completa de Pedidos",
@@ -314,43 +372,61 @@ export default function PedidosAdmin() {
             let y = 30;
 
             listaFuente.forEach((p, i) => {
-                doc.setFontSize(12);
-                doc.text(`Pedido ${i + 1}`, 15, y);
+                const estadoInfo = obtenerEstadoPedido(p);
+                const origen = obtenerNombreOrigen(p.sourceCollection);
+                const fechaPedido = formatearFecha(
+                    p.fechaObj ?? p.fecha ?? p.createdAt ?? p.fechaCreacion ?? p.created_at ?? p.timestamp
+                );
+
+                pdfDoc.setFont("helvetica", "bold");
+                pdfDoc.setFontSize(12);
+                pdfDoc.text(`Pedido ${i + 1} - ${p.id || "sin-id"}`, 15, y);
                 y += 6;
 
-                autoTable(doc, {
+                autoTable(pdfDoc, {
                     startY: y,
                     body: [
+                        ["Estado", estadoInfo.texto],
+                        ["Fecha cancelación", estadoInfo.fechaCancelacion],
+                        ["Origen", origen],
+                        ["Catálogo", p.catalogo || "—"],
                         ["Cliente", p.cliente || "—"],
+                        ["Instagram", p.instagram || "—"],
+                        ["DNI", p.dni || "—"],
                         ["Correo", p.correo || "—"],
-                        ["Fecha", p.fecha || p.fechaObj.toLocaleString()],
-                        ["Total", `$${p.total || 0}`],
+                        ["Teléfono", p.telefono || "—"],
+                        ["Método entrega", p.metodoEntrega || "—"],
+                        ["Dirección", obtenerDireccionResumida(p)],
+                        ["Fecha pedido", fechaPedido],
+                        ["Total", `$${Number(p.total) || 0}`],
                     ],
                     theme: "plain",
                 });
 
-                y = doc.lastAutoTable.finalY + 8;
+                y = pdfDoc.lastAutoTable.finalY + 8;
 
-                autoTable(doc, {
+                autoTable(pdfDoc, {
                     startY: y,
-                    head: [["Producto", "Cant.", "Precio", "Subtotal"]],
+                    head: [["Producto", "Autor", "Colección", "Cant.", "Precio", "Subtotal"]],
                     body:
                         p.productos?.map(prod => [
-                            prod.titulo,
-                            prod.cantidad,
-                            `$${prod.precioUnitario}`,
-                            `$${prod.subtotal}`,
-                        ]) || [],
+                            prod?.titulo || "—",
+                            prod?.autor || "—",
+                            prod?.coleccion || prod?.categoria || "—",
+                            Number(prod?.cantidad) || 0,
+                            `$${Number(prod?.precioUnitario) || 0}`,
+                            `$${Number(prod?.subtotal) || 0}`,
+                        ]) || [["—", "—", "—", 0, "$0", "$0"]],
                 });
 
-                y = doc.lastAutoTable.finalY + 15;
+                y = pdfDoc.lastAutoTable.finalY + 15;
                 if (y > 270) {
-                    doc.addPage();
+                    pdfDoc.addPage();
                     y = 30;
                 }
             });
 
-            doc.save(
+            pdfDoc.save(
                 formato.includes("UltimoMes")
                     ? "pedidos_ultimo_mes.pdf"
                     : "lista_pedidos.pdf"
@@ -362,16 +438,67 @@ export default function PedidosAdmin() {
             const filas = [];
 
             listaFuente.forEach(p => {
-                p.productos?.forEach((prod, i) => {
+                const estadoInfo = obtenerEstadoPedido(p);
+                const origen = obtenerNombreOrigen(p.sourceCollection);
+                const fechaPedido = formatearFecha(
+                    p.fechaObj ?? p.fecha ?? p.createdAt ?? p.fechaCreacion ?? p.created_at ?? p.timestamp
+                );
+                const productos = Array.isArray(p.productos) ? p.productos : [];
+
+                if (productos.length === 0) {
                     filas.push({
-                        Cliente: p.cliente,
-                        Correo: p.correo,
-                        Fecha: p.fecha || p.fechaObj.toLocaleString(),
-                        Producto: prod.titulo,
-                        Cantidad: prod.cantidad,
-                        Precio: prod.precioUnitario,
-                        Subtotal: prod.subtotal,
-                        Total: i === 0 ? p.total : "",
+                        PedidoId: p.id || "",
+                        Estado: estadoInfo.texto,
+                        FechaCancelacion: estadoInfo.fechaCancelacion,
+                        Origen: origen,
+                        Catalogo: p.catalogo || "",
+                        Cliente: p.cliente || "",
+                        Instagram: p.instagram || "",
+                        DNI: p.dni || "",
+                        Correo: p.correo || "",
+                        Telefono: p.telefono || "",
+                        Fecha: fechaPedido,
+                        MetodoEntrega: p.metodoEntrega || "",
+                        Direccion: p.direccion || "",
+                        Departamento: p.departamento || "",
+                        Ciudad: p.ciudad || "",
+                        CodigoPostal: p.codigoPostal || "",
+                        Producto: "",
+                        AutorProducto: "",
+                        ColeccionProducto: "",
+                        Cantidad: "",
+                        PrecioUnitario: "",
+                        Subtotal: "",
+                        Total: Number(p.total) || 0,
+                    });
+                    return;
+                }
+
+                productos.forEach((prod, i) => {
+                    filas.push({
+                        PedidoId: p.id || "",
+                        Estado: estadoInfo.texto,
+                        FechaCancelacion: estadoInfo.fechaCancelacion,
+                        Origen: origen,
+                        Catalogo: p.catalogo || "",
+                        Cliente: p.cliente || "",
+                        Instagram: p.instagram || "",
+                        DNI: p.dni || "",
+                        Correo: p.correo || "",
+                        Telefono: p.telefono || "",
+                        Fecha: fechaPedido,
+                        MetodoEntrega: p.metodoEntrega || "",
+                        Direccion: p.direccion || "",
+                        Departamento: p.departamento || "",
+                        Ciudad: p.ciudad || "",
+                        CodigoPostal: p.codigoPostal || "",
+                        Producto: prod?.titulo || "",
+                        AutorProducto: prod?.autor || "",
+                        ColeccionProducto: prod?.coleccion || prod?.categoria || "",
+                        Cantidad: Number(prod?.cantidad) || 0,
+                        PrecioUnitario: Number(prod?.precioUnitario) || 0,
+                        Subtotal: Number(prod?.subtotal) || 0,
+                        Total: i === 0 ? Number(p.total) || 0 : "",
                     });
                 });
             });
@@ -395,87 +522,130 @@ export default function PedidosAdmin() {
     // PDF individual
     // -------------------------------------------------
     const handleDescargarPDF = async (pedido) => {
-        const doc = new jsPDF({ orientation: "portrait" });
+        const pdfDoc = new jsPDF({ orientation: "portrait" });
+        const estadoInfo = obtenerEstadoPedido(pedido);
+        const origen = obtenerNombreOrigen(pedido?.sourceCollection);
+        const fechaPedido = formatearFecha(
+            pedido?.fechaObj ?? pedido?.fecha ?? pedido?.createdAt ?? pedido?.fechaCreacion ?? pedido?.created_at ?? pedido?.timestamp
+        );
 
         // Logo
         try {
             const img = new Image();
             img.src = logo;
             await new Promise(res => img.onload = res);
-            doc.addImage(img, "PNG", 15, 10, 25, 25);
+            pdfDoc.addImage(img, "PNG", 15, 10, 25, 25);
         } catch (e) {
             console.warn("No se pudo cargar el logo");
         }
 
         let y = 45;
 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(20);
-        doc.text("Comprobante de Envío", 105, 25, { align: "center" });
+        pdfDoc.setFont("helvetica", "bold");
+        pdfDoc.setFontSize(20);
+        pdfDoc.text("Comprobante de Pedido", 105, 25, { align: "center" });
 
-        doc.setDrawColor(160);
-        doc.line(15, 35, 195, 35);
+        pdfDoc.setDrawColor(160);
+        pdfDoc.line(15, 35, 195, 35);
+
+        autoTable(pdfDoc, {
+            startY: y,
+            body: [
+                ["Pedido ID", pedido?.id || "No disponible"],
+                ["Estado", estadoInfo.texto],
+                ["Fecha cancelación", estadoInfo.fechaCancelacion],
+                ["Origen", origen],
+                ["Catálogo", pedido?.catalogo || "No disponible"],
+                ["Fecha pedido", fechaPedido],
+                ["Total", `$${Number(pedido?.total) || 0}`],
+            ],
+            theme: "grid",
+            styles: { fontSize: 10 },
+            margin: { left: 15, right: 15 },
+            headStyles: { fillColor: estadoInfo.cancelado ? [185, 28, 28] : [22, 163, 74] },
+        });
+
+        y = pdfDoc.lastAutoTable.finalY + 8;
 
         // -------- DATOS CLIENTE --------
-        doc.setFontSize(12);
-        doc.text("Datos del Cliente:", 15, y);
+        pdfDoc.setFontSize(12);
+        pdfDoc.text("Datos del Cliente:", 15, y);
         y += 8;
 
-        doc.setFont("helvetica", "normal");
-        doc.text(`Nombre: ${pedido.cliente || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Correo: ${pedido.correo || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Teléfono: ${pedido.telefono || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Instagram: ${pedido.instagram || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Método de entrega: ${pedido.metodoEntrega || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Fecha: ${pedido.fecha || "No disponible"}`, 15, y); y += 10;
+        autoTable(pdfDoc, {
+            startY: y,
+            body: [
+                ["Nombre", pedido?.cliente || "No disponible"],
+                ["Correo", pedido?.correo || "No disponible"],
+                ["Teléfono", pedido?.telefono || "No disponible"],
+                ["Instagram", pedido?.instagram || "No disponible"],
+                ["DNI", pedido?.dni || "No disponible"],
+                ["Método de entrega", pedido?.metodoEntrega || "No disponible"],
+            ],
+            theme: "plain",
+            styles: { fontSize: 11 },
+            margin: { left: 15, right: 15 },
+        });
+
+        y = pdfDoc.lastAutoTable.finalY + 8;
 
         // -------- DIRECCIÓN --------
-        doc.setFont("helvetica", "bold");
-        doc.text("Dirección de Envío:", 15, y);
+        pdfDoc.setFont("helvetica", "bold");
+        pdfDoc.text("Dirección de Envío:", 15, y);
         y += 8;
 
-        doc.setFont("helvetica", "normal");
-        doc.text(`Dirección: ${pedido.direccion || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Ciudad: ${pedido.ciudad || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Código Postal: ${pedido.codigoPostal || "No disponible"}`, 15, y); y += 7;
-        doc.text(`Departamento: ${pedido.departamento || "No disponible"}`, 15, y); y += 7;
-        doc.text(`DNI: ${pedido.dni || "No disponible"}`, 15, y); y += 10;
+        autoTable(pdfDoc, {
+            startY: y,
+            body: [
+                ["Dirección", pedido?.direccion || "No disponible"],
+                ["Ciudad", pedido?.ciudad || "No disponible"],
+                ["Código Postal", pedido?.codigoPostal || "No disponible"],
+                ["Departamento", pedido?.departamento || "No disponible"],
+            ],
+            theme: "plain",
+            styles: { fontSize: 11 },
+            margin: { left: 15, right: 15 },
+        });
+
+        y = pdfDoc.lastAutoTable.finalY + 8;
 
         // -------- PRODUCTOS --------
         const productos = pedido.productos?.map(p => [
-            p.titulo,
-            p.cantidad,
-            `$${p.precioUnitario}`,
-            `$${p.subtotal}`
-        ]) || [];
+            p?.titulo || "—",
+            p?.autor || "—",
+            p?.coleccion || p?.categoria || "—",
+            Number(p?.cantidad) || 0,
+            `$${Number(p?.precioUnitario) || 0}`,
+            `$${Number(p?.subtotal) || 0}`
+        ]) || [["—", "—", "—", 0, "$0", "$0"]];
 
-        autoTable(doc, {
+        autoTable(pdfDoc, {
             startY: y,
-            head: [["Producto", "Cantidad", "Precio", "Subtotal"]],
+            head: [["Producto", "Autor", "Colección", "Cantidad", "Precio", "Subtotal"]],
             body: productos,
             theme: "grid",
             styles: { fontSize: 11 },
             headStyles: { fillColor: [120, 120, 120] },
             margin: { left: 15, right: 15 },
             didDrawPage: () => {
-                doc.setFontSize(10);
-                doc.text("Comprobante de Envío", 105, 290, { align: "center" });
+                pdfDoc.setFontSize(10);
+                pdfDoc.text("Comprobante de Pedido", 105, 290, { align: "center" });
             }
         });
 
-        y = doc.lastAutoTable.finalY + 10;
+        y = pdfDoc.lastAutoTable.finalY + 10;
 
         // -------- TOTAL (SIEMPRE VISIBLE) --------
         if (y > 270) {
-            doc.addPage();
+            pdfDoc.addPage();
             y = 30;
         }
 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text(`TOTAL: $${pedido.total}`, 15, y);
+        pdfDoc.setFont("helvetica", "bold");
+        pdfDoc.setFontSize(14);
+        pdfDoc.text(`TOTAL: $${Number(pedido?.total) || 0}`, 15, y);
 
-        doc.save(`comprobante_envio_${pedido.id}.pdf`);
+        pdfDoc.save(`comprobante_pedido_${pedido?.id || "sin_id"}.pdf`);
     };
     // -------------------------------------------------
     // WhatsApp
