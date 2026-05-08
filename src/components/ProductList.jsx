@@ -34,6 +34,15 @@ const DEFAULT_FILTERS = {
   verDisponibles: false,
 };
 
+const normalizeFilterValue = (value) =>
+  String(value ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+const isSameFilterValue = (leftValue, rightValue) =>
+  normalizeFilterValue(leftValue) === normalizeFilterValue(rightValue);
+
 const getSavedFilters = (storageKey) => {
   if (typeof window === "undefined") return DEFAULT_FILTERS;
 
@@ -208,10 +217,33 @@ const ProductList = ({ catalogKey = "drop" }) => {
       return a.localeCompare(b, "es", { sensitivity: "base" }); // orden alfabético
     });
 
-  const generos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.genero).filter(Boolean))]), [productos]);
-  const estilos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.estilo).filter(Boolean))]), [productos]);
-  const sellos = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.sello).filter(Boolean))]), [productos]);
-  const autores = useMemo(() => ordenarOpciones([...new Set(productos.map((p) => p.autor).filter(Boolean))]), [productos]);
+  const getUniqueFilterOptions = useCallback(
+    (field) => {
+      const optionsMap = new Map();
+
+      productos.forEach((producto) => {
+        const rawValue = producto?.[field];
+        const displayValue = String(rawValue ?? "")
+          .trim()
+          .replace(/\s+/g, " ");
+        const normalizedValue = normalizeFilterValue(rawValue);
+
+        if (!normalizedValue || optionsMap.has(normalizedValue)) {
+          return;
+        }
+
+        optionsMap.set(normalizedValue, displayValue);
+      });
+
+      return ordenarOpciones([...optionsMap.values()]);
+    },
+    [productos],
+  );
+
+  const generos = useMemo(() => getUniqueFilterOptions("genero"), [getUniqueFilterOptions]);
+  const estilos = useMemo(() => getUniqueFilterOptions("estilo"), [getUniqueFilterOptions]);
+  const sellos = useMemo(() => getUniqueFilterOptions("sello"), [getUniqueFilterOptions]);
+  const autores = useMemo(() => getUniqueFilterOptions("autor"), [getUniqueFilterOptions]);
 
   /* -------------------------------
     FILTROS
@@ -222,10 +254,10 @@ const ProductList = ({ catalogKey = "drop" }) => {
       .map((producto) => ({
         ...producto,
         titulo: producto.titulo?.trim() || "",
-        sello: producto.sello?.trim() || "",
-        autor: producto.autor?.trim() || "",
-        genero: producto.genero?.trim() || "",
-        estilo: producto.estilo?.trim() || "",
+        sello: String(producto.sello ?? "").trim().replace(/\s+/g, " "),
+        autor: String(producto.autor ?? "").trim().replace(/\s+/g, " "),
+        genero: String(producto.genero ?? "").trim().replace(/\s+/g, " "),
+        estilo: String(producto.estilo ?? "").trim().replace(/\s+/g, " "),
       }))
       .filter((producto) => {
         const coincideTexto = (producto.titulo || "")
@@ -233,13 +265,21 @@ const ProductList = ({ catalogKey = "drop" }) => {
           .includes(filtroTexto.toLowerCase());
 
         const coincideGenero =
-          !generoSeleccionado || producto.genero === generoSeleccionado;
+          !generoSeleccionado ||
+          normalizeFilterValue(producto.genero) ===
+            normalizeFilterValue(generoSeleccionado);
         const coincideEstilo =
-          !estiloSeleccionado || producto.estilo === estiloSeleccionado;
+          !estiloSeleccionado ||
+          normalizeFilterValue(producto.estilo) ===
+            normalizeFilterValue(estiloSeleccionado);
         const coincideSello =
-          !selloSeleccionado || producto.sello === selloSeleccionado;
+          !selloSeleccionado ||
+          normalizeFilterValue(producto.sello) ===
+            normalizeFilterValue(selloSeleccionado);
         const coincideAutor =
-          !autorSeleccionado || producto.autor === autorSeleccionado;
+          !autorSeleccionado ||
+          normalizeFilterValue(producto.autor) ===
+            normalizeFilterValue(autorSeleccionado);
 
         const stockDisponible =
           (producto.cantidad ?? 0) - (producto.reservados ?? 0) > 0;
@@ -522,7 +562,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                     <button
                       key={g}
                       onClick={() => applySidebarFilter(setGeneroSeleccionado, g)}
-                      className={generoSeleccionado === g ? "active" : ""}
+                      className={isSameFilterValue(generoSeleccionado, g) ? "active" : ""}
                     >
                       {g}
                     </button>
@@ -547,7 +587,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                     <button
                       key={e}
                       onClick={() => applySidebarFilter(setEstiloSeleccionado, e)}
-                      className={estiloSeleccionado === e ? "active" : ""}
+                      className={isSameFilterValue(estiloSeleccionado, e) ? "active" : ""}
                     >
                       {e}
                     </button>
@@ -572,7 +612,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                     <button
                       key={s}
                       onClick={() => applySidebarFilter(setSelloSeleccionado, s)}
-                      className={selloSeleccionado === s ? "active" : ""}
+                      className={isSameFilterValue(selloSeleccionado, s) ? "active" : ""}
                     >
                       {s}
                     </button>
@@ -597,7 +637,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                     <button
                       key={a}
                       onClick={() => applySidebarFilter(setAutorSeleccionado, a)}
-                      className={autorSeleccionado === a ? "active" : ""}
+                      className={isSameFilterValue(autorSeleccionado, a) ? "active" : ""}
                     >
                       {a}
                     </button>
