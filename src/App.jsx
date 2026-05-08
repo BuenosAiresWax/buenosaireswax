@@ -7,6 +7,7 @@ import CartPopupButton from "./components/CartPopupButton";
 import DropAccess from "./components/DropAccess";
 import HeroSlider from "./components/HeroSlider";
 import CatalogPage from "./components/CatalogPage";
+import CatalogAccessGate from "./components/CatalogAccessGate";
 
 import "./styles/styles.css";
 
@@ -183,16 +184,18 @@ function App({ forceDrop = false }) {
     window.dispatchEvent(new Event("bawax-auth-changed"));
   };
 
-  if (!ventanaDropActiva && !forceDrop) {
-    return (
-      <>
-        <CatalogPage catalogKey="tienda" />
-        <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="tienda" />
-        {mostrarModal && (
-          <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="tienda" />
-        )}
-      </>
-    );
+  if (!forceDrop) {
+    if (!ventanaDropActiva) {
+      return (
+        <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
+          <CatalogPage catalogKey="tienda" />
+          <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="tienda" />
+          {mostrarModal && (
+            <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="tienda" />
+          )}
+        </CatalogAccessGate>
+      );
+    }
   }
 
   if (!autenticado) {
@@ -203,6 +206,19 @@ function App({ forceDrop = false }) {
           fechaObjetivo={DROP_DATE}
           onAccesoPermitido={manejarAutenticacion}
         />
+      </>
+    );
+  }
+
+  if (!forceDrop) {
+    return (
+      <>
+        <HeroSlider />
+        <ProductList catalogKey="drop" />
+        <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="drop" />
+        {mostrarModal && (
+          <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="drop" />
+        )}
       </>
     );
   }
