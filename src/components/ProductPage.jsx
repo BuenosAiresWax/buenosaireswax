@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
@@ -21,6 +21,7 @@ const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
 
 function ProductPage({ catalogKey = "drop" }) {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
   const { setTrack } = useContext(PlayerContext); // <-- NUEVO
   const catalog = getCatalogConfig(catalogKey);
@@ -158,7 +159,17 @@ function ProductPage({ catalogKey = "drop" }) {
       <LoaderOverlay visible={isLoading} />
       <div className="detail-grid">
         <div className="breadcrumb">
-          <Link to={catalog.listPath}>{breadcrumbRootLabel}</Link> &gt; <span>{producto.titulo}</span>
+          <button
+            className="breadcrumb-back"
+            onClick={() =>
+              window.history.state?.idx > 0
+                ? navigate(-1)
+                : navigate(catalog.listPath)
+            }
+          >
+            {breadcrumbRootLabel}
+          </button>
+          &gt; <span>{producto.titulo}</span>
         </div>
 
         {/* LEFT - IMAGEN */}

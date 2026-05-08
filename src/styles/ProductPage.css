@@ -23,12 +23,19 @@
   color: #ccc;
 }
 
-.breadcrumb a {
+.breadcrumb a,
+.breadcrumb-back {
   color: #00ff88;
   text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
-.breadcrumb a:hover {
+.breadcrumb a:hover,
+.breadcrumb-back:hover {
   text-decoration: underline;
 }
 

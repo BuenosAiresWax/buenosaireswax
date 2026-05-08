@@ -507,31 +507,6 @@ const ProductList = ({ catalogKey = "drop" }) => {
         {sidebarVisible && isMobile && <div className="sidebar-overlay" onClick={() => setSidebarVisible(false)} />}
         <div className={`filters-sidebar ${sidebarVisible ? 'visible' : ''}`}>
             <div className="sidebar-filter">
-              <button className="filter-toggle" onClick={() => setEstilosOpen(!estilosOpen)}>
-                Estilos {estilosOpen ? '−' : '+'}
-              </button>
-              {estilosOpen && (
-                <div className="filter-options">
-                  <button
-                    onClick={() => applySidebarFilter(setEstiloSeleccionado, "")}
-                    className={estiloSeleccionado === "" ? "active" : ""}
-                  >
-                    Todos
-                  </button>
-                  {estilos.map((e) => (
-                    <button
-                      key={e}
-                      onClick={() => applySidebarFilter(setEstiloSeleccionado, e)}
-                      className={estiloSeleccionado === e ? "active" : ""}
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="sidebar-filter">
               <button className="filter-toggle" onClick={() => setGenerosOpen(!generosOpen)}>
                 Géneros {generosOpen ? '−' : '+'}
               </button>
@@ -550,6 +525,31 @@ const ProductList = ({ catalogKey = "drop" }) => {
                       className={generoSeleccionado === g ? "active" : ""}
                     >
                       {g}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="sidebar-filter">
+              <button className="filter-toggle" onClick={() => setEstilosOpen(!estilosOpen)}>
+                Estilos {estilosOpen ? '−' : '+'}
+              </button>
+              {estilosOpen && (
+                <div className="filter-options">
+                  <button
+                    onClick={() => applySidebarFilter(setEstiloSeleccionado, "")}
+                    className={estiloSeleccionado === "" ? "active" : ""}
+                  >
+                    Todos
+                  </button>
+                  {estilos.map((e) => (
+                    <button
+                      key={e}
+                      onClick={() => applySidebarFilter(setEstiloSeleccionado, e)}
+                      className={estiloSeleccionado === e ? "active" : ""}
+                    >
+                      {e}
                     </button>
                   ))}
                 </div>
