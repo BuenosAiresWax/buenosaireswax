@@ -17,8 +17,7 @@ import {
 
 import "../styles/ProductPage.css";
 
-// Hardcode (válido) para pruebas:
-const HARDCODED_SC_URL = "https://soundcloud.com/forss/flickermood";
+const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
 
 function ProductPage({ catalogKey = "drop" }) {
   const { id } = useParams();
@@ -120,6 +119,15 @@ function ProductPage({ catalogKey = "drop" }) {
   const cartActionLabel = isEquipamientoCatalog
     ? "Consultar disponibilidad"
     : "Añadir al carrito";
+  const escuchaUrl = (producto.escucha || "").trim();
+  const normalizedEscuchaUrl = escuchaUrl.toLowerCase();
+  const hasPlaceholderEscuchaUrl =
+    normalizedEscuchaUrl === PLACEHOLDER_LISTEN_URL.toLowerCase();
+  const hasValidEscuchaUrl = /^https?:\/\//i.test(escuchaUrl);
+  const canPlayProduct =
+    !isEquipamientoCatalog &&
+    !hasPlaceholderEscuchaUrl &&
+    hasValidEscuchaUrl;
 
   const cartKey = getCartItemKey({ id, collectionName: catalog.collectionName });
   const carritoItem = cartItems.find((item) => getCartItemKey(item) === cartKey);
@@ -135,7 +143,9 @@ function ProductPage({ catalogKey = "drop" }) {
   };
 
   const handlePlay = () => {
-    setTrack(HARDCODED_SC_URL, true, {
+    if (!canPlayProduct) return;
+
+    setTrack(escuchaUrl, true, {
       titulo: producto.titulo,
       autor: producto.autor,
       imagen: producto.imagen,
@@ -188,7 +198,7 @@ function ProductPage({ catalogKey = "drop" }) {
           </div>
 
           {/* Botón que controla el PLAYER GLOBAL */}
-          {!isEquipamientoCatalog && (
+          {canPlayProduct && (
             <button className="detail-play-btn" onClick={handlePlay}>
               🔊 Reproducir
             </button>

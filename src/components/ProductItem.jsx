@@ -9,7 +9,7 @@ import FaqModal from "./FaqModal";
 import "../styles/ProductItem.css";
 import { attachCatalogMeta, getCartItemKey, getCatalogConfig } from "../utils/catalog";
 
-const HARDCODED_SC_URL = "https://soundcloud.com/forss/flickermood"; // <-- NUEVO (válido)
+const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const showQuickButtons = false;
@@ -95,6 +95,15 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     productoProp.catalogKey === "equipamiento" ||
     producto.catalogKey === "equipamiento" ||
     producto.collectionName === "equipamiento";
+  const escuchaUrl = (producto.escucha || "").trim();
+  const normalizedEscuchaUrl = escuchaUrl.toLowerCase();
+  const hasPlaceholderEscuchaUrl =
+    normalizedEscuchaUrl === PLACEHOLDER_LISTEN_URL.toLowerCase();
+  const hasValidEscuchaUrl = /^https?:\/\//i.test(escuchaUrl);
+  const canShowPlayButton =
+    !isEquipamientoCatalog &&
+    !hasPlaceholderEscuchaUrl &&
+    hasValidEscuchaUrl;
   const cartActionLabel = isEquipamientoCatalog
     ? "Consultar disponibilidad"
     : "Agregar al carrito";
@@ -223,7 +232,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              setTrack(HARDCODED_SC_URL, true, {
+              setTrack(escuchaUrl, true, {
                 titulo: producto.titulo,
                 autor: producto.autor,
                 imagen: producto.imagen,
@@ -282,7 +291,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
         <h4 className="sello">Label: {producto.sello}</h4>
 
         <div className="product-actions">
-          {!isEquipamientoCatalog && (
+          {canShowPlayButton && (
             <button
               type="button"
               className="action-button action-play-button"
@@ -290,7 +299,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setTrack(HARDCODED_SC_URL, true, {
+                setTrack(escuchaUrl, true, {
                   titulo: producto.titulo,
                   autor: producto.autor,
                   imagen: producto.imagen,
