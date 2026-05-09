@@ -1,6 +1,7 @@
 import { useMemo, useState, useRef } from "react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { db, storage } from "../firebase/config";
 import { useAdminData } from "../context/AdminDataContext";
 
 import "../styles/adminProductos.css";
@@ -58,6 +59,7 @@ export default function ProductosAdmin() {
     const [formData, setFormData] = useState({});
     const [modal, setModal] = useState(null);
     const [processing, setProcessing] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [orden, setOrden] = useState("mayorPrecio");
     const [coleccionSeleccionada, setColeccionSeleccionada] = useState("productos");
 
@@ -118,6 +120,53 @@ export default function ProductosAdmin() {
             ...prev,
             [name]: EDITABLE_NUMERIC_FIELDS.includes(name) ? parseNumericValue(value) : value,
         }));
+    };
+
+    const handleImageUpload = async (event, productId) => {
+        const inputElement = event.target;
+        const file = inputElement.files?.[0];
+
+        if (!file) return;
+
+        setProcessing(true);
+        setUploadingImage(true);
+        setError(null);
+
+        try {
+            const extension = file.name.includes(".")
+                ? file.name.split(".").pop()?.toLowerCase()
+                : "jpg";
+            const safeProductId = String(productId || formData.titulo || "producto")
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9-_]/g, "-");
+            const fileName = `${safeProductId}-${Date.now()}.${extension || "jpg"}`;
+            const imageRef = ref(storage, `productos/${fileName}`);
+
+            await uploadBytes(imageRef, file, {
+                contentType: file.type || "image/jpeg",
+            });
+
+            const downloadURL = await getDownloadURL(imageRef);
+            setFormData((prev) => ({ ...prev, imagen: downloadURL }));
+
+            setModal({
+                type: "success",
+                message: "Imagen subida correctamente.",
+                onClose: () => setModal(null),
+            });
+        } catch (err) {
+            console.error(err);
+            setModal({
+                type: "error",
+                message: "No se pudo subir la imagen.",
+                onClose: () => setModal(null),
+            });
+        } finally {
+            setProcessing(false);
+            setUploadingImage(false);
+            inputElement.value = "";
+        }
     };
 
     const handleSave = (id) => {
@@ -379,6 +428,37 @@ export default function ProductosAdmin() {
                                                     />
                                                 </label>
 
+                                                <label className="edit-field">
+                                                    <span>Imagen (URL)</span>
+                                                    <input
+                                                        name="imagen"
+                                                        value={formData.imagen ?? ""}
+                                                        onChange={handleChange}
+                                                        className="input-edit"
+                                                        placeholder="https://..."
+                                                    />
+                                                </label>
+
+                                                <label className="edit-field">
+                                                    <span>Subir imagen</span>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(event) => handleImageUpload(event, producto.id)}
+                                                        className="input-edit"
+                                                        disabled={processing}
+                                                    />
+                                                </label>
+
+                                                {formData.imagen && (
+                                                    <p>
+                                                        <strong>URL actual:</strong>{" "}
+                                                        <a href={formData.imagen} target="_blank" rel="noreferrer">
+                                                            Abrir imagen
+                                                        </a>
+                                                    </p>
+                                                )}
+
                                                 <div className="edit-grid">
                                                     {[
                                                         "autor",
@@ -432,7 +512,7 @@ export default function ProductosAdmin() {
                                                     onClick={() =>
                                                         handleSave(producto.id)
                                                     }
-                                                    disabled={processing}
+                                                    disabled={processing || uploadingImage}
                                                 >
                                                     {processing
                                                         ? "Guardando..."
@@ -473,6 +553,16 @@ export default function ProductosAdmin() {
                                                 <p>
                                                     <strong>Sello:</strong>{" "}
                                                     {getTextOrFallback(producto.sello)}
+                                                </p>
+                                                <p>
+                                                    <strong>Imagen:</strong>{" "}
+                                                    {producto.imagen ? (
+                                                        <a href={producto.imagen} target="_blank" rel="noreferrer">
+                                                            Ver URL de imagen
+                                                        </a>
+                                                    ) : (
+                                                        "Sin dato"
+                                                    )}
                                                 </p>
                                             </div>
 
