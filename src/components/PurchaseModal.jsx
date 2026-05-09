@@ -688,7 +688,7 @@ ${
                     <div className="pickup-info-row">
                       <span className="pickup-info-label">Horario</span>
                       <span className="pickup-info-value">
-                        Viernes y sabados de 19:00 a 23:59
+                        Horario: miercoles a sabados de 12:00 a 20:00hs
                       </span>
                     </div>
                   </div>
