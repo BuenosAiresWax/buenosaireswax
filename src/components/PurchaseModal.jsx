@@ -418,7 +418,7 @@ ${
 
 💰 Total general: ${formatPrice(total)}
 
-✅ En este mensaje adjunto el comprobante de pago. Para pedidos de la tienda fisica Enviar a alias E110101
+✅ En este mensaje adjunto el comprobante de pago. 🛒 Para pedidos de la tienda fisica Enviar a alias E110101
         `.trim();
 
       setPedidoEnviado(true);
