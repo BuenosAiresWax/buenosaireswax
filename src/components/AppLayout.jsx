@@ -2,25 +2,16 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import PlayerBar from "../player/PlayerBar";
+import { isDropAccessWindowActive } from "../utils/dropSchedule";
 
 import logo from "../../assets/logo/header-logo.png";
 
 const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
-const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-05-09T20:00:00";
 
 function hasValidAccess() {
   const isAuth = localStorage.getItem("autenticado") === "true";
   const savedVersion = localStorage.getItem("accessVersion");
   return isAuth && savedVersion === ACCESS_VERSION;
-}
-
-function isDropAccessWindowActive() {
-  const fechaObj = new Date(DROP_DATE);
-  const ahora = new Date();
-  const diferenciaMs = fechaObj - ahora;
-  const tresDiasMs = 3 * 24 * 60 * 60 * 1000;
-
-  return diferenciaMs > 0 && diferenciaMs < tresDiasMs;
 }
 
 function AppLayout() {

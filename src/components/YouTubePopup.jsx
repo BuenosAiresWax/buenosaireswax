@@ -51,7 +51,7 @@ const YouTubePopup = () => {
 
             <div className="popup-video">
                 <iframe
-                    src="https://www.youtube.com/embed/eOCtZwXAPCg"
+                    src="https://www.youtube.com/embed/q0PcC1UoXqQ"
                     title="YouTube Video"
                     frameBorder="0"
                     loading="lazy"
@@ -64,7 +64,7 @@ const YouTubePopup = () => {
             <h3 className="popup-title">UNBOXING DE VINILOS DE HOUSE Y TECHNO CON CHIRI Y GONZ | BAWAX DROP 012</h3>
 
             <a
-                href="https://www.youtube.com/watch?v=eOCtZwXAPCg"
+                href="https://www.youtube.com/watch?v=q0PcC1UoXqQ"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="popup-button"

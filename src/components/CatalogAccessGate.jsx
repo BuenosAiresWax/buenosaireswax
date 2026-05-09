@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { isCatalogUnlockedByDropTime } from "../utils/dropSchedule";
 
 const ACCESS_VERSION =
   import.meta.env.VITE_STORE_ACCESS_VERSION || import.meta.env.VITE_ACCESS_VERSION;
@@ -11,9 +12,27 @@ function hasSectionAccess(sectionKey) {
 }
 
 function CatalogAccessGate({ sectionKey, sectionLabel, children }) {
-  const [autenticado, setAutenticado] = useState(() => hasSectionAccess(sectionKey));
+  const [autenticado, setAutenticado] = useState(
+    () => hasSectionAccess(sectionKey) || isCatalogUnlockedByDropTime(),
+  );
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (autenticado) return;
+
+    const syncAccess = () => {
+      if (hasSectionAccess(sectionKey) || isCatalogUnlockedByDropTime()) {
+        setAutenticado(true);
+      }
+    };
+
+    syncAccess();
+
+    const intervalId = setInterval(syncAccess, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [autenticado, sectionKey]);
 
   const manejarSubmit = (e) => {
     e.preventDefault();

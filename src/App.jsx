@@ -8,6 +8,7 @@ import DropAccess from "./components/DropAccess";
 import HeroSlider from "./components/HeroSlider";
 import CatalogPage from "./components/CatalogPage";
 import CatalogAccessGate from "./components/CatalogAccessGate";
+import { DROP_DATE, isDropAccessWindowActive } from "./utils/dropSchedule";
 
 import "./styles/styles.css";
 
@@ -19,9 +20,6 @@ const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
    FECHA GLOBAL DEL DROP
    (solo cambias esto cada mes)
 ================================ */
-
-const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-05-09T20:00:00";
-const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 function App({ forceDrop = false }) {
   const [autenticado, setAutenticado] = useState(() => {
@@ -36,10 +34,7 @@ function App({ forceDrop = false }) {
 
   useEffect(() => {
     const actualizarVentanaDrop = () => {
-      const fechaDrop = new Date(DROP_DATE);
-      const ahora = new Date();
-      const diferenciaMs = fechaDrop - ahora;
-      setVentanaDropActiva(diferenciaMs > 0 && diferenciaMs < THREE_DAYS_MS);
+      setVentanaDropActiva(isDropAccessWindowActive());
     };
 
     actualizarVentanaDrop();
