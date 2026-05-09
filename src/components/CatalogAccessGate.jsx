@@ -5,8 +5,8 @@ const ACCESS_VERSION =
 const STORE_ACCESS_CODE = import.meta.env.VITE_STORE_CODE || import.meta.env.VITE_DROP_CODE;
 
 function hasSectionAccess(sectionKey) {
-  const isAuth = localStorage.getItem(`catalogAccess:${sectionKey}`) === "true";
-  const savedVersion = localStorage.getItem(`catalogAccessVersion:${sectionKey}`);
+  const isAuth = sessionStorage.getItem(`catalogAccess:${sectionKey}`) === "true";
+  const savedVersion = sessionStorage.getItem(`catalogAccessVersion:${sectionKey}`);
   return isAuth && savedVersion === ACCESS_VERSION;
 }
 
@@ -19,8 +19,8 @@ function CatalogAccessGate({ sectionKey, sectionLabel, children }) {
     e.preventDefault();
 
     if (password === STORE_ACCESS_CODE) {
-      localStorage.setItem(`catalogAccess:${sectionKey}`, "true");
-      localStorage.setItem(`catalogAccessVersion:${sectionKey}`, ACCESS_VERSION);
+      sessionStorage.setItem(`catalogAccess:${sectionKey}`, "true");
+      sessionStorage.setItem(`catalogAccessVersion:${sectionKey}`, ACCESS_VERSION);
       setAutenticado(true);
       setError("");
       return;
