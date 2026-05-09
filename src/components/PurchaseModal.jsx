@@ -408,7 +408,7 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
 📦 Entrega: ${metodoEntregaDetalle}
 ${
   isArtlabPickup
-    ? "🏠 Punto de retiro: Rosetti 93\n🕒 Horario: viernes y sabados de 19:00 a 23:59"
+    ? "🏠 Punto de retiro: Rosetti 93\n🕒 Horario: miercoles a sabados de 12:00 a 20:00hs"
     : !isRetiro
       ? `🏠 Dirección: ${direccion}${departamento ? `, (${departamento})` : ""}, ${ciudad} (${codigoPostal})`
       : ""
