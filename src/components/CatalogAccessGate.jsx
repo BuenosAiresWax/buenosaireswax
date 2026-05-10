@@ -11,6 +11,11 @@ function hasSectionAccess(sectionKey) {
 }
 
 function CatalogAccessGate({ sectionKey, sectionLabel, children }) {
+  // Tienda y Equipamiento abren siempre sin contraseña
+  if (sectionKey === "tienda" || sectionKey === "equipamiento") {
+    return children;
+  }
+
   const [autenticado, setAutenticado] = useState(() => hasSectionAccess(sectionKey));
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
