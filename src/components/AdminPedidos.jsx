@@ -209,7 +209,13 @@ export default function PedidosAdmin() {
     // -------------------------------------------------
     // Cancelar pedido (revertir stock)
     // -------------------------------------------------
-    async function resolveProductDocRef(productoPedido) {
+    function obtenerColeccionProductos(sourceCollection) {
+        if (sourceCollection === "pedidosTienda") return "productosTienda";
+        if (sourceCollection === "pedidosEquipamiento") return "equipamiento";
+        return "productos"; // drop / default
+    }
+
+    async function resolveProductDocRef(productoPedido, coleccionProductos) {
         const candidateIds = [
             productoPedido?.id,
             productoPedido?.productoId,
@@ -221,14 +227,14 @@ export default function PedidosAdmin() {
         ].filter(Boolean);
 
         for (const id of candidateIds) {
-            const ref = doc(db, "productos", String(id));
+            const ref = doc(db, coleccionProductos, String(id));
             const snap = await getDoc(ref);
             if (snap.exists()) return ref;
         }
 
         if (productoPedido?.titulo) {
             const byTitle = query(
-                collection(db, "productos"),
+                collection(db, coleccionProductos),
                 where("titulo", "==", productoPedido.titulo),
                 limit(1),
             );
@@ -240,7 +246,7 @@ export default function PedidosAdmin() {
     }
 
     const handleCancelarPedido = async (pedido) => {
-        if (pedido?.cancelado) {
+        if (esPedidoCancelado(pedido)) {
             setAccionMsg("Este pedido ya estaba cancelado.");
             return;
         }
@@ -254,14 +260,16 @@ export default function PedidosAdmin() {
         setAccionMsg("");
 
         try {
-            const orderRef = doc(db, "pedidos", pedido.id);
+            const coleccionPedido = pedido.sourceCollection || "pedidos";
+            const coleccionProductos = obtenerColeccionProductos(coleccionPedido);
+            const orderRef = doc(db, coleccionPedido, pedido.id);
             const ajustesStock = [];
 
             for (const producto of pedido.productos || []) {
                 const cantidadComprada = Number(producto?.cantidad) || 0;
                 if (cantidadComprada <= 0) continue;
 
-                const productRef = await resolveProductDocRef(producto);
+                const productRef = await resolveProductDocRef(producto, coleccionProductos);
                 if (!productRef) {
                     throw new Error(`No se encontró producto para "${producto?.titulo || "sin título"}".`);
                 }
@@ -274,6 +282,7 @@ export default function PedidosAdmin() {
             }
 
             await runTransaction(db, async (tx) => {
+                // ── FASE 1: todos los reads ──
                 const pedidoSnap = await tx.get(orderRef);
                 if (!pedidoSnap.exists()) {
                     throw new Error("El pedido no existe o fue eliminado.");
@@ -284,17 +293,20 @@ export default function PedidosAdmin() {
                     throw new Error("already-cancelled");
                 }
 
-                for (const ajuste of ajustesStock) {
-                    const productSnap = await tx.get(ajuste.ref);
+                const productSnaps = await Promise.all(
+                    ajustesStock.map(ajuste => tx.get(ajuste.ref))
+                );
+
+                // ── FASE 2: todos los writes ──
+                productSnaps.forEach((productSnap, i) => {
+                    const ajuste = ajustesStock[i];
                     if (!productSnap.exists()) {
                         throw new Error(`El producto "${ajuste.titulo}" no existe.`);
                     }
-
                     const reservadosActual = Number(productSnap.data()?.reservados) || 0;
                     const reservadosActualizados = Math.max(0, reservadosActual - ajuste.cantidadComprada);
-
                     tx.update(ajuste.ref, { reservados: reservadosActualizados });
-                }
+                });
 
                 tx.update(orderRef, {
                     cancelado: true,
