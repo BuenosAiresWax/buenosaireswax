@@ -20,7 +20,7 @@ function parseFechaDesdeString(fechaStr) {
             .trim();
 
         const match = texto.match(
-            /^(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})(?:,|\s+a\s+las\s+)(\d{1,2}):(\d{2})(?:\s*([ap])\.?\s*m\.?)?$/i,
+            /^(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})(?:,\s*|\s+a\s+las\s+)(\d{1,2}):(\d{2})(?:\s*([ap])\.?\s*m\.?)?$/i,
         );
 
         if (match) {
