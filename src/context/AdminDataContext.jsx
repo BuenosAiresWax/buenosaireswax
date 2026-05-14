@@ -1,11 +1,13 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { normalizarFecha } from "../utils/fechas";
-
 const AdminDataContext = createContext();
 
+
 function mapDocs(snap, collectionName) {
+    if (!snap || !snap.docs) return [];
     return snap.docs.map(doc => {
         const data = doc.data();
         return {
@@ -16,9 +18,8 @@ function mapDocs(snap, collectionName) {
                 data.fecha ?? data.createdAt ?? data.created_at
             ),
         };
-    }).sort((a, b) => b.fechaObj - a.fechaObj);
+    }).sort((a, b) => (b.fechaObj ?? 0) - (a.fechaObj ?? 0));
 }
-
 export function AdminDataProvider({ children }) {
     const [pedidos, setPedidos] = useState([]);
     const [pedidosTienda, setPedidosTienda] = useState([]);
@@ -86,7 +87,31 @@ export function AdminDataProvider({ children }) {
     };
 
     useEffect(() => {
+        // Cargar datos iniciales
         fetchAll();
+
+        // Escuchar cambios en tiempo real para pedidos
+        const unsubPedidos = onSnapshot(collection(db, "pedidos"), (snap) => {
+            setPedidos(mapDocs(snap, "pedidos"));
+        });
+
+        const unsubPedidosTienda = onSnapshot(collection(db, "pedidosTienda"), (snap) => {
+            setPedidosTienda(mapDocs(snap, "pedidosTienda"));
+        });
+
+        const unsubPedidosEquipamiento = onSnapshot(collection(db, "pedidosEquipamiento"), (snap) => {
+            const equipNuevo = mapDocs(snap, "pedidosEquipamiento");
+            setPedidosEquipamiento(
+                [...equipNuevo].sort((a, b) => b.fechaObj - a.fechaObj)
+            );
+        });
+
+        // Limpiar suscripciones al desmontar
+        return () => {
+            unsubPedidos();
+            unsubPedidosTienda();
+            unsubPedidosEquipamiento();
+        };
     }, []);
 
     return (

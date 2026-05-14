@@ -11,31 +11,37 @@ function parseFechaDesdeString(fechaStr) {
     if (!fechaStr || typeof fechaStr !== "string") return new Date(0);
 
     try {
-        // Ej: "12 de marzo de 2025, 3:25 p. m."
-        const [diaMes, tiempo] = fechaStr.split(", ");
-        const partes = diaMes.split(" ");
+        // Soporta ambos formatos:
+        // - "12 de marzo de 2025, 3:25 p. m."
+        // - "14 de mayo de 2026 a las 11:41 a. m."
+        const texto = fechaStr
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
 
-        const dia = parseInt(partes[0]);
-        const mes = partes[2]?.toLowerCase();
-        const año = parseInt(partes[4]);
+        const match = texto.match(
+            /^(\d{1,2})\s+de\s+([a-záéíóú]+)\s+de\s+(\d{4})(?:,|\s+a\s+las\s+)(\d{1,2}):(\d{2})(?:\s*([ap])\.?\s*m\.?)?$/i,
+        );
 
-        let [hora, min] = tiempo.split(":");
-        let pm = false;
+        if (match) {
+            const [, diaStr, mesStr, anioStr, horaStr, minStr, meridiem] = match;
+            const dia = parseInt(diaStr, 10);
+            const mes = meses[mesStr.normalize("NFD").replace(/[\u0300-\u036f]/g, "")] ?? 0;
+            const anio = parseInt(anioStr, 10);
+            let hora = parseInt(horaStr, 10);
+            const min = parseInt(minStr, 10);
 
-        if (min.includes("p. m.")) {
-            pm = true;
-            min = min.replace(" p. m.", "");
-        } else {
-            min = min.replace(" a. m.", "");
+            if (meridiem === "p" && hora < 12) hora += 12;
+            if (meridiem === "a" && hora === 12) hora = 0;
+
+            return new Date(anio, mes, dia, hora, min);
         }
 
-        hora = parseInt(hora);
-        min = parseInt(min);
+        // Compatibilidad con Date.parse para strings ISO u otros formatos válidos
+        const parsed = new Date(fechaStr);
+        if (!isNaN(parsed)) return parsed;
 
-        if (pm && hora < 12) hora += 12;
-        if (!pm && hora === 12) hora = 0;
-
-        return new Date(año, meses[mes] ?? 0, dia, hora, min);
+        return new Date(0);
     } catch (e) {
         const d = new Date(fechaStr);
         return isNaN(d) ? new Date(0) : d;
