@@ -122,12 +122,16 @@ function construirLinkWhatsapp(pedido) {
 function PedidoCard({ pedido, onCancel, cancelando }) {
     const isCancelado = Boolean(pedido?.cancelado);
     const whatsappLink = construirLinkWhatsapp(pedido);
+    const origenEtiqueta = obtenerEtiquetaOrigen(pedido?.sourceCollection);
 
     return (
         <div className="apc-card">
             <div className="apc-card-head">
                 <h4>{pedido.cliente || "No disponible"}</h4>
                 <div className="apc-card-head-right">
+                    <span className={`apc-origen-badge apc-origen-badge-${pedido?.sourceCollection === "pedidosTienda" ? "tienda" : "equipamiento"}`}>
+                        {origenEtiqueta}
+                    </span>
                     {isCancelado && <span className="apc-cancelado-badge">Cancelado</span>}
                     <span>{pedido.fecha || "Sin fecha"}</span>
                 </div>
@@ -245,6 +249,18 @@ function ordenarPedidos(lista, orden) {
     }
 
     return copia;
+}
+
+function obtenerEtiquetaColeccion(filtroColeccion) {
+    if (filtroColeccion === "tienda") return "Tienda";
+    if (filtroColeccion === "equipamiento") return "Equipamiento";
+    return "Vista combinada";
+}
+
+function obtenerEtiquetaOrigen(sourceCollection) {
+    if (sourceCollection === "pedidosTienda") return "Tienda";
+    if (sourceCollection === "pedidosEquipamiento" || sourceCollection === "equipamiento") return "Equipamiento";
+    return "Pedido";
 }
 
 export default function AdminPedidosCatalogos() {
@@ -464,6 +480,13 @@ export default function AdminPedidosCatalogos() {
         [pedidosEquipamiento, pedidosEquipamientoLegacy],
     );
 
+    const pedidosBaseSeleccionados = useMemo(() => {
+        if (filtroColeccion === "tienda") return pedidosTienda;
+        if (filtroColeccion === "equipamiento") return pedidosEquipamientoBase;
+
+        return [...pedidosTienda, ...pedidosEquipamientoBase];
+    }, [filtroColeccion, pedidosTienda, pedidosEquipamientoBase]);
+
     const todosPedidos = useMemo(
         () => ordenarPedidos([...pedidosTienda, ...pedidosEquipamientoBase], "masReciente"),
         [pedidosTienda, pedidosEquipamientoBase],
@@ -471,9 +494,9 @@ export default function AdminPedidosCatalogos() {
 
     const metodosEntregaDisponibles = useMemo(() => {
         return Array.from(
-            new Set(todosPedidos.map((p) => p.metodoEntrega).filter(Boolean)),
+            new Set(pedidosBaseSeleccionados.map((p) => p.metodoEntrega).filter(Boolean)),
         ).sort((a, b) => a.localeCompare(b));
-    }, [todosPedidos]);
+    }, [pedidosBaseSeleccionados]);
 
     const filtrarPedidos = (lista) => {
         const textoBusqueda = normalizarTexto(busqueda);
@@ -520,16 +543,38 @@ export default function AdminPedidosCatalogos() {
         [pedidosTienda, busqueda, filtroEstado, filtroEntrega, filtroFecha, orden],
     );
 
-    const equipamientoFiltrados = useMemo(() => {
-        const listaBase = pedidosEquipamientoBase;
-
-        return filtrarPedidos(listaBase);
-    }, [pedidosEquipamientoBase, busqueda, filtroEstado, filtroEntrega, filtroFecha, orden]);
+    const equipamientoFiltrados = useMemo(
+        () => filtrarPedidos(pedidosEquipamientoBase),
+        [pedidosEquipamientoBase, busqueda, filtroEstado, filtroEntrega, filtroFecha, orden],
+    );
 
     const pedidosVisibles = useMemo(
-        () => [...tiendaFiltrados, ...equipamientoFiltrados],
-        [tiendaFiltrados, equipamientoFiltrados],
+        () => filtrarPedidos(pedidosBaseSeleccionados),
+        [pedidosBaseSeleccionados, busqueda, filtroEstado, filtroEntrega, filtroFecha, orden],
     );
+
+    const resumenDashboard = useMemo(() => {
+        const activos = pedidosVisibles.filter((pedido) => !pedido.cancelado).length;
+        const cancelados = pedidosVisibles.length - activos;
+        const totalFacturado = pedidosVisibles.reduce(
+            (acumulado, pedido) => acumulado + (Number(pedido.total) || 0),
+            0,
+        );
+
+        return {
+            total: pedidosVisibles.length,
+            activos,
+            cancelados,
+            totalFacturado,
+        };
+    }, [pedidosVisibles]);
+
+    const etiquetaColeccionActiva = obtenerEtiquetaColeccion(filtroColeccion);
+    const fuenteActivaDescripcion = useMemo(() => {
+        if (filtroColeccion === "tienda") return "Solo pedidos de tienda";
+        if (filtroColeccion === "equipamiento") return "Solo pedidos de equipamiento";
+        return "Pedidos de tienda y equipamiento en una sola bandeja";
+    }, [filtroColeccion]);
 
     const construirFilasExcel = (lista) => {
         const filas = [];
@@ -636,13 +681,20 @@ export default function AdminPedidosCatalogos() {
     return (
         <div className="apc-container">
             <div className="apc-header">
-                <h1>Pedidos de Tienda + Equipamiento</h1>
+                <div className="apc-header-copy">
+                    <p className="apc-kicker">Dashboard de pedidos</p>
+                    <h1>Consulta automática de pedidos</h1>
+                    <p className="apc-header-subtitle">
+                        Vista activa: <strong>{etiquetaColeccionActiva}</strong>. Busca, filtra y exporta sin cambiar de pantalla.
+                    </p>
+                </div>
+
                 <button className="apc-back-btn" onClick={() => navigate("/admin")}>Volver al Panel</button>
             </div>
 
             <div className="apc-toolbar">
                 <div className="apc-toolbar-group apc-toolbar-group-search">
-                    <label className="apc-filter-label" htmlFor="apc-search-input">🔎 Buscar</label>
+                    <label className="apc-filter-label" htmlFor="apc-search-input">🔎 Búsqueda rápida</label>
                     <input
                         id="apc-search-input"
                         type="text"
@@ -655,7 +707,7 @@ export default function AdminPedidosCatalogos() {
 
                 <div className="apc-toolbar-group apc-toolbar-group-filters">
                     <div className="apc-filter-header">
-                        <label className="apc-filter-label">🧩 Filtros</label>
+                        <label className="apc-filter-label">🧩 Filtros inteligentes</label>
                         <button
                             type="button"
                             className={`apc-toggle-filters-btn ${filtrosAbiertos ? "open" : ""}`}
@@ -668,9 +720,9 @@ export default function AdminPedidosCatalogos() {
 
                     <div className={`apc-filters-grid ${filtrosAbiertos ? "open" : "collapsed"}`}>
                         <select value={filtroColeccion} onChange={(e) => setFiltroColeccion(e.target.value)} className="apc-select">
-                            <option value="todos">📦 Coleccion: ambas</option>
-                            <option value="tienda">📦 Solo Tienda</option>
-                            <option value="equipamiento">📦 Solo Equipamiento</option>
+                            <option value="todos">📦 Colección: ambas</option>
+                            <option value="tienda">📦 Colección: tienda</option>
+                            <option value="equipamiento">📦 Colección: equipamiento</option>
                         </select>
 
                         <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} className="apc-select">
@@ -728,6 +780,32 @@ export default function AdminPedidosCatalogos() {
                 </div>
             </div>
 
+            <section className="apc-resumen-grid" aria-label="Resumen de pedidos">
+                <article className="apc-resumen-card apc-resumen-card-highlight">
+                    <span>Pedidos visibles</span>
+                    <strong>{resumenDashboard.total}</strong>
+                    <p>{fuenteActivaDescripcion}</p>
+                </article>
+
+                <article className="apc-resumen-card">
+                    <span>Activos</span>
+                    <strong>{resumenDashboard.activos}</strong>
+                    <p>Pedidos listos para seguimiento</p>
+                </article>
+
+                <article className="apc-resumen-card">
+                    <span>Cancelados</span>
+                    <strong>{resumenDashboard.cancelados}</strong>
+                    <p>Pedidos bloqueados</p>
+                </article>
+
+                <article className="apc-resumen-card">
+                    <span>Total facturado</span>
+                    <strong>${resumenDashboard.totalFacturado.toLocaleString("es-AR")}</strong>
+                    <p>Suma de los pedidos visibles</p>
+                </article>
+            </section>
+
             {accionMsg && <p className="apc-accion-msg">{accionMsg}</p>}
 
             {alertaActiva && (
@@ -737,55 +815,35 @@ export default function AdminPedidosCatalogos() {
                 </div>
             )}
 
-            <div className="apc-columns">
-                {filtroColeccion !== "equipamiento" && (
-                    <section className="apc-box">
-                        <div className="apc-box-head">
-                            <h2>Tienda</h2>
-                            <span>{tiendaFiltrados.length} pedidos</span>
-                        </div>
+            <section className="apc-box apc-box-dashboard">
+                <div className="apc-box-head apc-box-head-main">
+                    <div>
+                        <h2>{etiquetaColeccionActiva}</h2>
+                        <span>{pedidosVisibles.length} pedidos visibles</span>
+                    </div>
 
-                        <div className="apc-list">
-                            {tiendaFiltrados.length === 0 ? (
-                                <p className="apc-empty">No hay pedidos para mostrar.</p>
-                            ) : (
-                                tiendaFiltrados.map((pedido) => (
-                                    <PedidoCard
-                                        key={pedido.uniqueId}
-                                        pedido={pedido}
-                                        onCancel={handleCancelarPedido}
-                                        cancelando={cancelandoId === pedido.uniqueId}
-                                    />
-                                ))
-                            )}
-                        </div>
-                    </section>
-                )}
+                    <p className="apc-box-head-description">
+                        {filtroColeccion === "todos"
+                            ? "Se muestran pedidos de tienda y equipamiento en una sola vista unificada."
+                            : `Se muestran solo los pedidos de ${etiquetaColeccionActiva.toLowerCase()}.`}
+                    </p>
+                </div>
 
-                {filtroColeccion !== "tienda" && (
-                    <section className="apc-box">
-                        <div className="apc-box-head">
-                            <h2>Equipamiento</h2>
-                            <span>{equipamientoFiltrados.length} pedidos</span>
-                        </div>
-
-                        <div className="apc-list">
-                            {equipamientoFiltrados.length === 0 ? (
-                                <p className="apc-empty">No hay pedidos para mostrar.</p>
-                            ) : (
-                                equipamientoFiltrados.map((pedido) => (
-                                    <PedidoCard
-                                        key={pedido.uniqueId}
-                                        pedido={pedido}
-                                        onCancel={handleCancelarPedido}
-                                        cancelando={cancelandoId === pedido.uniqueId}
-                                    />
-                                ))
-                            )}
-                        </div>
-                    </section>
-                )}
-            </div>
+                <div className="apc-list apc-list-dashboard">
+                    {pedidosVisibles.length === 0 ? (
+                        <p className="apc-empty">No hay pedidos para mostrar con los filtros actuales.</p>
+                    ) : (
+                        pedidosVisibles.map((pedido) => (
+                            <PedidoCard
+                                key={pedido.uniqueId}
+                                pedido={pedido}
+                                onCancel={handleCancelarPedido}
+                                cancelando={cancelandoId === pedido.uniqueId}
+                            />
+                        ))
+                    )}
+                </div>
+            </section>
         </div>
     );
 }
