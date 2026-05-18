@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -84,6 +84,7 @@ export default function PedidosAdmin() {
     const [pedidosVisibles, setPedidosVisibles] = useState([]);
     const [mesesOrdenados, setMesesOrdenados] = useState([]);
     const [mesActualIndex, setMesActualIndex] = useState(0);
+    const mesActualIndexRef = useRef(0);
     const [cargandoMes, setCargandoMes] = useState(false);
 
     const [orden, setOrden] = useState("masReciente");
@@ -123,6 +124,14 @@ export default function PedidosAdmin() {
     }, [todosPedidosCombinados, filtroColeccion]);
 
     // -------------------------------------------------
+    // Resetear posición de scroll al cambiar el filtro
+    // -------------------------------------------------
+    useEffect(() => {
+        mesActualIndexRef.current = 0;
+        setMesActualIndex(0);
+    }, [filtroColeccion]);
+
+    // -------------------------------------------------
     // Agrupar por mes (primer render)
     // -------------------------------------------------
     useEffect(() => {
@@ -143,8 +152,15 @@ export default function PedidosAdmin() {
         );
 
         setMesesOrdenados(keysOrdenadas);
-        setPedidosVisibles(grupos[keysOrdenadas[0]] || []);
-        setMesActualIndex(0);
+
+        // Reconstruir la lista visible para todos los meses ya cargados,
+        // preservando la posición de scroll ante actualizaciones en tiempo real.
+        const indexFin = Math.min(mesActualIndexRef.current, keysOrdenadas.length - 1);
+        const visibles = keysOrdenadas
+            .slice(0, indexFin + 1)
+            .flatMap(k => grupos[k] || []);
+
+        setPedidosVisibles(visibles.length > 0 ? visibles : grupos[keysOrdenadas[0]] || []);
     }, [pedidosTodos]);
 
     // -------------------------------------------------
@@ -172,6 +188,7 @@ export default function PedidosAdmin() {
 
         setTimeout(() => {
             const nuevoIndex = mesActualIndex + 1;
+            mesActualIndexRef.current = nuevoIndex;
             const mesKey = mesesOrdenados[nuevoIndex];
 
             const nuevosPedidos = pedidosTodos.filter(p => {
@@ -745,7 +762,7 @@ export default function PedidosAdmin() {
 
             <div className="cards-container">
                 {pedidosFiltrados.map(pedido => (
-                    <div key={pedido.id} className={`pedido-card ${pedido.cancelado ? "cancelado" : ""}`}>
+                    <div key={`${pedido.sourceCollection ?? "pedidos"}-${pedido.id}`} className={`pedido-card ${pedido.cancelado ? "cancelado" : ""}`}>
 
                         {pedido.cancelado && (
                             <div className="pedido-cancelado-overlay">

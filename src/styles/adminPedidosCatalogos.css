@@ -2,8 +2,17 @@
     min-height: 100vh;
     max-width: 1450px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1.25rem;
     color: #eaeaea;
+    overflow-x: hidden;
+    background: none;
+}
+.apc-container {
+    min-height: 100vh;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 1.25rem;
+    color: #eef2f8;
     overflow-x: hidden;
 }
 
@@ -18,16 +27,43 @@
     align-items: center;
     gap: 0.8rem;
     margin-bottom: 1rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+}
+
+.apc-header-copy {
+    min-width: 0;
+}
+
+.apc-kicker {
+    margin: 0 0 0.25rem;
+    color: #cdd8ea;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.74rem;
+    font-weight: 700;
 }
 
 .apc-header h1 {
     margin: 0;
     font-size: 1.7rem;
+    line-height: 1.1;
     font-weight: 700;
     background: linear-gradient(90deg, #9b6bff, #5fd6ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: auto;
+    background-clip: text;
+}
+
+.apc-header-subtitle {
+    margin: 0.45rem 0 0;
+    color: #cdd8ea;
+    max-width: 720px;
+    line-height: 1.5;
 }
 
 .apc-back-btn {
@@ -94,7 +130,7 @@
 }
 
 .apc-toggle-filters-btn {
-    display: inline-flex;
+    display: none;
     align-items: center;
     gap: 6px;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -106,7 +142,6 @@
     cursor: pointer;
     white-space: nowrap;
     max-width: 100%;
-    display: none;
 }
 
 .apc-toggle-filters-btn:hover {
@@ -138,12 +173,6 @@
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
-}
-
-.apc-accion-msg {
-    margin: 0 0 1rem;
-    color: #8fe3a2;
-    font-weight: 600;
 }
 
 .apc-search,
@@ -222,6 +251,52 @@
     background: #2f2f2f;
 }
 
+.apc-resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.apc-resumen-card {
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 14px 15px;
+    background: rgba(20, 20, 20, 0.6);
+}
+
+.apc-resumen-card span {
+    display: block;
+    color: #9ec8ff;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.45rem;
+}
+
+.apc-resumen-card strong {
+    display: block;
+    font-size: 1.45rem;
+    line-height: 1;
+    color: #fff;
+}
+
+.apc-resumen-card p {
+    margin: 0.45rem 0 0;
+    color: #b8b8b8;
+    font-size: 0.86rem;
+}
+
+.apc-resumen-card-highlight {
+    background: rgba(20, 20, 20, 0.6);
+}
+
+.apc-accion-msg {
+    margin: 0 0 1rem;
+    color: #8fe3a2;
+    font-weight: 600;
+}
+
 .apc-alerta {
     display: flex;
     justify-content: space-between;
@@ -250,29 +325,31 @@
     max-width: 100%;
 }
 
-.apc-columns {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-}
-
 .apc-box {
     background: rgba(20, 20, 20, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 12px;
-    padding: 12px;
-    max-height: calc(100vh - 220px);
+    padding: 14px;
     display: flex;
     flex-direction: column;
+}
+
+.apc-box-dashboard {
+    min-height: 0;
 }
 
 .apc-box-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     margin-bottom: 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 8px;
+}
+
+.apc-box-head-main {
+    align-items: flex-start;
 }
 
 .apc-box-head h2 {
@@ -286,19 +363,32 @@
     font-size: 0.9rem;
 }
 
+.apc-box-head-description {
+    margin: 0;
+    color: #b8b8b8;
+    max-width: 520px;
+    text-align: right;
+    line-height: 1.45;
+}
+
 .apc-list {
     overflow: auto;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
     gap: 0.8rem;
     padding-right: 4px;
+    align-items: start;
+}
+
+.apc-list-dashboard {
+    max-height: calc(100vh - 420px);
 }
 
 .apc-card {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
-    padding: 12px;
+    padding: 13px;
 }
 
 .apc-card-head {
@@ -313,6 +403,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .apc-card-head h4 {
@@ -323,6 +415,27 @@
 .apc-card-head span {
     color: #b8b8b8;
     font-size: 0.8rem;
+}
+
+.apc-origen-badge {
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.apc-origen-badge-tienda {
+    border: 1px solid rgba(95, 214, 255, 0.3);
+    background: rgba(95, 214, 255, 0.1);
+    color: #9ec8ff;
+}
+
+.apc-origen-badge-equipamiento {
+    border: 1px solid rgba(155, 107, 255, 0.3);
+    background: rgba(155, 107, 255, 0.1);
+    color: #a88bdc;
 }
 
 .apc-cancelado-badge {
@@ -373,7 +486,7 @@
     width: 70px;
     height: 70px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 6px;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.05);
 }
@@ -414,6 +527,7 @@
     margin-top: 8px;
     text-align: right;
     color: #fff;
+    font-size: 0.95rem;
 }
 
 .apc-card-actions {
@@ -503,12 +617,124 @@
         display: inline-flex;
     }
 
-    .apc-columns {
+    .apc-box-head-main {
+        flex-direction: column;
+    }
+
+    .apc-box-head-description {
+        text-align: left;
+        max-width: none;
+    }
+
+    .apc-resumen-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .apc-list {
         grid-template-columns: 1fr;
     }
 
-    .apc-box {
+    .apc-list-dashboard {
         max-height: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .apc-box {
+        padding: 12px;
+    }
+
+    .apc-list {
+        gap: 0.65rem;
+        padding-right: 2px;
+    }
+
+    .apc-card {
+        padding: 11px;
+        border-radius: 10px;
+    }
+
+    .apc-card-head {
+        margin-bottom: 6px;
+        gap: 0.4rem;
+    }
+
+    .apc-card-head h4 {
+        font-size: 0.94rem;
+    }
+
+    .apc-card-head span {
+        font-size: 0.72rem;
+    }
+
+    .apc-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px 8px;
+    }
+
+    .apc-card-grid p {
+        font-size: 0.76rem;
+        line-height: 1.28;
+    }
+
+    .apc-card-grid p:nth-child(5),
+    .apc-card-grid p:nth-child(6) {
+        grid-column: 1 / -1;
+    }
+
+    .apc-productos {
+        margin-top: 8px;
+    }
+
+    .apc-productos h5 {
+        font-size: 0.82rem;
+        margin-bottom: 4px;
+    }
+
+    .apc-producto-row {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 0.5rem;
+        align-items: start;
+        padding: 5px 0;
+    }
+
+    .apc-producto-imagen {
+        width: 48px;
+        height: 48px;
+        border-radius: 5px;
+    }
+
+    .apc-producto-info {
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .apc-producto-titulo {
+        font-size: 0.8rem;
+        line-height: 1.25;
+    }
+
+    .apc-producto-artista,
+    .apc-producto-cantidad {
+        font-size: 0.7rem;
+    }
+
+    .apc-total {
+        margin-top: 6px;
+        font-size: 0.86rem;
+    }
+
+    .apc-card-actions {
+        margin-top: 8px;
+        gap: 6px;
+    }
+
+    .apc-btn-whatsapp,
+    .apc-btn-cancelar-pedido {
+        padding: 6px 9px;
+        font-size: 0.76rem;
+        border-radius: 7px;
     }
 }
 
@@ -544,32 +770,173 @@
         align-items: stretch;
     }
 
+    .apc-header-copy {
+        text-align: left;
+    }
+
+    .apc-header h1 {
+        font-size: 1.7rem;
+    }
+
+    .apc-resumen-grid {
+        display: flex;
+        grid-template-columns: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 0.65rem;
+        padding: 0 0 0.25rem;
+        margin-bottom: 0.9rem;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .apc-resumen-card {
+        flex: 0 0 72vw;
+        min-width: 72vw;
+        max-width: 320px;
+        padding: 12px;
+        scroll-snap-align: start;
+    }
+
+    .apc-resumen-card span {
+        margin-bottom: 0.3rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+    }
+
+    .apc-resumen-card strong {
+        font-size: 1.2rem;
+    }
+
+    .apc-resumen-card p {
+        margin-top: 0.3rem;
+        font-size: 0.75rem;
+        line-height: 1.25;
+    }
+
+    .apc-resumen-grid::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .apc-resumen-grid::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+    }
+
+    .apc-resumen-grid::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .apc-resumen-card-highlight {
+        background: rgba(20, 20, 20, 0.72);
+    }
+
+    .apc-box {
+        padding: 10px;
+    }
+
+    .apc-card {
+        padding: 11px;
+        border-radius: 10px;
+    }
+
+    .apc-list {
+        gap: 0.65rem;
+        padding-right: 2px;
+    }
+
+    .apc-card-head {
+        margin-bottom: 6px;
+        gap: 0.4rem;
+    }
+
+    .apc-card-head-right {
+        gap: 6px;
+    }
+
+    .apc-cancelado-badge,
+    .apc-origen-badge {
+        font-size: 0.65rem;
+        padding: 3px 7px;
+    }
+
     .apc-card-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px 8px;
+    }
+
+    .apc-card-grid p {
+        font-size: 0.76rem;
+        line-height: 1.28;
+    }
+
+    .apc-card-grid p:nth-child(5),
+    .apc-card-grid p:nth-child(6) {
+        grid-column: 1 / -1;
     }
 
     .apc-producto-row {
-        flex-direction: column;
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 0.5rem;
+        padding: 4px 0;
+    }
+
+    .apc-producto-imagen {
+        width: 44px;
+        height: 44px;
+    }
+
+    .apc-producto-titulo {
+        font-size: 0.78rem;
+    }
+
+    .apc-producto-artista,
+    .apc-producto-cantidad {
+        font-size: 0.68rem;
+    }
+
+    .apc-btn-whatsapp,
+    .apc-btn-cancelar-pedido {
+        padding: 6px 9px;
+        font-size: 0.76rem;
+        border-radius: 7px;
+    }
+
+    .apc-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .apc-list::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+    }
+
+    .apc-producto-info {
+        gap: 2px;
+        min-width: 0;
     }
 
     .apc-alerta {
         flex-direction: column;
-        align-items: stretch;
+        font-size: 0.7rem;
     }
 
-    .apc-download-wrap {
-        width: 100%;
+    .apc-total {
+        margin-top: 6px;
+        font-size: 0.86rem;
+    }
+
+    .apc-card-actions {
+        margin-top: 8px;
+        gap: 6px;
     }
 
     .apc-download-icon-btn {
         width: 100%;
-        border-radius: 10px;
     }
 
     .apc-download-menu {
-        left: 0;
-        right: auto;
-        width: 100%;
-        min-width: 0;
+        right: 0;
+        left: auto;
     }
 }
