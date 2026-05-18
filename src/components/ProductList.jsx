@@ -260,9 +260,14 @@ const ProductList = ({ catalogKey = "drop" }) => {
         estilo: String(producto.estilo ?? "").trim().replace(/\s+/g, " "),
       }))
       .filter((producto) => {
-        const coincideTexto = (producto.titulo || "")
-          .toLowerCase()
-          .includes(filtroTexto.toLowerCase());
+        const textoBusqueda = filtroTexto.toLowerCase();
+        const coincideTexto =
+          !filtroTexto ||
+          (producto.titulo || "").toLowerCase().includes(textoBusqueda) ||
+          (producto.autor || "").toLowerCase().includes(textoBusqueda) ||
+          (producto.sello || "").toLowerCase().includes(textoBusqueda) ||
+          (producto.genero || "").toLowerCase().includes(textoBusqueda) ||
+          (producto.estilo || "").toLowerCase().includes(textoBusqueda);
 
         const coincideGenero =
           !generoSeleccionado ||

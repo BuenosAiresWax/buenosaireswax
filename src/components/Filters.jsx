@@ -53,6 +53,26 @@ function ClearIcon() {
     );
 }
 
+function SelectFilter({ value, onChange, options, placeholder }) {
+    return (
+        <div className="filter-select-wrapper">
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className={`filter-select ${value ? "is-active" : ""}`}
+            >
+                <option value="">{placeholder}</option>
+                {options.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                ))}
+            </select>
+            <svg className="select-chevron" viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="m6 9 6 6 6-6" />
+            </svg>
+        </div>
+    );
+}
+
 function Filters({
     filtroTexto,
     setFiltroTexto,
@@ -92,26 +112,34 @@ function Filters({
         setVerDisponibles(false);
     };
 
+    const hayFiltrosActivos = filtroTexto || generoSeleccionado || estiloSeleccionado || selloSeleccionado || autorSeleccionado || verDisponibles;
+
     return (
         <div className="filters-container">
+            {/* Fila 1: búsqueda + acciones */}
             <div className="filters-group">
-                {/* Campo de búsqueda */}
+                {/* Campo de búsqueda mejorado */}
                 <div className="search-input-container filters-item">
                     <img src={searchIcon} alt="Buscar" className="search-icon" />
                     <input
                         type="text"
-                        placeholder="Buscar por título..."
+                        placeholder="Buscar por título, artista..."
                         value={filtroTexto}
                         onChange={(e) => setFiltroTexto(e.target.value)}
                         className="search-input"
                     />
+                    {filtroTexto && (
+                        <button className="search-clear-btn" onClick={() => setFiltroTexto("")} aria-label="Limpiar búsqueda">
+                            <ClearIcon />
+                        </button>
+                    )}
                 </div>
 
                 <div className="filters-actions">
                     {/* Botón móvil para filtros */}
                     {isMobile && (
                         <button
-                            className="mobile-filter-btn"
+                            className={`mobile-filter-btn ${sidebarVisible ? "is-active" : ""}`}
                             onClick={() => setSidebarVisible(!sidebarVisible)}
                         >
                             <span className="btn-icon">
@@ -134,7 +162,10 @@ function Filters({
                     </button>
 
                     {/* Botón limpiar */}
-                    <button className="filters-action-btn clear-btn" onClick={limpiarFiltros}>
+                    <button
+                        className={`filters-action-btn clear-btn ${hayFiltrosActivos ? "has-filters" : ""}`}
+                        onClick={limpiarFiltros}
+                    >
                         <span className="btn-icon">
                             <ClearIcon />
                         </span>
@@ -142,6 +173,7 @@ function Filters({
                     </button>
                 </div>
             </div>
+
         </div>
     );
 }
