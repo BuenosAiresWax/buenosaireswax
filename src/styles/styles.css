@@ -21,6 +21,11 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.04' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
 }
 
+html.checkout-modal-open,
+body.checkout-modal-open {
+    overflow: hidden;
+}
+
 /* tarjeta mensaje sin stock */
 .product-item.no-results {
     display: flex;
@@ -348,5 +353,17 @@ body {
 
     .removeBtn {
         background-color: transparent;
+    }
+
+    body.checkout-modal-open .filters-container,
+    body.checkout-modal-open .filters-sidebar,
+    body.checkout-modal-open .sidebar-overlay,
+    body.checkout-modal-open .playerbar,
+    body.checkout-modal-open .cart-popup {
+        display: none !important;
+    }
+
+    body.mobile-filters-open .cart-popup {
+        display: none !important;
     }
 }

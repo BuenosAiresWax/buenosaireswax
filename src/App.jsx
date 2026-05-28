@@ -184,7 +184,11 @@ function App({ forceDrop = false }) {
       return (
         <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
           <CatalogPage catalogKey="tienda" />
-          <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="tienda" />
+          <CartPopupButton
+            onOpen={() => setMostrarModal(true)}
+            catalogKey="tienda"
+            isHidden={mostrarModal}
+          />
           {mostrarModal && (
             <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="tienda" />
           )}
@@ -210,7 +214,11 @@ function App({ forceDrop = false }) {
       <>
         <HeroSlider />
         <ProductList catalogKey="drop" />
-        <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="drop" />
+        <CartPopupButton
+          onOpen={() => setMostrarModal(true)}
+          catalogKey="drop"
+          isHidden={mostrarModal}
+        />
         {mostrarModal && (
           <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="drop" />
         )}
@@ -222,7 +230,11 @@ function App({ forceDrop = false }) {
     <>
       <HeroSlider />
       <ProductList catalogKey="drop" />
-      <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey="drop" />
+      <CartPopupButton
+        onOpen={() => setMostrarModal(true)}
+        catalogKey="drop"
+        isHidden={mostrarModal}
+      />
       {mostrarModal && (
         <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="drop" />
       )}

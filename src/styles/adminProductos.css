@@ -490,8 +490,7 @@
 }
 
 .search-input {
-    width: auto;
-    padding: 8px 36px 8px 34px;
+    padding: 8px 36px 0px 34px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(255, 255, 255, 0);
     color: #fff;
@@ -577,7 +576,7 @@
     }
 
     .search-input {
-        max-width: 94%;
+        border: none;
     }
 
     .productos-list {

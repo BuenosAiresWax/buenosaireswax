@@ -49,6 +49,12 @@ function ProductPage({ catalogKey = "drop" }) {
   }, [catalog.collectionName, catalog.key, id]);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+  }, [id, catalog.key]);
+
+  useEffect(() => {
     if (!producto) return;
 
     const stockDisponible = (producto.cantidad ?? 0) - (producto.reservados ?? 0);
@@ -248,7 +254,11 @@ function ProductPage({ catalogKey = "drop" }) {
         </div>
       </div>
 
-      <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey={catalog.key} />
+      <CartPopupButton
+        onOpen={() => setMostrarModal(true)}
+        catalogKey={catalog.key}
+        isHidden={mostrarModal}
+      />
 
       {mostrarModal && (
         <PurchaseModal

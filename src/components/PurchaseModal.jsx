@@ -62,8 +62,15 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
     const cantidad = Number(item?.cantidad) || 0;
     return acc + precio * cantidad;
   }, 0);
+  const totalProductos = cartItemsByCatalog.reduce(
+    (acc, item) => acc + (Number(item?.cantidad) || 0),
+    0,
+  );
   const isArtlabPickup = metodoEntrega === "artlab";
   const isRetiro = isArtlabPickup || metodoEntrega.includes("Retiro");
+  const esDropCheckout = catalog.key === "drop";
+  const origenCompra = esDropCheckout ? "Drop" : "Tienda fisica";
+  const aliasPago = esDropCheckout ? "BuenosAioresWax" : "E110101";
   const metodoEntregaDetalle = isArtlabPickup
     ? "Punto de retiro Artlab (Rosetti 93, viernes y sabados de 19:00 a 23:59)"
     : metodoEntrega;
@@ -78,6 +85,18 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
     const totalGuardado = localStorage.getItem("ultimoTotalPedido");
     if (totalGuardado) setUltimoTotal(Number(totalGuardado));
   }, [pedidoEnviado, cartItemsByCatalog]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+
+    document.body.classList.add("checkout-modal-open");
+    document.documentElement.classList.add("checkout-modal-open");
+
+    return () => {
+      document.body.classList.remove("checkout-modal-open");
+      document.documentElement.classList.remove("checkout-modal-open");
+    };
+  }, []);
 
   const normalizarNombre = (nombre) =>
     nombre.trim().toLowerCase().replace(/\s+/g, "-");
@@ -287,15 +306,6 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
     }, 200);
   };
 
-  const copiarMensajeAlPortapapeles = async () => {
-    try {
-      await navigator.clipboard.writeText(mensajeWsp);
-      alert("Mensaje copiado al portapapeles ✅");
-    } catch {
-      alert("No se pudo copiar el mensaje.");
-    }
-  };
-
   const enviarPedidoYRedirigirWsp = async () => {
     setLoading(true);
     setError(null);
@@ -400,12 +410,12 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
 
 🧾 Pedido: ${docId}
 📅 Fecha: ${fecha}
+🏷️ Origen: ${origenCompra}
 
 👤 Cliente: ${nombre} - DNI ${dni}
 📧 Email: ${correo}
 📱 Teléfono: ${telefono}
 
-📦 Entrega: ${metodoEntregaDetalle}
 ${
   isArtlabPickup
     ? "🏠 Punto de retiro: Rosetti 93\n🕒 Horario: miercoles a sabados de 12:00 a 20:00hs"
@@ -418,7 +428,9 @@ ${
 
 💰 Total general: ${formatPrice(total)}
 
-✅ En este mensaje adjunto el comprobante de pago. 🛒 Para pedidos de la tienda fisica Enviar a alias E110101
+💳 Alias para transferir (${origenCompra}): ${aliasPago}
+
+✅ Pedido reservado. Quedamos atentos al envio de comprobante de pago.
         `.trim();
 
       setPedidoEnviado(true);
@@ -432,9 +444,6 @@ ${
       setLoading(false);
     }
   };
-
-  const obtenerLinkDePagoLibre = () =>
-    "https://link.mercadopago.com.ar/buenosaireswax";
 
   useEffect(() => {
     if (showCloseConfirm) {
@@ -483,132 +492,122 @@ ${
           </button>
           {pedidoEnviado ? (
             <>
-              <h2 className="modalTitle">✅ Pedido generado</h2>
-              <p className="modalText">Finalizá tu compra: solo 2 pasos</p>
-              <p className="modalText">
-                🧾 Número de orden:
-                <br />
-                <strong>{pedidoId}</strong>
-              </p>
-              <p className="modalText">
-                <strong>Total del pedido:</strong>
-                <br />
-                <span className="totalCheckout">
-                  $
-                  {ultimoTotal.toLocaleString("es-AR", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })}
-                </span>
-              </p>
-              {/* Texto 1 */}
-              <div className="info-box">
-                <span>1</span> Ingresa el monto de tu orden, completá el pago y
-                descarga el comprobante.
+              <div className="success-layout">
+                <section className="success-main">
+                  <p className="success-kicker">Pedido reservado</p>
+                  <h2 className="modalTitle success-title">Listo, ya guardamos tu pedido</h2>
+                  <p className="modalText success-subtitle">
+                    Revisa estos datos y envia el mensaje para finalizar la compra.
+                  </p>
+
+                  <div className="success-id-card" role="status" aria-live="polite">
+                    <p className="success-label">Pedido:</p>
+                    <p className="success-id-value">{pedidoId}</p>
+                  </div>
+
+                  <div className="success-total-card">
+                    <p className="success-label">Total:</p>
+                    <p className="totalCheckout success-total-value">
+                      $
+                      {ultimoTotal.toLocaleString("es-AR", {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </p>
+                  </div>
+                </section>
+
+                <aside className="success-actions">
+                  <div className="info-box success-info-box">
+                    Paso final: envia tu pedido por WhatsApp para completar la compra.
+                  </div>
+
+                  <p className="success-note">
+                    Se abrira WhatsApp con el mensaje prearmado para confirmar.
+                  </p>
+
+                  <button
+                    className="btn-whatsapp-succes"
+                    onClick={() =>
+                      window.open(
+                        `https://wa.me/5491165825180?text=${encodeURIComponent(mensajeWsp)}`,
+                        "_blank",
+                      )
+                    }
+                  >
+                    Enviar pedido por WhatsApp
+                  </button>
+                </aside>
               </div>
 
-              {/*                             <a href={obtenerLinkDePagoLibre()} target="_blank" rel="noopener noreferrer" className="btn-pago">
-                                💳 Pagar con Mercado Pago
-                            </a> */}
-
-              <div className="infoPagoContainer">
-                <p>Datos de deposito</p>
-                <p>Alias: BuenosAiresWax</p>
-                <p>Titular: Gonzalo Lijtenberg</p>
-              </div>
-
-              {/* Texto 2 */}
-              <div className="info-box">
-                <span>2</span>Envia el pedido generado y el comprobante de pago
-                descargado.
-              </div>
-
-              <button
-                className="btn-whatsapp-succes"
-                onClick={() =>
-                  window.open(
-                    `https://wa.me/5491165825180?text=${encodeURIComponent(mensajeWsp)}`,
-                    "_blank",
-                  )
-                }
-              >
-                📲 Enviar pedido por WhatsApp
-              </button>
-
-              {/* Texto final */}
-              <div className="info-box">
-                ¡Listo! Nos contactaremos para mantenerte al tanto de todo.
-              </div>
-
-              <button
-                className="btn-copiar"
-                onClick={copiarMensajeAlPortapapeles}
-              >
-                Copiar pedido 📋
-              </button>
-
-              <p className="modalText">Buenos Aires Wax</p>
+              <p className="modalText success-brand">Buenos Aires Wax</p>
             </>
           ) : (
             <>
               <h2 className="modalTitle">Resumen del pedido</h2>
 
-              <ul className="modal-product-list">
-                {cartItemsByCatalog.map((item) => (
-                  <li
-                    key={item.cartKey || getCartItemKey(item)}
-                    className={`modal-product-item ${productosAgotados.includes(getCartItemKey(item)) ? "agotado" : ""}`}
-                  >
-                    <div className="pedidoCarrito">
-                      <img className="imagenCarrito" src={item.imagen} alt="" />
-                      <div>
-                        <strong>{item?.titulo || "Producto sin nombre"}</strong>{" "}
-                        <br />
-                        {Number(item?.cantidad) || 0}u{" "}
-                        <strong>
-                          $
-                          {(Number(item?.precio) || 0) *
-                            (Number(item?.cantidad) || 0)}
-                        </strong>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => removeFromCart(item)}
-                      className="delete-btn"
-                      title="Quitar del carrito"
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <div className="cart-columns">
+                <div className="cart-left-panel">
+                  <div className="product-list-wrapper">
+                    <ul className="modal-product-list">
+                      {cartItemsByCatalog.map((item) => (
+                        <li
+                          key={item.cartKey || getCartItemKey(item)}
+                          className={`cart-item ${productosAgotados.includes(getCartItemKey(item)) ? "agotado" : ""}`}
+                        >
+                          <div className="cart-item__main">
+                            <img className="cart-item__img" src={item.imagen} alt={item?.titulo || ""} />
+                            <div className="cart-item__details">
+                              <span className="cart-item__title">{item?.titulo || "Producto sin nombre"}</span>
+                              <div className="cart-item__meta">
+                                <span className="cart-item__price">
+                                  ${((Number(item?.precio) || 0) * (Number(item?.cantidad) || 0)).toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                </span>
+                                <span className="cart-item__qty">{Number(item?.cantidad) || 0}u</span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => removeFromCart(item)}
+                            className="cart-item__remove"
+                            title="Quitar del carrito"
+                          >
+                            ×
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-              {productosAgotados.length > 0 && (
-                <>
-                  <p className="productoAgotadoMensaje">
-                    Algunos productos están agotados. Podés eliminarlos para
-                    continuar.
-                  </p>
-                  <button
-                    onClick={eliminarProductosAgotados}
-                    className="btn-eliminar-agotados"
-                  >
-                    Eliminar productos agotados
-                  </button>
-                </>
-              )}
+                  {productosAgotados.length > 0 && (
+                    <>
+                      <p className="productoAgotadoMensaje">
+                        Algunos productos están agotados. Podés eliminarlos para
+                        continuar.
+                      </p>
+                      <button
+                        onClick={eliminarProductosAgotados}
+                        className="btn-eliminar-agotados"
+                      >
+                        Eliminar productos agotados
+                      </button>
+                    </>
+                  )}
 
-              <div className="totalContainer">
-                <strong>Total:</strong> $
-                {total.toLocaleString("es-AR", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })}
-              </div>
+                  <div className="totalContainer">
+                    <span className="total-label">
+                      Total ({totalProductos} {totalProductos === 1 ? "producto" : "productos"})
+                    </span>
+                    <span className="total-value">
+                      ${total.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+                </div>
 
-              <p className="modalText">Formulario de Compra</p>
+                <div className="cart-right-panel">
+                  <p className="modalText">Formulario de Compra</p>
 
-              <form
+                  <form
                 className="form"
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -616,6 +615,7 @@ ${
                 }}
               >
                 <input
+                  className="field-nombre"
                   type="text"
                   placeholder="Nombre completo"
                   value={nombre}
@@ -624,14 +624,25 @@ ${
                   disabled={loading}
                 />
                 <input
+                  className="field-instagram"
                   type="text"
-                  placeholder="Intagram @"
+                  placeholder="Instagram @"
                   value={nombreInstagram}
                   onChange={(e) => setNombreInstagram(e.target.value)}
                   required
                   disabled={loading}
                 />
                 <input
+                  className="field-email"
+                  type="email"
+                  placeholder="Email"
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+                <input
+                  className="field-dni"
                   type="number"
                   placeholder="DNI"
                   value={dni}
@@ -640,20 +651,13 @@ ${
                   disabled={loading}
                 />
                 <input
+                  className="field-telefono"
                   type="tel"
                   placeholder="Teléfono"
                   value={telefono}
                   onChange={(e) =>
                     setTelefono(e.target.value.replace(/\D/g, ""))
                   }
-                  required
-                  disabled={loading}
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={correo}
-                  onChange={(e) => setCorreo(e.target.value)}
                   required
                   disabled={loading}
                 />
@@ -695,8 +699,9 @@ ${
                 )}
 
                 {metodoEntrega === "Envío a domicilio (Andreani)" && (
-                  <>
+                  <div className="shipping-fields">
                     <input
+                      className="field-envio-calle"
                       type="text"
                       placeholder="Calle y numero"
                       value={direccion}
@@ -705,6 +710,7 @@ ${
                       disabled={loading}
                     />
                     <input
+                      className="field-envio-ciudad"
                       type="text"
                       placeholder="Ciudad"
                       value={ciudad}
@@ -713,6 +719,7 @@ ${
                       disabled={loading}
                     />
                     <input
+                      className="field-envio-cp"
                       type="text"
                       placeholder="Código Postal"
                       value={codigoPostal}
@@ -721,21 +728,17 @@ ${
                       disabled={loading}
                     />
                     <input
+                      className="field-envio-depto"
                       type="text"
                       placeholder="Piso y Departamento (opcional)"
                       value={departamento}
                       onChange={(e) => setDepartamento(e.target.value)}
                       disabled={loading}
                     />
-                  </>
+                  </div>
                 )}
 
                 {error && <p className="form-error">{error}</p>}
-
-                <p className="modalText">
-                  Su pedido será armado y aparecerá listo para ser enviado por
-                  WhatsApp.
-                </p>
 
                 <div className="checkbox-confirmacion">
                   <input
@@ -761,7 +764,14 @@ ${
                 >
                   {loading ? "Procesando..." : "Crear orden"}
                 </button>
+
+                <p className="modalText form-footer-text">
+                  Su pedido será armado y aparecerá listo para ser enviado por
+                  WhatsApp.
+                </p>
               </form>
+                </div>{/* cart-right-panel */}
+              </div>{/* cart-columns */}
             </>
           )}
 
@@ -775,10 +785,6 @@ ${
                 </p>
                 <p>
                   ⚠️{" "}
-                  <span>
-                    Al cerrar esta ventana no verás más los datos de pedido y
-                    pago.
-                  </span>
                   ⚠️
                 </p>
                 <div className="confirm-actions">

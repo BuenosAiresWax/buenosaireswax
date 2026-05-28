@@ -15,7 +15,11 @@ function CatalogPage({ catalogKey }) {
 
       <ProductList catalogKey={catalog.key} />
 
-      <CartPopupButton onOpen={() => setMostrarModal(true)} catalogKey={catalog.key} />
+      <CartPopupButton
+        onOpen={() => setMostrarModal(true)}
+        catalogKey={catalog.key}
+        isHidden={mostrarModal}
+      />
 
       {mostrarModal && (
         <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey={catalog.key} />

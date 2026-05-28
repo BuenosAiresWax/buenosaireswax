@@ -123,13 +123,34 @@ const ProductList = ({ catalogKey = "drop" }) => {
   }, []);
 
   useEffect(() => {
-    if (sidebarVisible && isMobile) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
+    if (isMobile) {
+      setGenerosOpen(true);
+      setEstilosOpen(false);
+      setSellosOpen(false);
+      setAutoresOpen(false);
+      return;
     }
+
+    setGenerosOpen(true);
+    setEstilosOpen(true);
+    setSellosOpen(false);
+    setAutoresOpen(false);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const shouldLockScroll = sidebarVisible && isMobile;
+
+    document.body.classList.toggle("mobile-filters-open", shouldLockScroll);
+    document.documentElement.classList.toggle(
+      "mobile-filters-open",
+      shouldLockScroll,
+    );
+
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.classList.remove("mobile-filters-open");
+      document.documentElement.classList.remove("mobile-filters-open");
     };
   }, [sidebarVisible, isMobile]);
 
@@ -144,8 +165,31 @@ const ProductList = ({ catalogKey = "drop" }) => {
   const { mensaje, visible, mostrarMensaje } = useNotificacion(1000);
 
   const sentinelRef = useRef();
+  const productListContainerRef = useRef(null);
+  const hasMountedCategoryFiltersRef = useRef(false);
   const loadingStartRef = useRef(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const scrollToProductsTop = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const container = productListContainerRef.current;
+    const filtersContainer = document.querySelector(".filters-container");
+
+    if (!container) return;
+
+    const stickyOffset =
+      isMobile && filtersContainer
+        ? filtersContainer.getBoundingClientRect().height + 16
+        : 12;
+
+    const top = container.getBoundingClientRect().top + window.scrollY - stickyOffset;
+
+    window.scrollTo({
+      top: Math.max(0, top),
+      behavior: "smooth",
+    });
+  }, [isMobile]);
 
   /* -------------------------------
     FIREBASE
@@ -195,6 +239,21 @@ const ProductList = ({ catalogKey = "drop" }) => {
     autorSeleccionado,
     verDisponibles,
     filtersStorageKey,
+  ]);
+
+  useEffect(() => {
+    if (!hasMountedCategoryFiltersRef.current) {
+      hasMountedCategoryFiltersRef.current = true;
+      return;
+    }
+
+    scrollToProductsTop();
+  }, [
+    generoSeleccionado,
+    estiloSeleccionado,
+    selloSeleccionado,
+    autorSeleccionado,
+    scrollToProductsTop,
   ]);
 
   /* -------------------------------
@@ -494,11 +553,15 @@ const ProductList = ({ catalogKey = "drop" }) => {
       <div>
         <div className="filters-container filters-container-placeholder" aria-hidden="true">
           <div className="filters-group">
-            <div className="search-input-container filters-item filters-placeholder-block filters-placeholder-search" />
+            <div className="search-input-container filters-item filters-placeholder-search">
+              <span className="filters-placeholder-icon filters-placeholder-shimmer" />
+              <span className="filters-placeholder-input filters-placeholder-shimmer" />
+            </div>
 
-            <div className="filters-actions">
-              <div className="filters-action-btn filters-placeholder-block" />
-              <div className="filters-action-btn filters-placeholder-block" />
+            <div className="filters-actions filters-actions-placeholder">
+              <div className="filters-action-btn filters-placeholder-block filters-placeholder-shimmer filters-placeholder-mobile-toggle" />
+              <div className="filters-action-btn filters-placeholder-block filters-placeholder-shimmer filters-placeholder-availability" />
+              <div className="filters-action-btn filters-placeholder-block filters-placeholder-shimmer filters-placeholder-clear" />
             </div>
           </div>
         </div>
@@ -506,7 +569,12 @@ const ProductList = ({ catalogKey = "drop" }) => {
         <div className="product-list-container">
           <div className="filters-sidebar filters-sidebar-placeholder" aria-hidden="true">
             {Array.from({ length: FILTER_PLACEHOLDER_COUNT }).map((_, index) => (
-              <div key={index} className="sidebar-placeholder-row" />
+              <div key={index} className="sidebar-placeholder-section">
+                <div className="sidebar-placeholder-title filters-placeholder-shimmer" />
+                <div className="sidebar-placeholder-row filters-placeholder-shimmer" />
+                <div className="sidebar-placeholder-row filters-placeholder-shimmer" />
+                <div className="sidebar-placeholder-row filters-placeholder-shimmer" />
+              </div>
             ))}
           </div>
 
@@ -548,7 +616,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
         setSidebarVisible={setSidebarVisible}
       />
 
-      <div className="product-list-container">
+      <div className="product-list-container" ref={productListContainerRef}>
         {sidebarVisible && isMobile && <div className="sidebar-overlay" onClick={() => setSidebarVisible(false)} />}
         <div className={`filters-sidebar ${sidebarVisible ? 'visible' : ''}`}>
             <div className="sidebar-filter">

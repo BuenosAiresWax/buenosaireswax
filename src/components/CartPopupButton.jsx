@@ -1,18 +1,20 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import {
   getCartItemKey,
-  getCatalogConfig,
   getProductCollectionName,
   isCollectionIncludedInCheckout,
 } from "../utils/catalog";
 
 import "../styles/CartPopupButton.css";
 
-export default function CartPopupButton({ onOpen, catalogKey = "drop" }) {
+export default function CartPopupButton({
+  onOpen,
+  catalogKey = "drop",
+  isHidden = false,
+}) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { cartItems, removeFromCart } = useContext(CartContext);
-  const catalog = getCatalogConfig(catalogKey);
   const cartItemsByCatalog = cartItems.filter(
     (item) =>
       isCollectionIncludedInCheckout(getProductCollectionName(item), catalogKey),
@@ -27,7 +29,14 @@ export default function CartPopupButton({ onOpen, catalogKey = "drop" }) {
     0,
   );
 
+  useEffect(() => {
+    if (isHidden) {
+      setIsExpanded(false);
+    }
+  }, [isHidden]);
+
   const handleCheckout = () => {
+    setIsExpanded(false);
     onOpen();
   };
 
@@ -35,21 +44,36 @@ export default function CartPopupButton({ onOpen, catalogKey = "drop" }) {
     removeFromCart(producto);
   };
 
-  if (totalQuantity === 0) {
+  const handleToggleExpanded = () => {
+    setIsExpanded((prev) => !prev);
+  };
+
+  if (totalQuantity === 0 || isHidden) {
     return null;
   }
 
   return (
     <div className="cart-popup">
-      <div className="cart-popup-header">
+      <div
+        className="cart-popup-header"
+        onClick={handleToggleExpanded}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleToggleExpanded();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={isExpanded ? "Contraer carrito" : "Expandir carrito"}
+      >
         <h3>🛒 Carrito ({totalQuantity})</h3>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
+        <span
           className={`toggle-cart-button ${isExpanded ? "expanded" : "collapsed"}`}
-          aria-label={isExpanded ? "Contraer carrito" : "Expandir carrito"}
+          aria-hidden="true"
         >
           ▼
-        </button>
+        </span>
       </div>
       {isExpanded && (
         <>

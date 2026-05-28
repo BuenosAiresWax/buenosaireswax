@@ -129,15 +129,81 @@
     background: rgba(128, 128, 128, 0.08);
 }
 
+.filters-placeholder-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.filters-placeholder-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 45%,
+        rgba(255, 255, 255, 0.18) 50%,
+        rgba(255, 255, 255, 0.08) 55%,
+        transparent 100%
+    );
+    animation: filtersSkeletonShimmer 1.4s ease-in-out infinite;
+}
+
 .filters-placeholder-search {
     width: 100%;
-    min-height: 40px;
-    border-radius: 14px;
+    min-height: 42px;
+    border-radius: 0;
+    border: 2px solid rgba(128, 128, 128, 0.3);
+    box-sizing: border-box;
+    gap: 0.65rem;
+    padding: 0.5rem 0.85rem;
+}
+
+.filters-placeholder-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: rgba(128, 128, 128, 0.15);
+    flex-shrink: 0;
+}
+
+.filters-placeholder-input {
+    display: block;
+    height: 14px;
+    width: 62%;
+    border-radius: 999px;
+    background: rgba(128, 128, 128, 0.15);
+}
+
+.filters-actions-placeholder {
+    display: flex;
 }
 
 .filters-container-placeholder .filters-action-btn {
-    min-width: 120px;
+    width: 128px;
+    min-width: 128px;
     min-height: 40px;
+}
+
+.filters-placeholder-mobile-toggle {
+    display: none;
+}
+
+.filters-placeholder-availability,
+.filters-placeholder-clear {
+    display: inline-flex;
+}
+
+.sidebar-placeholder-section {
+    margin-bottom: 0.9rem;
+}
+
+.sidebar-placeholder-title {
+    height: 18px;
+    width: 72%;
+    margin: 0 0 0.45rem;
+    background: rgba(128, 128, 128, 0.2);
 }
 
 @media (max-width: 767px) {
@@ -145,6 +211,11 @@
     .filters-container {
         margin: 0 0 2.5rem;
         padding: 1rem 0.75rem;
+        position: sticky;
+        top: 0;
+        z-index: 950;
+        background: #282322;
+        backdrop-filter: blur(8px);
     }
 
     .filters-group {
@@ -215,6 +286,27 @@
     .filters-container-placeholder {
         min-height: 0;
     }
+
+    .filters-container-placeholder .filters-group {
+        gap: 0.75rem;
+    }
+
+    .filters-actions-placeholder {
+        display: contents;
+    }
+
+    .filters-container-placeholder .filters-action-btn {
+        width: auto;
+        min-width: 0;
+    }
+
+    .filters-placeholder-mobile-toggle {
+        display: inline-flex;
+    }
+
+    .filters-placeholder-input {
+        width: 68%;
+    }
 }
 
 @media (max-width: 420px) {
@@ -248,10 +340,16 @@
 }
 
 .sidebar-placeholder-row {
-    height: 34px;
-    margin-bottom: 0.7rem;
+    height: 28px;
+    margin-bottom: 0.45rem;
     border-bottom: 2px solid rgba(128, 128, 128, 0.22);
     opacity: 0.7;
+}
+
+@keyframes filtersSkeletonShimmer {
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .sidebar-filter {
@@ -323,9 +421,15 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
+    background: #282322e6;
+    backdrop-filter: blur(15px);
     z-index: 1000;
+}
+
+html.mobile-filters-open,
+body.mobile-filters-open {
+    overflow: hidden;
+    overscroll-behavior: none;
 }
 
 @media (max-width: 767px) {
@@ -341,6 +445,8 @@
         z-index: 1001;
         display: none;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 
     .filters-sidebar.visible {
