@@ -86,14 +86,34 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
   }, [pedidoEnviado, cartItemsByCatalog]);
 
   useEffect(() => {
-    if (typeof document === "undefined") return undefined;
+    if (typeof document === "undefined" || typeof window === "undefined") {
+      return undefined;
+    }
 
-    document.body.classList.add("checkout-modal-open");
-    document.documentElement.classList.add("checkout-modal-open");
+    const scrollY = window.scrollY;
+    const { body, documentElement } = document;
+
+    body.classList.add("checkout-modal-open");
+    documentElement.classList.add("checkout-modal-open");
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    documentElement.style.overflow = "hidden";
 
     return () => {
-      document.body.classList.remove("checkout-modal-open");
-      document.documentElement.classList.remove("checkout-modal-open");
+      body.classList.remove("checkout-modal-open");
+      documentElement.classList.remove("checkout-modal-open");
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      body.style.overflow = "";
+      documentElement.style.overflow = "";
+      window.scrollTo(0, scrollY);
     };
   }, []);
 
