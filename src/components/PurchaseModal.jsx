@@ -31,7 +31,6 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
   const [pedidoId, setPedidoId] = useState("");
   const [fechaPedido, setFechaPedido] = useState("");
   const [pedidoEnviado, setPedidoEnviado] = useState(false);
-  const [confirmado, setConfirmado] = useState(false);
   const [mensajeWsp, setMensajeWsp] = useState("");
   const [ultimoTotal, setUltimoTotal] = useState(0);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -263,7 +262,6 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
       setPedidoId("");
       setFechaPedido("");
       setPedidoEnviado(false);
-      setConfirmado(false);
       setMensajeWsp("");
       setLoading(false);
       setUltimoTotal(0);
@@ -298,7 +296,6 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
       setPedidoId("");
       setFechaPedido("");
       setPedidoEnviado(false);
-      setConfirmado(false);
       setMensajeWsp("");
       setLoading(false);
       setUltimoTotal(0);
@@ -327,12 +324,6 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
       (!direccion.trim() || !ciudad.trim() || !codigoPostal.trim())
     ) {
       setError("Completá los datos de envío.");
-      setLoading(false);
-      return;
-    }
-
-    if (!confirmado) {
-      setError("Debes confirmar que enviarás el comprobante.");
       setLoading(false);
       return;
     }
@@ -684,15 +675,13 @@ ${
                   <div className="pickup-info" role="status" aria-live="polite">
                     <p className="pickup-info-title">Punto de retiro Artlab</p>
                     <div className="pickup-info-row">
-                      <span className="pickup-info-label">Direccion</span>
                       <span className="pickup-info-value">
-                        Roseti 93, C1427 Cdad. Autónoma de Buenos Aires
+                        Roseti 93, C1427 CABA
                       </span>
                     </div>
                     <div className="pickup-info-row">
-                      <span className="pickup-info-label">Horario</span>
                       <span className="pickup-info-value">
-                        Horario: miercoles a sabados de 12:00 a 20:00hs
+                        Miercoles a Sabados de 12:00 a 20:00hs
                       </span>
                     </div>
                   </div>
@@ -739,19 +728,6 @@ ${
                 )}
 
                 {error && <p className="form-error">{error}</p>}
-
-                <div className="checkbox-confirmacion">
-                  <input
-                    type="checkbox"
-                    id="confirmacion"
-                    checked={confirmado}
-                    onChange={() => setConfirmado(!confirmado)}
-                    disabled={loading}
-                  />
-                  <label htmlFor="confirmacion">
-                    Confirmo enviar comprobante
-                  </label>
-                </div>
 
                 <button
                   className="btn-crear-orden"
