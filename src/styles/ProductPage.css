@@ -132,9 +132,11 @@
 
 .detail-price-stack {
   display: inline-flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .detail-price-old {
@@ -225,6 +227,24 @@
   .breadcrumb {
     margin-top: 2rem;
     margin-bottom: 0;
+  }
+
+  .detail-price-stack {
+    gap: 0.35rem;
+  }
+
+  .detail-price-old {
+    font-size: 0.85rem;
+  }
+
+  .detail-price-final {
+    font-size: 1.2rem;
+    padding-left: 0.5rem;
+  }
+
+  .detail-sale-badge-inline {
+    font-size: 10px;
+    padding: 0.2rem 0.45rem;
   }
 }
 
