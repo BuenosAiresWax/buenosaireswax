@@ -24,6 +24,9 @@ body {
 html.checkout-modal-open,
 body.checkout-modal-open {
     overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
+    touch-action: none;
 }
 
 /* tarjeta mensaje sin stock */

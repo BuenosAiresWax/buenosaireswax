@@ -1,10 +1,9 @@
 /* modal de compra */
 .modal-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
     background: rgba(0, 0, 0, 0);
     display: flex;
     align-items: center;
@@ -68,6 +67,8 @@
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     padding-top: 0.5rem;
 }
 
@@ -928,11 +929,14 @@
 
     .modal-backdrop {
         align-items: flex-end;
+        height: 100dvh;
+        min-height: 100svh;
+        padding-bottom: env(safe-area-inset-bottom);
     }
 
     .modal {
         width: calc(100% - 1rem);
-        max-height: 96dvh;
+        max-height: calc(100dvh - env(safe-area-inset-bottom));
         padding: 0 0.85rem 1rem;
         margin: 0 auto;
         align-self: flex-end;
@@ -967,6 +971,7 @@
 
     .modal-content {
         padding-top: 0;
+        padding-bottom: env(safe-area-inset-bottom);
     }
 
     .modal .close {

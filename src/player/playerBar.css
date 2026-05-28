@@ -20,7 +20,7 @@
   backdrop-filter: blur(4px);
   color: var(--color-letra, #e4e4e4);
 
-  padding: 10px 12px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
 
   display: flex;
   align-items: center;
