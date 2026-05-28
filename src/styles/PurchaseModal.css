@@ -205,7 +205,6 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 0.55rem 0.25rem 0.15rem;
     border-top: 1px solid rgba(255,255,255,0.1);
     margin-top: auto;
 }
@@ -955,18 +954,6 @@
     .modal.fade-out {
         transform: translate3d(0, 110%, 0);
         transition: transform 0.45s cubic-bezier(0.34, 0.7, 0.2, 1);
-    }
-
-    /* drag handle */
-    .modal::before {
-        content: '';
-        display: block;
-        width: 32px;
-        height: 3px;
-        background: rgba(255,255,255,0.18);
-        border-radius: 2px;
-        margin: 0.55rem auto 0.7rem;
-        flex-shrink: 0;
     }
 
     .modal-content {

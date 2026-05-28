@@ -65,6 +65,7 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    gap: 0.5rem;
 }
 
 /* Botón flotante + */
@@ -107,11 +108,60 @@
     margin-bottom: 0.4rem;
 }
 
+.price-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin: 0.6rem 0 1rem;
+}
+
 .product-card .info .price {
+    margin: 0;
+    color: var(--color-letra);
+    line-height: 1;
+}
+
+.product-card .info .price-single {
     font-size: 28px;
     font-weight: 600;
-    margin: 0.6rem 0 1rem;
+}
+
+.product-card .info .price-old {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.7;
+    text-decoration: line-through;
+}
+
+.product-card .info .price-final {
+    font-size: 30px;
+    font-weight: 700;
+    color: #00ff88;
+}
+
+.price-final-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.sale-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid #00ff88;
     color: var(--color-letra);
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.price-block.agotado .price,
+.price-block.agotado .sale-badge {
+    opacity: 0.45;
 }
 
 .product-card .info .description {

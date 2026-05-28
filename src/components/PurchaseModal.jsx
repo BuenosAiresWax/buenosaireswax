@@ -57,7 +57,7 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
     [cartItems, catalogKey],
   );
   const total = cartItemsByCatalog.reduce((acc, item) => {
-    const precio = Number(item?.precio) || 0;
+    const precio = Number(item?.precioFinal ?? item?.precio) || 0;
     const cantidad = Number(item?.cantidad) || 0;
     return acc + precio * cantidad;
   }, 0);
@@ -213,7 +213,7 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
           getCatalogKeyByCollectionName(collectionName);
         const catalogConfig = getCatalogConfig(catalogKeyFromCollection);
         const groupTotal = items.reduce(
-          (acc, p) => acc + (Number(p.precio) || 0) * (Number(p.cantidad) || 0),
+          (acc, p) => acc + (Number(p.precioFinal ?? p.precio) || 0) * (Number(p.cantidad) || 0),
           0,
         );
         const pedido = {
@@ -235,8 +235,8 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
             imagen: p.imagen || "",
             autor: p.autor || "",
             cantidad: Number(p.cantidad) || 0,
-            precioUnitario: Number(p.precio) || 0,
-            subtotal: (Number(p.precio) || 0) * (Number(p.cantidad) || 0),
+            precioUnitario: Number(p.precioFinal ?? p.precio) || 0,
+            subtotal: (Number(p.precioFinal ?? p.precio) || 0) * (Number(p.cantidad) || 0),
           })),
           total: groupTotal,
           fecha,
@@ -397,14 +397,14 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
           const sectionTitle = `\n${itemCatalog.label}:`;
           const lines = items.map((p) => {
             const quantity = Number(p?.cantidad) || 0;
-            const unitPrice = Number(p?.precio) || 0;
+            const unitPrice = Number(p?.precioFinal ?? p?.precio) || 0;
             const subtotal = quantity * unitPrice;
             const title = p?.titulo || "Producto sin nombre";
             return `- ${quantity} x ${title} | Unitario: ${formatPrice(unitPrice)} | Subtotal: ${formatPrice(subtotal)}`;
           });
           const sectionTotal = items.reduce(
             (acc, p) =>
-              acc + (Number(p?.precio) || 0) * (Number(p?.cantidad) || 0),
+              acc + (Number(p?.precioFinal ?? p?.precio) || 0) * (Number(p?.cantidad) || 0),
             0,
           );
 
@@ -572,7 +572,7 @@ ${
                               <span className="cart-item__title">{item?.titulo || "Producto sin nombre"}</span>
                               <div className="cart-item__meta">
                                 <span className="cart-item__price">
-                                  ${((Number(item?.precio) || 0) * (Number(item?.cantidad) || 0)).toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                  ${((Number(item?.precioFinal ?? item?.precio) || 0) * (Number(item?.cantidad) || 0)).toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                 </span>
                                 <span className="cart-item__qty">{Number(item?.cantidad) || 0}u</span>
                               </div>

@@ -20,7 +20,7 @@ export default function CartPopupButton({
       isCollectionIncludedInCheckout(getProductCollectionName(item), catalogKey),
   );
   const total = cartItemsByCatalog.reduce((sum, item) => {
-    const precio = Number(item?.precio) || 0;
+    const precio = Number(item?.precioFinal ?? item?.precio) || 0;
     const cantidad = Number(item?.cantidad) || 0;
     return sum + precio * cantidad;
   }, 0);
@@ -90,7 +90,7 @@ export default function CartPopupButton({
                 <div className="cart-item-info">
                   <p className="cart-item-name">{item?.titulo || "Producto sin nombre"}</p>
                   <p className="cart-item-price">
-                    ${(Number(item?.precio) || 0).toLocaleString("es-AR")}
+                      ${(Number(item?.precioFinal ?? item?.precio) || 0).toLocaleString("es-AR")}
                   </p>
                   <p className="cart-item-quantity">Cant: {Number(item?.cantidad) || 0}</p>
                 </div>

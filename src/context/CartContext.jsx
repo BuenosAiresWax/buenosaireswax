@@ -1,18 +1,19 @@
 // src/context/CartContext.js
 import { createContext, useState, useEffect } from "react";
-import { getCartItemKey, getProductCollectionName } from "../utils/catalog";
+import {
+    attachCatalogMeta,
+    getCartItemKey,
+    getCatalogKeyByCollectionName,
+    getProductCollectionName,
+} from "../utils/catalog";
 
 export const CartContext = createContext();
 
 const hydrateCartItems = (items = []) =>
     items.map((item) => {
-        const collectionName = getProductCollectionName(item);
+        const catalogKey = item.catalogKey || getCatalogKeyByCollectionName(item.collectionName);
 
-        return {
-            ...item,
-            collectionName,
-            cartKey: `${collectionName}:${item.id}`,
-        };
+        return attachCatalogMeta(item, catalogKey);
     });
 
 export function CartProvider({ children }) {

@@ -7,7 +7,12 @@ import { db } from "../firebase/config";
 
 import FaqModal from "./FaqModal";
 import "../styles/ProductItem.css";
-import { attachCatalogMeta, getCartItemKey, getCatalogConfig } from "../utils/catalog";
+import {
+  attachCatalogMeta,
+  getCartItemKey,
+  getCatalogConfig,
+  getProductPricing,
+} from "../utils/catalog";
 
 const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
 
@@ -107,6 +112,8 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const cartActionLabel = isEquipamientoCatalog
     ? "Consultar disponibilidad"
     : "Agregar al carrito";
+  const pricing = getProductPricing(producto);
+  const showSaleBadge = pricing.esSale;
 
   const handleDescriptionClick = () => {
     if (window.innerWidth <= 768) {
@@ -176,7 +183,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
         priceCurrency: "ARS",
 
-        price: producto.precio ?? 0,
+        price: pricing.precioFinal,
 
         priceValidUntil: new Date(
           new Date().setDate(new Date().getDate() + 30),
@@ -268,13 +275,33 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
 
         <p className="autor">{producto.autor}</p>
 
-        <p className={`price ${stockDisponible <= 0 ? "agotado" : ""}`}>
-          {isEquipamientoCatalog
-            ? "Consultar precio"
-            : `$${(producto?.precio ?? 0).toLocaleString("es-AR", {
+        <div className={`price-block ${stockDisponible <= 0 ? "agotado" : ""}`}>
+          {isEquipamientoCatalog ? (
+            <p className="price price-single">Consultar precio</p>
+          ) : showSaleBadge ? (
+            <>
+              <p className="price price-old">
+                ${pricing.precioOriginal.toLocaleString("es-AR", {
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+              <div className="price-final-row">
+                <p className="price price-final">
+                  ${pricing.precioFinal.toLocaleString("es-AR", {
+                    minimumFractionDigits: 0,
+                  })}
+                </p>
+                <span className="sale-badge">Sale</span>
+              </div>
+            </>
+          ) : (
+            <p className="price price-single">
+              ${pricing.precioFinal.toLocaleString("es-AR", {
                 minimumFractionDigits: 0,
-              })}`}
-        </p>
+              })}
+            </p>
+          )}
+        </div>
 
         <div className="description-container" onClick={handleDescriptionClick}>
           <p className="description" title={fullDescription}>

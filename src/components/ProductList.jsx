@@ -27,11 +27,13 @@ const FILTER_PLACEHOLDER_COUNT = 4;
 
 const DEFAULT_FILTERS = {
   filtroTexto: "",
+  categoriaSeleccionada: "",
   generoSeleccionado: "",
   estiloSeleccionado: "",
   selloSeleccionado: "",
   autorSeleccionado: "",
   verDisponibles: false,
+  verSale: false,
 };
 
 const normalizeFilterValue = (value) =>
@@ -39,6 +41,21 @@ const normalizeFilterValue = (value) =>
     .trim()
     .replace(/\s+/g, " ")
     .toLowerCase();
+
+const normalizeCategoryToken = (value) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const isSaleCategory = (value) => normalizeFilterValue(value) === "sale";
+
+const isHiddenSidebarCategory = (value) => {
+  const normalized = normalizeCategoryToken(value);
+  return normalized === "vinilo" || normalized === "sin categoria";
+};
 
 const isSameFilterValue = (leftValue, rightValue) =>
   normalizeFilterValue(leftValue) === normalizeFilterValue(rightValue);
@@ -57,6 +74,7 @@ const getSavedFilters = (storageKey) => {
       ...DEFAULT_FILTERS,
       ...parsed,
       verDisponibles: Boolean(parsed?.verDisponibles),
+      verSale: Boolean(parsed?.verSale),
     };
   } catch {
     return DEFAULT_FILTERS;
@@ -77,6 +95,9 @@ const ProductList = ({ catalogKey = "drop" }) => {
   const [limit, setLimit] = useState(BATCH_SIZE);
 
   const [filtroTexto, setFiltroTexto] = useState(initialFilters.filtroTexto);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(
+    initialFilters.categoriaSeleccionada,
+  );
   const [generoSeleccionado, setGeneroSeleccionado] = useState(
     initialFilters.generoSeleccionado,
   );
@@ -92,12 +113,14 @@ const ProductList = ({ catalogKey = "drop" }) => {
   const [verDisponibles, setVerDisponibles] = useState(
     initialFilters.verDisponibles,
   );
+  const [verSale, setVerSale] = useState(initialFilters.verSale);
 
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
 
-  const [estilosOpen, setEstilosOpen] = useState(true);
+  const [categoriasOpen, setCategoriasOpen] = useState(true);
+  const [estilosOpen, setEstilosOpen] = useState(false);
   const [generosOpen, setGenerosOpen] = useState(true);
   const [sellosOpen, setSellosOpen] = useState(false);
   const [autoresOpen, setAutoresOpen] = useState(false);
@@ -106,11 +129,13 @@ const ProductList = ({ catalogKey = "drop" }) => {
     const savedFilters = getSavedFilters(filtersStorageKey);
 
     setFiltroTexto(savedFilters.filtroTexto);
+    setCategoriaSeleccionada(savedFilters.categoriaSeleccionada);
     setGeneroSeleccionado(savedFilters.generoSeleccionado);
     setEstiloSeleccionado(savedFilters.estiloSeleccionado);
     setSelloSeleccionado(savedFilters.selloSeleccionado);
     setAutorSeleccionado(savedFilters.autorSeleccionado);
     setVerDisponibles(savedFilters.verDisponibles);
+    setVerSale(savedFilters.verSale);
     setLimit(BATCH_SIZE);
     setSidebarVisible(false);
   }, [filtersStorageKey]);
@@ -124,6 +149,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
 
   useEffect(() => {
     if (isMobile) {
+      setCategoriasOpen(true);
       setGenerosOpen(true);
       setEstilosOpen(false);
       setSellosOpen(false);
@@ -131,8 +157,9 @@ const ProductList = ({ catalogKey = "drop" }) => {
       return;
     }
 
+    setCategoriasOpen(true);
     setGenerosOpen(true);
-    setEstilosOpen(true);
+    setEstilosOpen(false);
     setSellosOpen(false);
     setAutoresOpen(false);
   }, [isMobile]);
@@ -224,20 +251,24 @@ const ProductList = ({ catalogKey = "drop" }) => {
       filtersStorageKey,
       JSON.stringify({
         filtroTexto,
+        categoriaSeleccionada,
         generoSeleccionado,
         estiloSeleccionado,
         selloSeleccionado,
         autorSeleccionado,
         verDisponibles,
+        verSale,
       }),
     );
   }, [
     filtroTexto,
+    categoriaSeleccionada,
     generoSeleccionado,
     estiloSeleccionado,
     selloSeleccionado,
     autorSeleccionado,
     verDisponibles,
+    verSale,
     filtersStorageKey,
   ]);
 
@@ -249,6 +280,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
 
     scrollToProductsTop();
   }, [
+    categoriaSeleccionada,
     generoSeleccionado,
     estiloSeleccionado,
     selloSeleccionado,
@@ -300,6 +332,13 @@ const ProductList = ({ catalogKey = "drop" }) => {
   );
 
   const generos = useMemo(() => getUniqueFilterOptions("genero"), [getUniqueFilterOptions]);
+  const categorias = useMemo(
+    () =>
+      getUniqueFilterOptions("categoria").filter(
+        (categoria) => !isHiddenSidebarCategory(categoria),
+      ),
+    [getUniqueFilterOptions],
+  );
   const estilos = useMemo(() => getUniqueFilterOptions("estilo"), [getUniqueFilterOptions]);
   const sellos = useMemo(() => getUniqueFilterOptions("sello"), [getUniqueFilterOptions]);
   const autores = useMemo(() => getUniqueFilterOptions("autor"), [getUniqueFilterOptions]);
@@ -332,6 +371,10 @@ const ProductList = ({ catalogKey = "drop" }) => {
           !generoSeleccionado ||
           normalizeFilterValue(producto.genero) ===
             normalizeFilterValue(generoSeleccionado);
+        const coincideCategoria =
+          !categoriaSeleccionada ||
+          normalizeFilterValue(producto.categoria) ===
+            normalizeFilterValue(categoriaSeleccionada);
         const coincideEstilo =
           !estiloSeleccionado ||
           normalizeFilterValue(producto.estilo) ===
@@ -349,14 +392,17 @@ const ProductList = ({ catalogKey = "drop" }) => {
           (producto.cantidad ?? 0) - (producto.reservados ?? 0) > 0;
 
         const coincideStock = !verDisponibles || stockDisponible;
+        const coincideSale = !verSale || isSaleCategory(producto.categoria);
 
         return (
           coincideTexto &&
+          coincideCategoria &&
           coincideGenero &&
           coincideEstilo &&
           coincideSello &&
           coincideAutor &&
-          coincideStock
+          coincideStock &&
+          coincideSale
         );
       });
 
@@ -396,11 +442,13 @@ const ProductList = ({ catalogKey = "drop" }) => {
   }, [
     productos,
     filtroTexto,
+    categoriaSeleccionada,
     generoSeleccionado,
     estiloSeleccionado,
     selloSeleccionado,
     autorSeleccionado,
     verDisponibles,
+    verSale,
   ]);
 
   const productosLimitados = productosFiltrados.slice(0, limit);
@@ -597,6 +645,8 @@ const ProductList = ({ catalogKey = "drop" }) => {
       <Filters
         filtroTexto={filtroTexto}
         setFiltroTexto={setFiltroTexto}
+        categoriaSeleccionada={categoriaSeleccionada}
+        setCategoriaSeleccionada={setCategoriaSeleccionada}
         generoSeleccionado={generoSeleccionado}
         setGeneroSeleccionado={setGeneroSeleccionado}
         estiloSeleccionado={estiloSeleccionado}
@@ -607,7 +657,10 @@ const ProductList = ({ catalogKey = "drop" }) => {
         setAutorSeleccionado={setAutorSeleccionado}
         verDisponibles={verDisponibles}
         setVerDisponibles={setVerDisponibles}
+        verSale={verSale}
+        setVerSale={setVerSale}
         productos={productos}
+        categorias={categorias}
         generos={generos}
         estilos={estilos}
         sellos={sellos}
@@ -619,6 +672,31 @@ const ProductList = ({ catalogKey = "drop" }) => {
       <div className="product-list-container" ref={productListContainerRef}>
         {sidebarVisible && isMobile && <div className="sidebar-overlay" onClick={() => setSidebarVisible(false)} />}
         <div className={`filters-sidebar ${sidebarVisible ? 'visible' : ''}`}>
+            <div className="sidebar-filter">
+              <button className="filter-toggle" onClick={() => setCategoriasOpen(!categoriasOpen)}>
+                Categorías {categoriasOpen ? '−' : '+'}
+              </button>
+              {categoriasOpen && (
+                <div className="filter-options">
+                  <button
+                    onClick={() => applySidebarFilter(setCategoriaSeleccionada, "")}
+                    className={categoriaSeleccionada === "" ? "active" : ""}
+                  >
+                    Todas
+                  </button>
+                  {categorias.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => applySidebarFilter(setCategoriaSeleccionada, c)}
+                      className={isSameFilterValue(categoriaSeleccionada, c) ? "active" : ""}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="sidebar-filter">
               <button className="filter-toggle" onClick={() => setGenerosOpen(!generosOpen)}>
                 Géneros {generosOpen ? '−' : '+'}

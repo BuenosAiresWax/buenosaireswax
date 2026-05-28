@@ -76,6 +76,8 @@ function SelectFilter({ value, onChange, options, placeholder }) {
 function Filters({
     filtroTexto,
     setFiltroTexto,
+    categoriaSeleccionada,
+    setCategoriaSeleccionada,
     generoSeleccionado,
     setGeneroSeleccionado,
     estiloSeleccionado,
@@ -86,6 +88,8 @@ function Filters({
     setAutorSeleccionado,
     verDisponibles,
     setVerDisponibles,
+    verSale,
+    setVerSale,
     productos,
     generos,
     estilos,
@@ -105,14 +109,24 @@ function Filters({
 
     const limpiarFiltros = () => {
         setFiltroTexto("");
+        setCategoriaSeleccionada("");
         setGeneroSeleccionado("");
         setEstiloSeleccionado("");
         setSelloSeleccionado("");
         setAutorSeleccionado("");
         setVerDisponibles(false);
+        setVerSale(false);
     };
 
-    const hayFiltrosActivos = filtroTexto || generoSeleccionado || estiloSeleccionado || selloSeleccionado || autorSeleccionado || verDisponibles;
+    const hayFiltrosActivos =
+        filtroTexto ||
+        categoriaSeleccionada ||
+        generoSeleccionado ||
+        estiloSeleccionado ||
+        selloSeleccionado ||
+        autorSeleccionado ||
+        verDisponibles ||
+        verSale;
 
     return (
         <div className="filters-container">
@@ -160,6 +174,19 @@ function Filters({
                         </span>
                         <span className="btn-label">{verDisponibles ? "Todo" : "Disponibles"}</span>
                     </button>
+
+                    {!isMobile && (
+                        <button
+                            className={`filters-action-btn availability-btn ${verSale ? "is-active" : ""}`}
+                            onClick={() => setVerSale(!verSale)}
+                            aria-pressed={verSale}
+                        >
+                            <span className="btn-icon">
+                                <GridIcon />
+                            </span>
+                            <span className="btn-label">Sale</span>
+                        </button>
+                    )}
 
                     {/* Botón limpiar */}
                     <button

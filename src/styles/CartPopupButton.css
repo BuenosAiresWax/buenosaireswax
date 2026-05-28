@@ -157,8 +157,6 @@
 .cart-item {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 10px;
-    padding-bottom: 10px;
     min-width: 0;
 }
 

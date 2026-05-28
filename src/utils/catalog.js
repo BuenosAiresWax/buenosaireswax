@@ -31,6 +31,45 @@ export const CATALOGS = {
   },
 };
 
+const SALE_CATEGORY = "sale";
+const SALE_DISCOUNT_PERCENT = 15;
+const SALE_MULTIPLIER = 1 - SALE_DISCOUNT_PERCENT / 100;
+
+const normalizeText = (value) =>
+  String(value ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+const parsePrice = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+export function isSaleProduct(producto) {
+  return normalizeText(producto?.categoria) === SALE_CATEGORY;
+}
+
+export function getProductPricing(producto) {
+  const esSale = isSaleProduct(producto);
+  const precioOriginal = Number.isFinite(Number(producto?.precioOriginal))
+    ? Number(producto.precioOriginal)
+    : parsePrice(producto?.precio);
+  const precioFinal = Number.isFinite(Number(producto?.precioFinal))
+    ? Number(producto.precioFinal)
+    : esSale
+      ? Math.round(precioOriginal * SALE_MULTIPLIER)
+      : precioOriginal;
+
+  return {
+    esSale,
+    descuentoPorcentaje: esSale ? SALE_DISCOUNT_PERCENT : 0,
+    precioOriginal,
+    precioFinal,
+    precioDescuento: precioOriginal - precioFinal,
+  };
+}
+
 const MIXED_CHECKOUT_COLLECTIONS = [
   CATALOGS.tienda.collectionName,
   CATALOGS.equipamiento.collectionName,
@@ -77,6 +116,7 @@ export function getCartItemKey(producto) {
 
 export function attachCatalogMeta(producto, catalogKey = "drop") {
   const catalog = getCatalogConfig(catalogKey);
+  const pricing = getProductPricing(producto);
 
   return {
     ...producto,
@@ -84,5 +124,8 @@ export function attachCatalogMeta(producto, catalogKey = "drop") {
     collectionName: catalog.collectionName,
     detailPath: catalog.buildDetailPath(producto.id),
     cartKey: `${catalog.collectionName}:${producto.id}`,
+    ...pricing,
+    precio: pricing.precioFinal,
+    precioUnitario: pricing.precioFinal,
   };
 }

@@ -13,6 +13,7 @@ import {
   getCatalogBreadcrumbLabel,
   getCatalogConfig,
   getCatalogKeyByCollectionName,
+  getProductPricing,
 } from "../utils/catalog";
 
 import "../styles/ProductPage.css";
@@ -77,7 +78,7 @@ function ProductPage({ catalogKey = "drop" }) {
       offers: {
         "@type": "Offer",
         priceCurrency: "ARS",
-        price: producto.precio,
+        price: pricing.precioFinal,
         itemCondition: "https://schema.org/NewCondition",
         availability:
           stockDisponible > 0
@@ -135,6 +136,8 @@ function ProductPage({ catalogKey = "drop" }) {
     !isEquipamientoCatalog &&
     !hasPlaceholderEscuchaUrl &&
     hasValidEscuchaUrl;
+  const pricing = getProductPricing(producto);
+  const showSaleBadge = pricing.esSale;
 
   const cartKey = getCartItemKey({ id, collectionName: catalog.collectionName });
   const carritoItem = cartItems.find((item) => getCartItemKey(item) === cartKey);
@@ -234,7 +237,21 @@ function ProductPage({ catalogKey = "drop" }) {
             <strong>Precio:</strong>{" "}
             {isEquipamientoCatalog
               ? "Consultar"
-              : `$${producto.precio ? producto.precio.toLocaleString("es-AR") : "-"}`}
+              : showSaleBadge ? (
+                  <span className="detail-price-stack">
+                    <span className="detail-price-old">
+                      ${pricing.precioOriginal.toLocaleString("es-AR")}
+                    </span>
+                    <span className="detail-price-final-row">
+                      <span className="detail-price-final">
+                        ${pricing.precioFinal.toLocaleString("es-AR")}
+                      </span>
+                      <span className="detail-sale-badge-inline">Sale</span>
+                    </span>
+                  </span>
+                ) : (
+                  `$${pricing.precioFinal.toLocaleString("es-AR")}`
+                )}
           </p>
 
           <p className={stockDisponible > 0 ? "stock-ok" : "stock-off"}>
