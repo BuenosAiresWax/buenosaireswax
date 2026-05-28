@@ -148,7 +148,7 @@
 .detail-price-final {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #f7b530;
+  color: #fac775;
 }
 
 .detail-price-final-row {
@@ -162,7 +162,7 @@
   align-items: center;
   justify-content: center;
   padding: 0.25rem 0.55rem;
-  border: 1px solid #f7b530;
+  border: 1px solid #fac775;
   color: var(--color-letra);
   font-size: 11px;
   font-weight: 800;
