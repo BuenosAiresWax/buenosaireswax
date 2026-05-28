@@ -232,7 +232,7 @@
     .filters-action-btn {
         justify-content: center;
         min-width: 0;
-        padding: 0.5rem 0.85rem;
+        padding: 0.5rem 0.25rem;
     }
 
     .search-input-container {
