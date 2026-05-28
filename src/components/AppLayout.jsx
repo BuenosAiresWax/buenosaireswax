@@ -36,6 +36,51 @@ function AppLayout() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return undefined;
+    }
+
+    const root = document.documentElement;
+    const visualViewport = window.visualViewport;
+
+    const updateViewportGap = () => {
+      const viewportGap = visualViewport
+        ? Math.max(
+            0,
+            window.innerHeight - visualViewport.height - visualViewport.offsetTop,
+          )
+        : 0;
+
+      root.style.setProperty(
+        "--visual-viewport-bottom-gap",
+        `${viewportGap}px`,
+      );
+    };
+
+    updateViewportGap();
+
+    if (visualViewport) {
+      visualViewport.addEventListener("resize", updateViewportGap);
+      visualViewport.addEventListener("scroll", updateViewportGap);
+    }
+
+    window.addEventListener("resize", updateViewportGap);
+    window.addEventListener("orientationchange", updateViewportGap);
+
+    return () => {
+      root.style.removeProperty("--visual-viewport-bottom-gap");
+
+      if (visualViewport) {
+        visualViewport.removeEventListener("resize", updateViewportGap);
+        visualViewport.removeEventListener("scroll", updateViewportGap);
+      }
+
+      window.removeEventListener("resize", updateViewportGap);
+      window.removeEventListener("orientationchange", updateViewportGap);
+    };
+  }, []);
+
   const isDropAccessActive =
     location.pathname === "/" && !autenticado && isDropAccessWindowActive();
   const isEquipamientoRoute =
@@ -43,7 +88,10 @@ function AppLayout() {
     location.pathname.startsWith("/equipamiento/");
 
   return (
-    <div className="app-container" style={{ paddingBottom: "84px" }}>
+    <div
+      className="app-container"
+      style={{ paddingBottom: "calc(84px + var(--visual-viewport-bottom-gap, 0px))" }}
+    >
       <div className="headerContainer">
         <NavLink to="/" className="logoLink" aria-label="Ir al inicio de BAWAX">
           <img src={logo} alt="bawax" className="logo" />
