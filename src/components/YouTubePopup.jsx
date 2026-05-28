@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "../styles/YoutubePopup.css";
 
+const CART_OPEN_EVENT = "bawax:cart-open";
+
 const YouTubePopup = () => {
     const [visible, setVisible] = useState(false);
     const [closing, setClosing] = useState(false);
@@ -30,6 +32,19 @@ const YouTubePopup = () => {
             window.removeEventListener("touchstart", handleFirstInteraction);
         };
     }, [started]);
+
+    useEffect(() => {
+        const handleCartOpen = () => {
+            setClosing(false);
+            setVisible(false);
+        };
+
+        window.addEventListener(CART_OPEN_EVENT, handleCartOpen);
+
+        return () => {
+            window.removeEventListener(CART_OPEN_EVENT, handleCartOpen);
+        };
+    }, []);
 
     const handleClose = () => {
         setClosing(true);

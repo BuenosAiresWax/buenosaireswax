@@ -8,6 +8,8 @@ import {
 
 import "../styles/CartPopupButton.css";
 
+const CART_OPEN_EVENT = "bawax:cart-open";
+
 export default function CartPopupButton({
   onOpen,
   catalogKey = "drop",
@@ -36,6 +38,7 @@ export default function CartPopupButton({
   }, [isHidden]);
 
   const handleCheckout = () => {
+    window.dispatchEvent(new Event(CART_OPEN_EVENT));
     setIsExpanded(false);
     onOpen();
   };
@@ -45,7 +48,15 @@ export default function CartPopupButton({
   };
 
   const handleToggleExpanded = () => {
-    setIsExpanded((prev) => !prev);
+    setIsExpanded((prev) => {
+      const nextValue = !prev;
+
+      if (nextValue) {
+        window.dispatchEvent(new Event(CART_OPEN_EVENT));
+      }
+
+      return nextValue;
+    });
   };
 
   if (totalQuantity === 0 || isHidden) {
