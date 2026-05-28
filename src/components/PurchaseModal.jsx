@@ -741,10 +741,10 @@ ${
                   {loading ? "Procesando..." : "Crear orden"}
                 </button>
 
-                <p className="modalText form-footer-text">
+{/*                 <p className="modalText form-footer-text">
                   Su pedido será armado y aparecerá listo para ser enviado por
                   WhatsApp.
-                </p>
+                </p> */}
               </form>
                 </div>{/* cart-right-panel */}
               </div>{/* cart-columns */}
