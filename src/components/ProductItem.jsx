@@ -291,7 +291,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                     minimumFractionDigits: 0,
                   })}
                 </p>
-                <span className="sale-badge">Sale</span>
+                <span className="sale-badge">%15 off</span>
               </div>
             </>
           ) : (

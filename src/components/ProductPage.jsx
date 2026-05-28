@@ -246,7 +246,7 @@ function ProductPage({ catalogKey = "drop" }) {
                       <span className="detail-price-final">
                         ${pricing.precioFinal.toLocaleString("es-AR")}
                       </span>
-                      <span className="detail-sale-badge-inline">Sale</span>
+                      <span className="detail-sale-badge-inline">15% off</span>
                     </span>
                   </span>
                 ) : (

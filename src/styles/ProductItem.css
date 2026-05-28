@@ -127,7 +127,7 @@
 }
 
 .product-card .info .price-old {
-    font-size: 14px;
+    font-size: 1.2rem;
     font-weight: 500;
     opacity: 0.7;
     text-decoration: line-through;
@@ -136,7 +136,7 @@
 .product-card .info .price-final {
     font-size: 30px;
     font-weight: 700;
-    color: #00ff88;
+    color: #f7b530;
 }
 
 .price-final-row {
@@ -150,7 +150,7 @@
     align-items: center;
     justify-content: center;
     padding: 0.25rem 0.55rem;
-    border: 1px solid #00ff88;
+    border: 1px solid #f7b530;
     color: var(--color-letra);
     font-size: 0.7rem;
     font-weight: 400;
