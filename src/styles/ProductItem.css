@@ -1,6 +1,6 @@
 .product-card {
-    width: 240px;
-    max-width: 100%;
+    width: 100%;
+    max-width: 240px;
     height: max-content;
     display: flex;
     flex-direction: column;
@@ -8,6 +8,12 @@
     font-family: 'Courier New', Courier, monospace;
     position: relative;
     overflow: hidden;
+}
+
+@media (max-width: 767px) {
+    .product-card {
+        max-width: 320px;
+    }
 }
 
 /* Imagen cuadrada */
@@ -151,9 +157,9 @@
     justify-content: center;
     padding: 0.25rem 0.55rem;
     border: 1px solid #fac775;
-    color: var(--color-letra);
+    color: #fac775;
     font-size: 0.7rem;
-    font-weight: 400;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     white-space: nowrap;
@@ -512,7 +518,8 @@
 
 @media (min-width: 768px) and (max-width: 1100px) {
     .product-card {
-        width: min(100%, 320px);
+        width: 100%;
+        max-width: 240px;
     }
 
     .product-card .info {
