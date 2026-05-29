@@ -211,10 +211,13 @@ function ProductPage({ catalogKey = "drop" }) {
           <p className="detail-description">{producto.descripcion}</p>
 
           {/* TAGS */}
-          <div className="tags">
-            {producto.genero && <span>{producto.genero}</span>}
-            {producto.estilo && <span>{producto.estilo}</span>}
-            <span>Vinyl</span>
+          <div className="tags-section">
+            <p className="tags-title">Categorias</p>
+            <div className="tags" aria-label="Categorias del producto">
+              {producto.genero && <span>{producto.genero}</span>}
+              {producto.estilo && <span>{producto.estilo}</span>}
+              <span className="tag-vinyl">Vinyl</span>
+            </div>
           </div>
 
           {/* Botón que controla el PLAYER GLOBAL */}
@@ -227,32 +230,41 @@ function ProductPage({ catalogKey = "drop" }) {
 
         {/* RIGHT - META */}
         <div className="detail-right">
-          <p>
-            <strong>Label:</strong> {producto.autor || "-"}
-          </p>
-          <p>
-            <strong>Formato:</strong> 12" Vinyl
-          </p>
-          <p className="detail-right-price">
-            <strong>Precio:</strong>{" "}
-            {isEquipamientoCatalog
-              ? "Consultar"
-              : showSaleBadge ? (
-                  <span className="detail-price-stack">
-                    <span className="detail-price-old">
-                      ${pricing.precioOriginal.toLocaleString("es-AR")}
-                    </span>
-                    <span className="detail-price-final-row">
-                      <span className="detail-price-final">
-                        ${pricing.precioFinal.toLocaleString("es-AR")}
-                      </span>
-                      <span className="detail-sale-badge-inline">15% off</span>
-                    </span>
+          <div className="detail-meta-card">
+            <div className="meta-row">
+              <span className="meta-key">Label:</span>
+              <span className="meta-value">{producto.autor || "-"}</span>
+            </div>
+
+            <div className="meta-row">
+              <span className="meta-key">Formato:</span>
+              <span className="meta-value">12&quot; Vinyl</span>
+            </div>
+
+            <div className="meta-price-block">
+              <span className="meta-key">Precio:</span>
+
+              {isEquipamientoCatalog ? (
+                <span className="meta-price-main">Consultar</span>
+              ) : showSaleBadge ? (
+                <span className="meta-price-stack">
+                  <span className="meta-price-old">
+                    ${pricing.precioOriginal.toLocaleString("es-AR")}
                   </span>
-                ) : (
-                  `$${pricing.precioFinal.toLocaleString("es-AR")}`
-                )}
-          </p>
+                  <span className="meta-price-main-row">
+                    <span className="meta-price-main">
+                      ${pricing.precioFinal.toLocaleString("es-AR")}
+                    </span>
+                    <span className="meta-price-badge">15% off</span>
+                  </span>
+                </span>
+              ) : (
+                <span className="meta-price-main">
+                  ${pricing.precioFinal.toLocaleString("es-AR")}
+                </span>
+              )}
+            </div>
+          </div>
 
           <p className={stockDisponible > 0 ? "stock-ok" : "stock-off"}>
             {stockDisponible > 0 ? "DISPONIBLE" : "AGOTADO"}
