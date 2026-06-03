@@ -220,6 +220,10 @@
   color: #fac775;
 }
 
+.meta-price-main-default {
+  color: var(--color-letra);
+}
+
 .meta-price-badge {
   display: inline-flex;
   align-items: center;
@@ -232,6 +236,12 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.meta-new-in-badge {
+  border-color: #00ff88;
+  color: #00ff88;
+  background: #282322;
 }
 
 .detail-price-stack {

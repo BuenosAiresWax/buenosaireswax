@@ -165,6 +165,12 @@
     white-space: nowrap;
 }
 
+.new-in-badge {
+    border-color: #00ff88;
+    color: #00ff88;
+    background: #282322;
+}
+
 .price-block.agotado .price,
 .price-block.agotado .sale-badge {
     opacity: 0.45;

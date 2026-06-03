@@ -32,6 +32,7 @@ export const CATALOGS = {
 };
 
 const SALE_CATEGORY = "sale";
+const NEW_IN_CATEGORY = "new in";
 const SALE_DISCOUNT_PERCENT = 15;
 const SALE_MULTIPLIER = 1 - SALE_DISCOUNT_PERCENT / 100;
 
@@ -48,6 +49,10 @@ const parsePrice = (value) => {
 
 export function isSaleProduct(producto) {
   return normalizeText(producto?.categoria) === SALE_CATEGORY;
+}
+
+export function isNewInProduct(producto) {
+  return normalizeText(producto?.categoria) === NEW_IN_CATEGORY;
 }
 
 export function getProductPricing(producto) {

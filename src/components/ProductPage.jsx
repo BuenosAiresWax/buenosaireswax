@@ -14,6 +14,7 @@ import {
   getCatalogConfig,
   getCatalogKeyByCollectionName,
   getProductPricing,
+  isNewInProduct,
 } from "../utils/catalog";
 
 import "../styles/ProductPage.css";
@@ -138,6 +139,7 @@ function ProductPage({ catalogKey = "drop" }) {
     hasValidEscuchaUrl;
   const pricing = getProductPricing(producto);
   const showSaleBadge = pricing.esSale;
+  const showNewInBadge = isNewInProduct(producto);
 
   const cartKey = getCartItemKey({ id, collectionName: catalog.collectionName });
   const carritoItem = cartItems.find((item) => getCartItemKey(item) === cartKey);
@@ -257,6 +259,13 @@ function ProductPage({ catalogKey = "drop" }) {
                     </span>
                     <span className="meta-price-badge">15% off</span>
                   </span>
+                </span>
+              ) : showNewInBadge ? (
+                <span className="meta-price-main-row">
+                  <span className="meta-price-main meta-price-main-default">
+                    ${pricing.precioFinal.toLocaleString("es-AR")}
+                  </span>
+                  <span className="meta-price-badge meta-new-in-badge">New in</span>
                 </span>
               ) : (
                 <span className="meta-price-main">

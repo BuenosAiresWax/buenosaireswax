@@ -12,6 +12,7 @@ import {
   getCartItemKey,
   getCatalogConfig,
   getProductPricing,
+  isNewInProduct,
 } from "../utils/catalog";
 
 const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
@@ -114,6 +115,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     : "Agregar al carrito";
   const pricing = getProductPricing(producto);
   const showSaleBadge = pricing.esSale;
+  const showNewInBadge = isNewInProduct(producto);
 
   const handleDescriptionClick = () => {
     if (window.innerWidth <= 768) {
@@ -294,6 +296,15 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 <span className="sale-badge">%15 off</span>
               </div>
             </>
+          ) : showNewInBadge ? (
+            <div className="price-final-row">
+              <p className="price price-single">
+                ${pricing.precioFinal.toLocaleString("es-AR", {
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+              <span className="sale-badge new-in-badge">New in</span>
+            </div>
           ) : (
             <p className="price price-single">
               ${pricing.precioFinal.toLocaleString("es-AR", {
