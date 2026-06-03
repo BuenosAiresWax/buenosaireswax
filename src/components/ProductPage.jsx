@@ -265,7 +265,7 @@ function ProductPage({ catalogKey = "drop" }) {
                   <span className="meta-price-main meta-price-main-default">
                     ${pricing.precioFinal.toLocaleString("es-AR")}
                   </span>
-                  <span className="meta-price-badge meta-new-in-badge">New in</span>
+                  <span className="meta-price-badge meta-new-in-badge">New</span>
                 </span>
               ) : (
                 <span className="meta-price-main">

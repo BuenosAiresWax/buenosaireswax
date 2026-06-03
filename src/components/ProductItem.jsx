@@ -303,7 +303,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                   minimumFractionDigits: 0,
                 })}
               </p>
-              <span className="sale-badge new-in-badge">New in</span>
+              <span className="sale-badge new-in-badge">New</span>
             </div>
           ) : (
             <p className="price price-single">

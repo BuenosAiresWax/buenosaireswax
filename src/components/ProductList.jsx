@@ -60,6 +60,9 @@ const isHiddenSidebarCategory = (value) => {
 const isSameFilterValue = (leftValue, rightValue) =>
   normalizeFilterValue(leftValue) === normalizeFilterValue(rightValue);
 
+const formatCategoryLabel = (value) =>
+  normalizeFilterValue(value) === "new in" ? "News" : value;
+
 const getSavedFilters = (storageKey) => {
   if (typeof window === "undefined") return DEFAULT_FILTERS;
 
@@ -690,7 +693,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
                       onClick={() => applySidebarFilter(setCategoriaSeleccionada, c)}
                       className={isSameFilterValue(categoriaSeleccionada, c) ? "active" : ""}
                     >
-                      {c}
+                      {formatCategoryLabel(c)}
                     </button>
                   ))}
                 </div>
