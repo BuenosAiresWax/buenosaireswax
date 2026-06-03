@@ -54,7 +54,7 @@ const isSaleCategory = (value) => normalizeFilterValue(value) === "sale";
 
 const isHiddenSidebarCategory = (value) => {
   const normalized = normalizeCategoryToken(value);
-  return normalized === "vinilo" || normalized === "sin categoria";
+  return normalized === "vinilo" || normalized === "vinilos" || normalized === "sin categoria";
 };
 
 const isSameFilterValue = (leftValue, rightValue) =>
