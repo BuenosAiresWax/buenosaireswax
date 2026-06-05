@@ -4,6 +4,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
 import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
+import { isPlayableSoundCloudUrl, normalizeSoundCloudUrl } from "../player/soundcloudUrl";
 import PlayerBar from "../player/PlayerBar";
 import PurchaseModal from "./PurchaseModal";
 import CartPopupButton from "./CartPopupButton";
@@ -19,8 +20,6 @@ import {
 } from "../utils/catalog";
 
 import "../styles/ProductPage.css";
-
-const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
 
 function ProductPage({ catalogKey = "drop" }) {
   const { id } = useParams();
@@ -148,14 +147,10 @@ function ProductPage({ catalogKey = "drop" }) {
     ? "Consultar disponibilidad"
     : "Añadir al carrito";
   const escuchaUrl = (producto.escucha || "").trim();
-  const normalizedEscuchaUrl = escuchaUrl.toLowerCase();
-  const hasPlaceholderEscuchaUrl =
-    normalizedEscuchaUrl === PLACEHOLDER_LISTEN_URL.toLowerCase();
-  const hasValidEscuchaUrl = /^https?:\/\//i.test(escuchaUrl);
+  const normalizedEscuchaUrl = normalizeSoundCloudUrl(escuchaUrl);
   const canPlayProduct =
     !isEquipamientoCatalog &&
-    !hasPlaceholderEscuchaUrl &&
-    hasValidEscuchaUrl;
+    isPlayableSoundCloudUrl(escuchaUrl);
   const shouldShowProductPlayer = canPlayProduct || Boolean(currentTrackUrl);
   const pricing = getProductPricing(producto);
   const showSaleBadge = pricing.esSale;
@@ -177,7 +172,7 @@ function ProductPage({ catalogKey = "drop" }) {
   const handlePlay = () => {
     if (!canPlayProduct) return;
 
-    setTrack(escuchaUrl, true, {
+    setTrack(normalizedEscuchaUrl, true, {
       titulo: producto.titulo,
       autor: producto.autor,
       imagen: producto.imagen,

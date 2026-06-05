@@ -8,13 +8,14 @@ import "./playerBar.css";
  * Lo ocultamos. Después cargamos tracks con widget.load(...)
  */
 const DEFAULT_EMBED =
-    "https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/forss/flickermood";
+    "https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/soundcloud";
 
 export default function PlayerBar({ className = "" }) {
     const { loaded, error } = useSoundCloudScript();
     const iframeRef = useRef(null);
     const widgetRef = useRef(null);
     const autoplayTimersRef = useRef([]);
+    const loadSequenceRef = useRef(0);
 
     const {
         currentTrackUrl,
@@ -29,6 +30,7 @@ export default function PlayerBar({ className = "" }) {
     } = useContext(PlayerContext);
 
     const [ready, setReady] = useState(false);
+    const [isTrackLoading, setIsTrackLoading] = useState(false);
     const iframeSrc = useMemo(() => DEFAULT_EMBED, []);
     const normalizedTrackValue = (currentTrackUrl || "").trim().toLowerCase();
     const hasNoTrackPlaceholder =
@@ -47,6 +49,56 @@ export default function PlayerBar({ className = "" }) {
         autoplayTimersRef.current = [];
     };
 
+    useEffect(() => {
+        const handleUnhandledRejection = (event) => {
+            const reason = event?.reason;
+            const isAbortError = reason?.name === "AbortError";
+            const message = typeof reason?.message === "string" ? reason.message : "";
+            const stack = typeof reason?.stack === "string" ? reason.stack : "";
+            const isSoundCloudWidgetError =
+                message.includes("signal is aborted") ||
+                stack.includes("widget-");
+
+            // El widget de SoundCloud aborta requests internos al cambiar/cancelar cargas.
+            // Evitamos ruido en consola solo para ese caso específico.
+            if (isAbortError && isSoundCloudWidgetError) {
+                event.preventDefault();
+            }
+        };
+
+        window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+        return () => {
+            window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+        };
+    }, []);
+
+    const canUseWidget = (widget) => {
+        if (!widget) return false;
+        if (!iframeRef.current) return false;
+        return !!iframeRef.current.contentWindow;
+    };
+
+    const safeWidgetCall = (widget, callback) => {
+        if (!canUseWidget(widget)) return false;
+
+        try {
+            callback();
+            return true;
+        } catch (err) {
+            // Evita romper la app cuando el iframe del widget se desmonta entre renders.
+            if (
+                err instanceof TypeError &&
+                typeof err.message === "string" &&
+                err.message.includes("postMessage")
+            ) {
+                return false;
+            }
+
+            throw err;
+        }
+    };
+
     useEffect(() => () => clearAutoplayTimers(), []);
 
     // Crear widget una vez
@@ -60,28 +112,65 @@ export default function PlayerBar({ className = "" }) {
         widgetRef.current = widget;
 
         registerHandlers({
-            play: () => widget.play(),
-            pause: () => widget.pause(),
+            play: () => {
+                safeWidgetCall(widgetRef.current, () => widgetRef.current.play());
+            },
+            pause: () => {
+                safeWidgetCall(widgetRef.current, () => widgetRef.current.pause());
+            },
             load: (url, autoplay) =>
-                widget.load(url, {
-                    auto_play: !!autoplay,
-                    hide_related: true,
-                    show_comments: false,
-                    show_user: false,
-                    show_reposts: false,
-                    show_teaser: false,
-                    visual: false,
+                safeWidgetCall(widgetRef.current, () => {
+                    widgetRef.current.load(url, {
+                        auto_play: !!autoplay,
+                        hide_related: true,
+                        show_comments: false,
+                        show_user: false,
+                        show_reposts: false,
+                        show_teaser: false,
+                        visual: false,
+                    });
                 }),
         });
 
         const onPlay = () => setIsPlaying(true);
         const onPause = () => setIsPlaying(false);
         const onFinish = () => setIsPlaying(false);
+        const onReady = () => setReady(true);
 
-        widget.bind(window.SC.Widget.Events.PLAY, onPlay);
-        widget.bind(window.SC.Widget.Events.PAUSE, onPause);
-        widget.bind(window.SC.Widget.Events.FINISH, onFinish);
-        widget.bind(window.SC.Widget.Events.READY, () => setReady(true));
+        const handlePlay = () => {
+            setIsTrackLoading(false);
+            onPlay();
+        };
+
+        const handlePause = () => {
+            setIsTrackLoading(false);
+            onPause();
+        };
+
+        const handleFinish = () => {
+            setIsTrackLoading(false);
+            onFinish();
+        };
+
+        widget.bind(window.SC.Widget.Events.PLAY, handlePlay);
+        widget.bind(window.SC.Widget.Events.PAUSE, handlePause);
+        widget.bind(window.SC.Widget.Events.FINISH, handleFinish);
+        widget.bind(window.SC.Widget.Events.READY, onReady);
+
+        return () => {
+            clearAutoplayTimers();
+            registerHandlers({ play: null, pause: null, load: null });
+
+            if (window.SC?.Widget?.Events) {
+                widget.unbind(window.SC.Widget.Events.PLAY, handlePlay);
+                widget.unbind(window.SC.Widget.Events.PAUSE, handlePause);
+                widget.unbind(window.SC.Widget.Events.FINISH, handleFinish);
+                widget.unbind(window.SC.Widget.Events.READY, onReady);
+            }
+
+            widgetRef.current = null;
+            setReady(false);
+        };
     }, [loaded, registerHandlers, setIsPlaying]);
 
     // Cargar el track cuando cambia currentTrackUrl
@@ -93,19 +182,24 @@ export default function PlayerBar({ className = "" }) {
         clearAutoplayTimers();
 
         if (!currentTrackUrl || !hasPlayableTrack) {
-            widget.pause();
+            safeWidgetCall(widget, () => widget.pause());
             setIsPlaying(false);
+            setIsTrackLoading(false);
             return;
         }
 
         const autoplay = autoplayRef.current;
+        const currentLoadSequence = loadSequenceRef.current + 1;
+        loadSequenceRef.current = currentLoadSequence;
 
         // Forzamos pausa antes de cargar el nuevo track para evitar estados inconsistentes
         // cuando se cambia de tema mientras otro está reproduciéndose.
-        widget.pause();
+        safeWidgetCall(widget, () => widget.pause());
         setIsPlaying(false);
+        setIsTrackLoading(true);
 
-        widget.load(currentTrackUrl, {
+        safeWidgetCall(widget, () =>
+            widget.load(currentTrackUrl, {
             auto_play: !!autoplay,
             hide_related: true,
             show_comments: false,
@@ -114,24 +208,34 @@ export default function PlayerBar({ className = "" }) {
             show_teaser: false,
             visual: false,
             callback: () => {
+                if (loadSequenceRef.current !== currentLoadSequence) return;
+                setIsTrackLoading(false);
+
                 if (!autoplay) return;
 
                 const attemptDelays = [0, 160, 420, 900, 1600];
                 autoplayTimersRef.current = attemptDelays.map((delay) =>
                     setTimeout(() => {
-                        widget.play();
+                        if (widgetRef.current !== widget) return;
+                        safeWidgetCall(widget, () => widget.play());
                     }, delay),
                 );
 
                 const pausedCheckTimer = setTimeout(() => {
-                    widget.isPaused((paused) => {
-                        if (paused) widget.play();
+                    if (widgetRef.current !== widget) return;
+                    safeWidgetCall(widget, () => {
+                        widget.isPaused((paused) => {
+                            if (paused) {
+                                safeWidgetCall(widget, () => widget.play());
+                            }
+                        });
                     });
                 }, 2300);
 
                 autoplayTimersRef.current.push(pausedCheckTimer);
             },
-        });
+        }),
+        );
 
         // Si autoplay es true, actualizar estado y forzar play después de que se cargue el track
         if (autoplay) {
@@ -151,6 +255,8 @@ export default function PlayerBar({ className = "" }) {
                     ? "Este disco no tiene temas disponibles"
                     : !hasPlayableTrack
                     ? "Sin reproducción"
+                    : isTrackLoading
+                        ? "Cargando…"
                     : isPlaying
                         ? "Reproduciendo"
                         : "Pausado";

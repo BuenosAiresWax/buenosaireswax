@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
+import { isPlayableSoundCloudUrl, normalizeSoundCloudUrl } from "../player/soundcloudUrl";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -15,7 +16,6 @@ import {
   isNewInProduct,
 } from "../utils/catalog";
 
-const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
 const LIST_SCROLL_STORAGE_KEY = "bawax:product-list-scroll";
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
@@ -121,14 +121,8 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     producto.catalogKey === "equipamiento" ||
     producto.collectionName === "equipamiento";
   const escuchaUrl = (producto.escucha || "").trim();
-  const normalizedEscuchaUrl = escuchaUrl.toLowerCase();
-  const hasPlaceholderEscuchaUrl =
-    normalizedEscuchaUrl === PLACEHOLDER_LISTEN_URL.toLowerCase();
-  const hasValidEscuchaUrl = /^https?:\/\//i.test(escuchaUrl);
-  const canShowPlayButton =
-    !isEquipamientoCatalog &&
-    !hasPlaceholderEscuchaUrl &&
-    hasValidEscuchaUrl;
+  const normalizedEscuchaUrl = normalizeSoundCloudUrl(escuchaUrl);
+  const canShowPlayButton = !isEquipamientoCatalog && isPlayableSoundCloudUrl(escuchaUrl);
   const cartActionLabel = isEquipamientoCatalog
     ? "Consultar disponibilidad"
     : "Agregar al carrito";
@@ -260,7 +254,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              setTrack(escuchaUrl, true, {
+              setTrack(normalizedEscuchaUrl, true, {
                 titulo: producto.titulo,
                 autor: producto.autor,
                 imagen: producto.imagen,
@@ -356,7 +350,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setTrack(escuchaUrl, true, {
+                setTrack(normalizedEscuchaUrl, true, {
                   titulo: producto.titulo,
                   autor: producto.autor,
                   imagen: producto.imagen,

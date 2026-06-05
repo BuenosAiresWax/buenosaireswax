@@ -1,4 +1,5 @@
 import { createContext, useCallback, useMemo, useRef, useState } from "react";
+import { normalizeSoundCloudUrl } from "./soundcloudUrl";
 
 const defaultPlayerContextValue = {
     currentTrackUrl: null,
@@ -37,8 +38,10 @@ export function PlayerProvider({ children }) {
     }, []);
 
     const setTrack = useCallback((url, autoplay = true, metadata = null) => {
+        const normalizedUrl = normalizeSoundCloudUrl(url);
+
         autoplayRef.current = !!autoplay;
-        setCurrentTrackUrl(url);
+        setCurrentTrackUrl(normalizedUrl);
         setCurrentTrackMetadata(metadata);
         setTrackRequestId((prev) => prev + 1);
         // NO cambiar isPlaying aquí - dejar que los callbacks del widget lo manejen
@@ -55,6 +58,7 @@ export function PlayerProvider({ children }) {
     const stop = useCallback(() => {
         handlersRef.current.pause?.();
         setCurrentTrackUrl(null);
+        setCurrentTrackMetadata(null);
         setIsPlaying(false);
     }, []);
 
