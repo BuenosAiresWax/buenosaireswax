@@ -4,6 +4,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
 import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
+import PlayerBar from "../player/PlayerBar";
 import PurchaseModal from "./PurchaseModal";
 import CartPopupButton from "./CartPopupButton";
 import LoaderOverlay from "./LoaderOverlay";
@@ -25,12 +26,15 @@ function ProductPage({ catalogKey = "drop" }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
-  const { setTrack } = useContext(PlayerContext); // <-- NUEVO
+  const { setTrack, currentTrackUrl } = useContext(PlayerContext); // <-- NUEVO
   const catalog = getCatalogConfig(catalogKey);
 
   const [producto, setProducto] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
 
   useEffect(() => {
     const ref = doc(db, catalog.collectionName, id);
@@ -55,6 +59,21 @@ function ProductPage({ catalogKey = "drop" }) {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
   }, [id, catalog.key]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const updateIsMobile = () => setIsMobile(window.innerWidth < 768);
+    updateIsMobile();
+
+    window.addEventListener("resize", updateIsMobile);
+    window.addEventListener("orientationchange", updateIsMobile);
+
+    return () => {
+      window.removeEventListener("resize", updateIsMobile);
+      window.removeEventListener("orientationchange", updateIsMobile);
+    };
+  }, []);
 
   useEffect(() => {
     if (!producto) return;
@@ -137,6 +156,7 @@ function ProductPage({ catalogKey = "drop" }) {
     !isEquipamientoCatalog &&
     !hasPlaceholderEscuchaUrl &&
     hasValidEscuchaUrl;
+  const shouldShowProductPlayer = canPlayProduct || Boolean(currentTrackUrl);
   const pricing = getProductPricing(producto);
   const showSaleBadge = pricing.esSale;
   const showNewInBadge = isNewInProduct(producto);
@@ -190,6 +210,9 @@ function ProductPage({ catalogKey = "drop" }) {
             alt={producto.titulo}
             className="detail-image"
           />
+          {isMobile && shouldShowProductPlayer && (
+            <PlayerBar className="playerbar--mobile-inline playerbar--product-below-image" />
+          )}
         </div>
 
         {/* CENTER - INFO */}

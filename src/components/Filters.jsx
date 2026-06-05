@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/styles.css";
 import '../styles/Filters.css'
 import searchIcon from "../../assets/icons/lupa.png";
@@ -99,12 +99,44 @@ function Filters({
     setSidebarVisible,
 }) {
     const [isMobile, setIsMobile] = useState(false);
+    const filtersContainerRef = useRef(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    useEffect(() => {
+        const rootStyle = document.documentElement.style;
+        const updateMobileStickyOffsets = () => {
+            if (!filtersContainerRef.current || window.innerWidth >= 768) {
+                rootStyle.removeProperty("--mobile-filters-height");
+                rootStyle.removeProperty("--mobile-player-top");
+                return;
+            }
+
+            const filtersHeight = Math.ceil(filtersContainerRef.current.getBoundingClientRect().height);
+            rootStyle.setProperty("--mobile-filters-height", `${filtersHeight}px`);
+            rootStyle.setProperty("--mobile-player-top", `${filtersHeight}px`);
+        };
+
+        updateMobileStickyOffsets();
+
+        const resizeObserver = typeof ResizeObserver !== "undefined"
+            ? new ResizeObserver(updateMobileStickyOffsets)
+            : null;
+
+        if (resizeObserver && filtersContainerRef.current) {
+            resizeObserver.observe(filtersContainerRef.current);
+        }
+
+        window.addEventListener("resize", updateMobileStickyOffsets);
+        return () => {
+            if (resizeObserver) resizeObserver.disconnect();
+            window.removeEventListener("resize", updateMobileStickyOffsets);
+        };
     }, []);
 
     const limpiarFiltros = () => {
@@ -129,7 +161,7 @@ function Filters({
         verSale;
 
     return (
-        <div className="filters-container">
+        <div ref={filtersContainerRef} className="filters-container">
             {/* Fila 1: búsqueda + acciones */}
             <div className="filters-group">
                 {/* Campo de búsqueda mejorado */}

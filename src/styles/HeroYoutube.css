@@ -1,15 +1,30 @@
 .hero-youtube {
-    background-size: cover;
-    background-position: center;
+    --hero-pan-start: 10%;
+    --hero-pan-mid: 26%;
+    --hero-pan-end: 44%;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    isolation: isolate;
     width: 90%;
     height: 300px;
-    margin: 3rem auto;
+    margin: 3rem auto 0;
     overflow: hidden;
+    border-radius: 10px;
     font-family: var(--text-font);
+}
+
+.hero-youtube-media {
+    position: absolute;
+    inset: 0;
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-position: center top;
+    transform-origin: center;
+    animation: heroYoutubePanZoom 30s cubic-bezier(0.33, 0, 0.2, 1) infinite alternate;
+    will-change: background-position, transform;
+    z-index: 0;
 }
 
 .hero-youtube::before {
@@ -19,15 +34,13 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(40, 35, 34, 0.792);
-    /* Gris con opacidad */
+    background: rgba(40, 35, 34, 0.72);
     transition: background 0.5s ease;
     z-index: 1;
 }
 
 .hero-youtube:hover::before {
-    background: rgba(40, 35, 34, 0.3);
-    /* Más oscuro al hacer hover */
+    background: rgba(40, 35, 34, 0.4);
 }
 
 .hero-youtube-overlay {
@@ -45,11 +58,6 @@
     color: white;
     position: relative;
     z-index: 3;
-}
-
-
-.hero-youtube-content {
-    color: white;
 }
 
 .hero-youtube-content h4 {
@@ -75,14 +83,33 @@
     background: #cc0000;
 }
 
+@keyframes heroYoutubePanZoom {
+    0% {
+        background-position: center var(--hero-pan-start);
+    }
+    50% {
+        background-position: center var(--hero-pan-mid);
+    }
+    100% {
+        background-position: center var(--hero-pan-end);
+    }
+}
+
 @media (max-width: 767px) {
     .hero-youtube {
+        --hero-pan-start: 12%;
+        --hero-pan-mid: 30%;
+        --hero-pan-end: 52%;
         width: 100%;
-        height: 180px;
-        width: 100%;
+        max-width: 100%;
         height: 120px;
-        margin: 3rem auto;
+        margin: 3rem auto 0;
+        border-radius: 0;
+    }
+
+    .hero-youtube-media {
         background-size: cover;
+        animation: heroYoutubePanZoomMobile 26s cubic-bezier(0.33, 0, 0.2, 1) infinite alternate;
     }
 
     .hero-youtube-content h4 {
@@ -92,5 +119,20 @@
     .hero-youtube-btn {
         font-size: 0.8rem;
         padding: 0.2rem 1.2rem;
+    }
+}
+
+@keyframes heroYoutubePanZoomMobile {
+    0% {
+        background-position: center var(--hero-pan-start);
+        transform: scale(1.005);
+    }
+    50% {
+        background-position: center var(--hero-pan-mid);
+        transform: scale(1.012);
+    }
+    100% {
+        background-position: center var(--hero-pan-end);
+        transform: scale(1.02);
     }
 }

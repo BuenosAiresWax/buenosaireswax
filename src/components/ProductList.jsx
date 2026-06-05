@@ -6,6 +6,7 @@ import {
   useRef,
   useCallback,
 } from "react";
+import { useLocation, useNavigationType } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { useNotificacion } from "../hooks/useNotificacion";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -16,6 +17,7 @@ import Filters from "./Filters";
 import Notificacion from "./Notificacion";
 import Spinner from "./Spinner";
 import YouTubePopup from "./YouTubePopup";
+import PlayerBar from "../player/PlayerBar";
 import { attachCatalogMeta, getCatalogConfig } from "../utils/catalog";
 
 import "../styles/ProductList.css";
@@ -23,6 +25,7 @@ import "../styles/ProductList.css";
 const BATCH_SIZE = 15;
 const MIN_LOADING_TIME = 800;
 const FILTERS_STORAGE_KEY = "bawax:product-list-filters";
+const LIST_SCROLL_STORAGE_KEY = "bawax:product-list-scroll";
 const FILTER_PLACEHOLDER_COUNT = 4;
 
 const DEFAULT_FILTERS = {
@@ -86,6 +89,8 @@ const getSavedFilters = (storageKey) => {
 
 const ProductList = ({ catalogKey = "drop" }) => {
   const { cartItems } = useContext(CartContext);
+  const location = useLocation();
+  const navigationType = useNavigationType();
   const catalog = useMemo(() => getCatalogConfig(catalogKey), [catalogKey]);
   const filtersStorageKey = `${FILTERS_STORAGE_KEY}:${catalog.key}`;
   const initialFilters = useMemo(
@@ -198,6 +203,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
   const productListContainerRef = useRef(null);
   const hasMountedCategoryFiltersRef = useRef(false);
   const loadingStartRef = useRef(0);
+  const hasRestoredListScrollRef = useRef(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const scrollToProductsTop = useCallback(() => {
@@ -289,6 +295,75 @@ const ProductList = ({ catalogKey = "drop" }) => {
     selloSeleccionado,
     autorSeleccionado,
     scrollToProductsTop,
+  ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    if (loading) return undefined;
+    if (navigationType !== "POP") return undefined;
+    if (hasRestoredListScrollRef.current) return undefined;
+
+    let parsed = null;
+
+    try {
+      const raw = window.sessionStorage.getItem(LIST_SCROLL_STORAGE_KEY);
+      if (!raw) return undefined;
+      parsed = JSON.parse(raw);
+    } catch {
+      return undefined;
+    }
+
+    const currentPath = `${location.pathname}${location.search}`;
+    const isSameCatalog = (parsed?.catalogKey || "") === catalog.key;
+    const isSamePath = (parsed?.path || "") === currentPath;
+    const isValidScroll = Number.isFinite(parsed?.scrollY) && parsed.scrollY >= 0;
+
+    if (!isSameCatalog || !isSamePath || !isValidScroll) {
+      return undefined;
+    }
+
+    const targetScroll = parsed.scrollY;
+    const maxAttempts = 30;
+    let attempts = 0;
+    let rafId = 0;
+    let cancelled = false;
+
+    const tryRestore = () => {
+      if (cancelled) return;
+
+      attempts += 1;
+      window.scrollTo({ top: targetScroll, left: 0, behavior: "auto" });
+
+      const maxScrollableY = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+      const canReachTarget = maxScrollableY >= targetScroll;
+
+      if (canReachTarget || attempts >= maxAttempts) {
+        hasRestoredListScrollRef.current = true;
+        window.sessionStorage.removeItem(LIST_SCROLL_STORAGE_KEY);
+        return;
+      }
+
+      rafId = window.requestAnimationFrame(tryRestore);
+    };
+
+    rafId = window.requestAnimationFrame(tryRestore);
+
+    return () => {
+      cancelled = true;
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
+  }, [
+    loading,
+    navigationType,
+    catalog.key,
+    location.pathname,
+    location.search,
+    productos.length,
   ]);
 
   /* -------------------------------
@@ -802,6 +877,8 @@ const ProductList = ({ catalogKey = "drop" }) => {
           </div>
 
         <div className="product-list">
+          {isMobile && <PlayerBar className="playerbar--mobile-inline" />}
+
           {productosLimitados.length === 0 ? (
             <div className="product-item no-results">
               <div className="info">

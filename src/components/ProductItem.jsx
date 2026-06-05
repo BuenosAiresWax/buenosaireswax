@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
 import { doc, onSnapshot } from "firebase/firestore";
@@ -16,6 +16,7 @@ import {
 } from "../utils/catalog";
 
 const PLACEHOLDER_LISTEN_URL = "https://ejemplo.com/escucha";
+const LIST_SCROLL_STORAGE_KEY = "bawax:product-list-scroll";
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const showQuickButtons = false;
@@ -23,6 +24,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const player = useContext(PlayerContext);
   const setTrack = player?.setTrack ?? (() => {}); // <-- NUEVO
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [producto, setProducto] = useState(productoProp);
   const [mostrarFaq, setMostrarFaq] = useState(false);
@@ -88,6 +90,23 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     ) {
       return;
     }
+
+    if (typeof window !== "undefined") {
+      try {
+        window.sessionStorage.setItem(
+          LIST_SCROLL_STORAGE_KEY,
+          JSON.stringify({
+            catalogKey: productoProp.catalogKey || "drop",
+            path: `${location.pathname}${location.search}`,
+            scrollY: window.scrollY,
+            savedAt: Date.now(),
+          }),
+        );
+      } catch {
+        // noop: no bloquea la navegación si sessionStorage no está disponible
+      }
+    }
+
     navigate(
       productoProp.detailPath ||
         getCatalogConfig(productoProp.catalogKey).buildDetailPath(productoProp.id),

@@ -34,11 +34,140 @@
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.25s ease;
   will-change: transform, opacity;
+  border: 2px solid rgba(128, 128, 128, 0.3);
 }
 
 @media (max-width: 767px) {
+  .playerbar:not(.playerbar--mobile-inline) {
+    position: fixed;
+    top: auto;
+    bottom: calc(var(--visual-viewport-bottom-gap, 0px) + env(safe-area-inset-bottom));
+    z-index: 940;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    border-radius: 14px 14px 0 0;
+  }
+
+  .playerbar--mobile-inline {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--visual-viewport-bottom-gap, 0px) + env(safe-area-inset-bottom));
+    z-index: 940;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    background: #282322;
+    border-top: 3px solid rgba(128, 128, 128, 0.3);
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: blur(8px);
+  }
+
+  .playerbar--mobile-inline.playerbar--product-below-image {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--visual-viewport-bottom-gap, 0px) + env(safe-area-inset-bottom));
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .product-list > .playerbar--mobile-inline {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .playerbar--mobile-inline .playerbar__thumbnail {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
+  }
+
+  .playerbar--mobile-inline .playerbar__status {
+    margin-bottom: 4px;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.88;
+  }
+
+  .playerbar--mobile-inline .playerbar__title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .playerbar--mobile-inline .playerbar__artist,
+  .playerbar--mobile-inline .playerbar__hint {
+    font-size: 11px;
+    line-height: 1.2;
+    opacity: 0.78;
+  }
+
+  .playerbar--mobile-inline .playerbar__right {
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .playerbar--mobile-inline .playerbar__btn {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 8px;
+    border-width: 1px;
+    border-style: solid;
+    background: rgba(255, 255, 255, 0.06);
+    touch-action: manipulation;
+  }
+
+  .playerbar--mobile-inline .playerbar__btn svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .playerbar--mobile-inline .playerbar__btn--play {
+    background: rgba(100, 200, 100, 0.16);
+    border-color: rgba(100, 200, 100, 0.44);
+  }
+
+  .playerbar--mobile-inline .playerbar__btn--stop {
+    background: rgba(255, 107, 107, 0.12);
+    border-color: rgba(255, 107, 107, 0.42);
+  }
+
+  .playerbar--mobile-inline .playerbar__left {
+    min-width: 0;
+  }
+
+  .playerbar--mobile-inline .playerbar__meta {
+    gap: 8px;
+  }
+
+  .playerbar--mobile-inline .playerbar__label {
+    font-size: 16px;
+    opacity: 0.9;
+  }
+
   html.mobile-filters-open .playerbar,
   body.mobile-filters-open .playerbar {
+    transform: translateY(calc(100% + 10px));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  html.checkout-modal-open .playerbar,
+  body.checkout-modal-open .playerbar {
     transform: translateY(calc(100% + 10px));
     opacity: 0;
     pointer-events: none;
@@ -209,13 +338,34 @@ body.checkout-modal-open .playerbar {
     background: #282322;
   }
 
-  .playerbar__thumbnail {
-    width: 40px;
-    height: 40px;
+  .playerbar.playerbar--mobile-inline {
+    padding: 0.5rem;
+    gap: 8px;
+  }
+
+  .playerbar.playerbar--mobile-inline .playerbar__thumbnail {
+    width: 42px;
+    height: 42px;
     align-self: center;
   }
 
-  .playerbar__right {
-    justify-content: center;
+  .playerbar.playerbar--mobile-inline .playerbar__right {
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .playerbar.playerbar--mobile-inline .playerbar__btn {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 7px;
+  }
+
+  .playerbar.playerbar--mobile-inline .playerbar__title {
+    font-size: 12px;
+  }
+
+  .playerbar.playerbar--mobile-inline .playerbar__artist,
+  .playerbar.playerbar--mobile-inline .playerbar__hint {
+    font-size: 10px;
   }
 }

@@ -9,7 +9,7 @@
     position: relative;
     width: 90%;
     height: 300px;
-    margin: 3rem auto;
+    margin: 3rem auto 0;
 }
 
 .hero-overlay {
@@ -48,8 +48,9 @@
     .hero {
         background-image: url("../../assets/hero/hero-desktop.png");
         width: 100%;
+        max-width: 100%;
         height: 120px;
-        margin: 3rem auto;
+        margin: 3rem auto 0;
         background-size: cover;
     }
 

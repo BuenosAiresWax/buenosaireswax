@@ -17,6 +17,9 @@ function hasValidAccess() {
 function AppLayout() {
   const location = useLocation();
   const [autenticado, setAutenticado] = useState(() => hasValidAccess());
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
 
   const navItems = [
     { to: "/drop", label: "Próximo Drop" },
@@ -81,6 +84,21 @@ function AppLayout() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const updateIsMobile = () => setIsMobile(window.innerWidth < 768);
+    updateIsMobile();
+
+    window.addEventListener("resize", updateIsMobile);
+    window.addEventListener("orientationchange", updateIsMobile);
+
+    return () => {
+      window.removeEventListener("resize", updateIsMobile);
+      window.removeEventListener("orientationchange", updateIsMobile);
+    };
+  }, []);
+
   const isDropAccessActive =
     location.pathname === "/" && !autenticado && isDropAccessWindowActive();
   const isEquipamientoRoute =
@@ -90,7 +108,11 @@ function AppLayout() {
   return (
     <div
       className="app-container"
-      style={{ paddingBottom: "calc(84px + var(--visual-viewport-bottom-gap, 0px))" }}
+      style={{
+        paddingBottom: isMobile
+          ? "0px"
+          : "calc(84px + var(--visual-viewport-bottom-gap, 0px))",
+      }}
     >
       <div className="headerContainer">
         <NavLink to="/" className="logoLink" aria-label="Ir al inicio de BAWAX">
@@ -128,7 +150,7 @@ function AppLayout() {
       <Footer />
 
       {/* Player global persistente */}
-      {!isDropAccessActive && !isEquipamientoRoute && <PlayerBar />}
+      {!isMobile && !isDropAccessActive && !isEquipamientoRoute && <PlayerBar />}
     </div>
   );
 }

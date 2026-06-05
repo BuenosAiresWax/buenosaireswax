@@ -7,7 +7,6 @@
     justify-content: center;
     margin: 0 5% 3rem;
     padding: 1rem 0;
-    border-top: 3px solid rgba(128, 128, 128, 0.3);
     border-bottom: 3px solid rgba(128, 128, 128, 0.3);
 }
 
@@ -139,14 +138,12 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.08) 45%,
-        rgba(255, 255, 255, 0.18) 50%,
-        rgba(255, 255, 255, 0.08) 55%,
-        transparent 100%
-    );
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.08) 45%,
+            rgba(255, 255, 255, 0.18) 50%,
+            rgba(255, 255, 255, 0.08) 55%,
+            transparent 100%);
     animation: filtersSkeletonShimmer 1.4s ease-in-out infinite;
 }
 
@@ -209,20 +206,22 @@
 @media (max-width: 767px) {
 
     .filters-container {
-        margin: 0 0 2.5rem;
-        padding: 1rem 0.75rem;
+        margin: 0 0 0.4rem;
+        padding: 0.5rem;
         position: sticky;
         top: 0;
         z-index: 950;
         background: #282322;
         backdrop-filter: blur(8px);
+        border-bottom: none;
+
     }
 
     .filters-group {
         width: 100%;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 0.75rem;
+        gap: 0.5rem;
     }
 
     .filters-actions {
@@ -232,7 +231,9 @@
     .filters-action-btn {
         justify-content: center;
         min-width: 0;
-        padding: 0.5rem 0.25rem;
+        gap: 0.55rem;
+        padding: 0.25rem 0.85rem;
+        font-size: 12px;
     }
 
     .search-input-container {
@@ -240,7 +241,7 @@
         width: 100%;
         min-width: 0;
         max-width: none;
-        padding: 0.5rem 0.85rem;
+        padding: 0.25rem 0.85rem;
         border: 2px solid rgba(128, 128, 128, 0.3);
         box-sizing: border-box;
     }
@@ -258,11 +259,11 @@
         justify-content: center;
         gap: 0.55rem;
         box-sizing: border-box;
-        padding: 0.5rem 0.85rem;
+        padding: 0.25rem 0.85rem;
         background-color: rgba(128, 128, 128, 0);
         border: 2px solid rgba(128, 128, 128, 0.3);
         color: var(--color-letra);
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 500;
         letter-spacing: 0.03em;
         transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;

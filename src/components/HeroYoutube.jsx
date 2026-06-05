@@ -1,17 +1,30 @@
 import React from "react";
 import "../styles/HeroYoutube.css";
 
+const heroImageModules = import.meta.glob(
+    "../../assets/img/hero-youtube.{avif,webp,png,jpeg,jpg}",
+    { eager: true, import: "default" }
+);
+
+const preferredFormats = ["avif", "webp", "png", "jpeg", "jpg"];
+
+const heroBackgroundImage =
+    preferredFormats
+        .map((extension) => `../../assets/img/hero-youtube.${extension}`)
+        .map((path) => heroImageModules[path])
+        .find(Boolean) || "/assets/img/hero-youtube.jpeg";
+
 const HeroYoutube = () => {
-    // URL del video de YouTube
     const videoId = "q0PcC1UoXqQ";
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
     return (
-        <section
-            className="hero-youtube"
-            style={{ backgroundImage: `url(${thumbnailUrl})` }}
-        >
+        <section className="hero-youtube">
+            <div
+                className="hero-youtube-media"
+                style={{ backgroundImage: `url(${heroBackgroundImage})` }}
+                aria-hidden="true"
+            />
             <div className="hero-youtube-overlay">
                 <div className="hero-youtube-content">
                     <h4>Drop 013 📦 Disponible en YouTube</h4>

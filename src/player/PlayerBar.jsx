@@ -10,10 +10,11 @@ import "./playerBar.css";
 const DEFAULT_EMBED =
     "https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/forss/flickermood";
 
-export default function PlayerBar() {
+export default function PlayerBar({ className = "" }) {
     const { loaded, error } = useSoundCloudScript();
     const iframeRef = useRef(null);
     const widgetRef = useRef(null);
+    const autoplayTimersRef = useRef([]);
 
     const {
         currentTrackUrl,
@@ -40,6 +41,13 @@ export default function PlayerBar() {
         !!currentTrackUrl &&
         !hasNoTrackPlaceholder &&
         /^https?:\/\//i.test((currentTrackUrl || "").trim());
+
+    const clearAutoplayTimers = () => {
+        autoplayTimersRef.current.forEach((timerId) => clearTimeout(timerId));
+        autoplayTimersRef.current = [];
+    };
+
+    useEffect(() => () => clearAutoplayTimers(), []);
 
     // Crear widget una vez
     useEffect(() => {
@@ -80,6 +88,10 @@ export default function PlayerBar() {
     useEffect(() => {
         const widget = widgetRef.current;
         if (!widget) return;
+        if (!ready) return;
+
+        clearAutoplayTimers();
+
         if (!currentTrackUrl || !hasPlayableTrack) {
             widget.pause();
             setIsPlaying(false);
@@ -88,8 +100,10 @@ export default function PlayerBar() {
 
         const autoplay = autoplayRef.current;
 
-        // Parar explícitamente el widget anterior antes de cargar uno nuevo
+        // Forzamos pausa antes de cargar el nuevo track para evitar estados inconsistentes
+        // cuando se cambia de tema mientras otro está reproduciéndose.
         widget.pause();
+        setIsPlaying(false);
 
         widget.load(currentTrackUrl, {
             auto_play: !!autoplay,
@@ -99,20 +113,33 @@ export default function PlayerBar() {
             show_reposts: false,
             show_teaser: false,
             visual: false,
+            callback: () => {
+                if (!autoplay) return;
+
+                const attemptDelays = [0, 160, 420, 900, 1600];
+                autoplayTimersRef.current = attemptDelays.map((delay) =>
+                    setTimeout(() => {
+                        widget.play();
+                    }, delay),
+                );
+
+                const pausedCheckTimer = setTimeout(() => {
+                    widget.isPaused((paused) => {
+                        if (paused) widget.play();
+                    });
+                }, 2300);
+
+                autoplayTimersRef.current.push(pausedCheckTimer);
+            },
         });
 
         // Si autoplay es true, actualizar estado y forzar play después de que se cargue el track
         if (autoplay) {
-            setIsPlaying(true);
-            const playTimeout = setTimeout(() => {
-                widget.play();
-            }, 300);
-
-            return () => clearTimeout(playTimeout);
+            return () => clearAutoplayTimers();
         } else {
             setIsPlaying(false);
         }
-    }, [currentTrackUrl, hasPlayableTrack, trackRequestId, autoplayRef, setIsPlaying]);
+    }, [currentTrackUrl, hasPlayableTrack, trackRequestId, autoplayRef, ready, setIsPlaying]);
 
     const statusText = error
         ? "Error cargando SoundCloud"
@@ -138,7 +165,7 @@ export default function PlayerBar() {
                 src={iframeSrc}
             />
 
-            <div className="playerbar">
+            <div className={`playerbar ${className}`.trim()}>
                 {/* Thumbnail del track */}
                 <div className="playerbar__thumbnail">
                     {hasPlayableTrack && currentTrackMetadata?.imagen ? (
