@@ -146,95 +146,9 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     }
   };
 
-  // ... tu useEffect del schema queda igual ...
-
   /* ================================
-   SCHEMA PRODUCT + MUSIC
-================================ */
-  useEffect(() => {
-    const schema = {
-      "@context": "https://schema.org",
-
-      "@type": "Product",
-
-      "@id": `${window.location.origin}/#producto-${productoProp.id}`,
-
-      name: producto.titulo,
-
-      image: producto.imagen ? [producto.imagen] : [],
-
-      description: `${producto.descripcion || ""} ${producto.estilo || ""}`,
-
-      sku: productoProp.id,
-
-      brand: {
-        "@type": "Brand",
-        name: producto.sello || "Unknown",
-      },
-
-      /* relación musical */
-
-      isRelatedTo: {
-        "@type": "MusicAlbum",
-
-        name: producto.titulo,
-
-        byArtist: {
-          "@type": "MusicGroup",
-          name: producto.autor || "Unknown Artist",
-        },
-
-        genre: producto.genero || "Electronic",
-
-        recordLabel: {
-          "@type": "Organization",
-          name: producto.sello || "Unknown Label",
-        },
-      },
-
-      /* oferta */
-      offers: {
-        "@type": "Offer",
-
-        priceCurrency: "ARS",
-
-        price: pricing.precioFinal,
-
-        priceValidUntil: new Date(
-          new Date().setDate(new Date().getDate() + 30),
-        ).toISOString(),
-
-        availability:
-          stockDisponible > 0
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
-
-        url: window.location.origin,
-      },
-    };
-
-    const scriptId = `schema-product-${productoProp.id}`;
-
-    let script = document.getElementById(scriptId);
-
-    if (!script) {
-      script = document.createElement("script");
-
-      script.type = "application/ld+json";
-
-      script.id = scriptId;
-
-      document.head.appendChild(script);
-    }
-
-    script.textContent = JSON.stringify(schema);
-
-    return () => {
-      const existing = document.getElementById(scriptId);
-
-      if (existing) existing.remove();
-    };
-  }, [producto, stockDisponible, productoProp.id]);
+   SCHEMA: manejado por ProductList.jsx
+=============================== */
 
   return (
     <div className="product-card" onClick={handleCardClick}>

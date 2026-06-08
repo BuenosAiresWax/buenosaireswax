@@ -74,17 +74,25 @@ function App({ forceDrop = false }) {
         "@context": "https://schema.org",
         "@type": "MusicStore",
         "@id": `${baseUrl}/#musicstore`,
-        name: "BAWAX",
+        name: "BAWAX – Buenos Aires Wax",
         url: baseUrl,
         parentOrganization: {
           "@id": `${baseUrl}/#organization`,
         },
         description:
-          "Discos de vinilo nuevos y usados en Buenos Aires Wax. Drops nuevos cada mes, envíos a todo el país.",
+          "Discos de vinilo nuevos y usados en Buenos Aires Wax. Tienda física en CABA, drops mensuales y envíos a todo el país.",
         address: {
           "@type": "PostalAddress",
           addressCountry: "AR",
+          addressLocality: "Buenos Aires",
         },
+        image: `${baseUrl}/social-preview.jpg`,
+        priceRange: "$$",
+        currenciesAccepted: "ARS",
+        sameAs: [
+          "https://www.instagram.com/buenosaireswax/",
+          "https://www.youtube.com/@BuenosAiresWax",
+        ],
       },
 
       {
@@ -108,7 +116,7 @@ function App({ forceDrop = false }) {
         "@id": `${baseUrl}/#vinyl-drop`,
         name: `BAWAX Vinyl Drop – ${dropMonth}`,
         description:
-          "Nuevo drop mensual de discos de vinilo en Buenos Aires Wax. Ediciones seleccionadas para DJs y coleccionistas.",
+          "Nuevo drop mensual de discos de vinilo en Buenos Aires Wax. Ediciones seleccionadas para DJs y coleccionistas. Acceso exclusivo anticipado.",
         startDate: DROP_DATE,
         endDate: new Date(
           new Date(DROP_DATE).setDate(new Date(DROP_DATE).getDate() + 28),
@@ -121,6 +129,18 @@ function App({ forceDrop = false }) {
         },
         organizer: {
           "@id": `${baseUrl}/#organization`,
+        },
+        performer: {
+          "@type": "Organization",
+          name: "Varios artistas y sellos",
+        },
+        offers: {
+          "@type": "Offer",
+          url: baseUrl,
+          price: "0",
+          priceCurrency: "ARS",
+          availability: "https://schema.org/OnlineOnly",
+          validFrom: DROP_DATE,
         },
         image: [`${baseUrl}/social-preview.jpg`],
       },

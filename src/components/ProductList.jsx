@@ -538,11 +538,15 @@ const ProductList = ({ catalogKey = "drop" }) => {
   useEffect(() => {
     if (!productosLimitados.length) return;
 
+    const origin = window.location.origin;
+    const catalogLabel = catalog.label;
+
     const schema = {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
 
-      name: "Buenos Aires Wax",
+      name: `Buenos Aires Wax – ${catalogLabel}`,
+      description: catalog.description,
 
       mainEntity: {
         "@type": "ItemList",
@@ -556,12 +560,12 @@ const ProductList = ({ catalogKey = "drop" }) => {
 
             position: index + 1,
 
-            url: `${window.location.origin}/#${producto.detailPath}`,
+            url: `${origin}/#${producto.detailPath}`,
 
             item: {
               "@type": "Product",
 
-              "@id": `#producto-${producto.id}`,
+              "@id": `${origin}/#producto-${producto.id}`,
 
               name: producto.titulo,
 
@@ -609,11 +613,50 @@ const ProductList = ({ catalogKey = "drop" }) => {
 
                 price: producto.precio ?? 0,
 
+                priceValidUntil: new Date(
+                  new Date().setDate(new Date().getDate() + 30),
+                ).toISOString(),
+
                 availability: stockDisponible
                   ? "https://schema.org/InStock"
                   : "https://schema.org/OutOfStock",
 
-                url: `${window.location.origin}/#${producto.detailPath}`,
+                url: `${origin}/#${producto.detailPath}`,
+
+                shippingDetails: {
+                  "@type": "OfferShippingDetails",
+                  shippingRate: {
+                    "@type": "MonetaryAmount",
+                    value: "0",
+                    currency: "ARS",
+                  },
+                  shippingDestination: {
+                    "@type": "DefinedRegion",
+                    addressCountry: "AR",
+                  },
+                  deliveryTime: {
+                    "@type": "ShippingDeliveryTime",
+                    handlingTime: {
+                      "@type": "QuantitativeValue",
+                      minValue: 1,
+                      maxValue: 3,
+                      unitCode: "DAY",
+                    },
+                    transitTime: {
+                      "@type": "QuantitativeValue",
+                      minValue: 3,
+                      maxValue: 10,
+                      unitCode: "DAY",
+                    },
+                  },
+                },
+
+                hasMerchantReturnPolicy: {
+                  "@type": "MerchantReturnPolicy",
+                  applicableCountry: "AR",
+                  returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+                  merchantReturnDays: 7,
+                },
               },
             },
           };
@@ -631,7 +674,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
     return () => {
       document.head.removeChild(script);
     };
-  }, [productosLimitados]);
+  }, [productosLimitados, catalog]);
 
   /* -------------------------------
     INFINITE SCROLL

@@ -78,33 +78,117 @@ function ProductPage({ catalogKey = "drop" }) {
     if (!producto) return;
 
     const stockDisponible = (producto.cantidad ?? 0) - (producto.reservados ?? 0);
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "";
     const productUrl =
       typeof window !== "undefined"
         ? window.location.href
         : `${catalog.listPath}/${id}`;
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      sku: id,
-      url: productUrl,
-      name: producto.titulo,
-      image: producto.imagen,
-      description: producto.descripcion,
-      brand: {
-        "@type": "Brand",
-        name: producto.sello || producto.autor || "Bawax",
+    const listUrl = `${origin}${catalog.listPath}`;
+    const p = getProductPricing(producto);
+    const breadcrumbLabel = getCatalogBreadcrumbLabel(catalogKey);
+
+    const schema = [
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "@id": `${origin}/#producto-${id}`,
+        sku: id,
+        url: productUrl,
+        name: producto.titulo,
+        image: producto.imagen ? [producto.imagen] : [],
+        description: producto.descripcion,
+        brand: {
+          "@type": "Brand",
+          name: producto.sello || producto.autor || "Bawax",
+        },
+        isRelatedTo: {
+          "@type": "MusicAlbum",
+          name: producto.titulo,
+          byArtist: {
+            "@type": "MusicGroup",
+            name: producto.autor || "Unknown Artist",
+          },
+          genre: producto.genero || "Electronic",
+          recordLabel: {
+            "@type": "Organization",
+            name: producto.sello || "Unknown Label",
+          },
+        },
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "ARS",
+          price: p.precioFinal,
+          priceValidUntil: new Date(
+            new Date().setDate(new Date().getDate() + 30),
+          ).toISOString(),
+          itemCondition: "https://schema.org/NewCondition",
+          availability:
+            stockDisponible > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          url: productUrl,
+          shippingDetails: {
+            "@type": "OfferShippingDetails",
+            shippingRate: {
+              "@type": "MonetaryAmount",
+              value: "0",
+              currency: "ARS",
+            },
+            shippingDestination: {
+              "@type": "DefinedRegion",
+              addressCountry: "AR",
+            },
+            deliveryTime: {
+              "@type": "ShippingDeliveryTime",
+              handlingTime: {
+                "@type": "QuantitativeValue",
+                minValue: 1,
+                maxValue: 3,
+                unitCode: "DAY",
+              },
+              transitTime: {
+                "@type": "QuantitativeValue",
+                minValue: 3,
+                maxValue: 10,
+                unitCode: "DAY",
+              },
+            },
+          },
+          hasMerchantReturnPolicy: {
+            "@type": "MerchantReturnPolicy",
+            applicableCountry: "AR",
+            returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+            merchantReturnDays: 7,
+          },
+        },
       },
-      offers: {
-        "@type": "Offer",
-        priceCurrency: "ARS",
-        price: pricing.precioFinal,
-        itemCondition: "https://schema.org/NewCondition",
-        availability:
-          stockDisponible > 0
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
+
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "@id": `${origin}/#breadcrumb-${id}`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Buenos Aires Wax",
+            item: origin,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: breadcrumbLabel,
+            item: listUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: producto.titulo,
+          },
+        ],
       },
-    };
+    ];
 
     const script = document.createElement("script");
     script.type = "application/ld+json";
@@ -115,7 +199,7 @@ function ProductPage({ catalogKey = "drop" }) {
     return () => {
       document.head.removeChild(script);
     };
-  }, [producto]);
+  }, [producto, id, catalog.listPath, catalogKey]);
 
   if (isLoading) {
     return (
