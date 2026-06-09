@@ -1,4 +1,4 @@
-export const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-05-09T20:00:00";
+export const DROP_DATE = import.meta.env.VITE_DROP_DATE || "2026-06-09T20:00:00";
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 const ONE_HOUR_MS = 60 * 60 * 1000;

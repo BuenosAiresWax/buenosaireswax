@@ -66,7 +66,7 @@ const YouTubePopup = () => {
 
             <div className="popup-video">
                 <iframe
-                    src="https://www.youtube.com/embed/q0PcC1UoXqQ"
+                    src="https://www.youtube.com/embed/1hqHThNXFUw"
                     title="YouTube Video"
                     frameBorder="0"
                     loading="lazy"
@@ -77,7 +77,7 @@ const YouTubePopup = () => {
             </div>
 
             <a
-                href="https://www.youtube.com/watch?v=q0PcC1UoXqQ"
+                href="https://www.youtube.com/watch?v=1hqHThNXFUw"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="popup-button"

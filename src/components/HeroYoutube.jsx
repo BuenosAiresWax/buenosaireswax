@@ -15,7 +15,7 @@ const heroBackgroundImage =
         .find(Boolean) || "/assets/img/hero-youtube.jpeg";
 
 const HeroYoutube = () => {
-    const videoId = "q0PcC1UoXqQ";
+    const videoId = "1hqHThNXFUw";
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
     return (
@@ -27,7 +27,7 @@ const HeroYoutube = () => {
             />
             <div className="hero-youtube-overlay">
                 <div className="hero-youtube-content">
-                    <h4>Drop 013 📦 Disponible en YouTube</h4>
+                    <h4>Drop 014 📦 Disponible en YouTube</h4>
                     <a
                         href={videoUrl}
                         target="_blank"
