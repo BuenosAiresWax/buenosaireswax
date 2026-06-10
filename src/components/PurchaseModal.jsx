@@ -69,7 +69,7 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
   const isRetiro = isArtlabPickup || metodoEntrega.includes("Retiro");
   const esDropCheckout = catalog.key === "drop";
   const origenCompra = esDropCheckout ? "Drop" : "Tienda fisica";
-  const aliasPago = esDropCheckout ? "BuenosAioresWax" : "E110101";
+  const aliasPago = esDropCheckout ? "buenosaireswax" : "E110101";
   const metodoEntregaDetalle = isArtlabPickup
     ? "Punto de retiro Artlab (Rosetti 93, viernes y sabados de 19:00 a 23:59)"
     : metodoEntrega;
