@@ -8,7 +8,7 @@ import DropAccess from "./components/DropAccess";
 import HeroSlider from "./components/HeroSlider";
 import CatalogPage from "./components/CatalogPage";
 import CatalogAccessGate from "./components/CatalogAccessGate";
-import { DROP_DATE, isDropAccessWindowActive } from "./utils/dropSchedule";
+import { DROP_DATE, isDropAccessWindowActive, parseDropDate } from "./utils/dropSchedule";
 
 import "./styles/styles.css";
 
@@ -49,12 +49,19 @@ function App({ forceDrop = false }) {
   useEffect(() => {
     const baseUrl = window.location.origin;
 
-    const dropDate = new Date(DROP_DATE);
+    const dropDate = parseDropDate(DROP_DATE);
 
-    const dropMonth = dropDate.toLocaleString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
+    const dropMonth = dropDate
+      ? dropDate.toLocaleString("en-US", {
+          month: "long",
+          year: "numeric",
+        })
+      : "Próximo drop";
+
+    const startDate = dropDate ? dropDate.toISOString() : undefined;
+    const endDate = dropDate
+      ? new Date(dropDate.getTime() + 28 * 24 * 60 * 60 * 1000).toISOString()
+      : undefined;
 
     const schema = [
       {
@@ -117,10 +124,8 @@ function App({ forceDrop = false }) {
         name: `BAWAX Vinyl Drop – ${dropMonth}`,
         description:
           "Nuevo drop mensual de discos de vinilo en Buenos Aires Wax. Ediciones seleccionadas para DJs y coleccionistas. Acceso exclusivo anticipado.",
-        startDate: DROP_DATE,
-        endDate: new Date(
-          new Date(DROP_DATE).setDate(new Date(DROP_DATE).getDate() + 28),
-        ).toISOString(),
+        startDate,
+        endDate,
         eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
         eventStatus: "https://schema.org/EventScheduled",
         location: {
@@ -140,7 +145,7 @@ function App({ forceDrop = false }) {
           price: "0",
           priceCurrency: "ARS",
           availability: "https://schema.org/OnlineOnly",
-          validFrom: DROP_DATE,
+          validFrom: startDate,
         },
         image: [`${baseUrl}/social-preview.jpg`],
       },

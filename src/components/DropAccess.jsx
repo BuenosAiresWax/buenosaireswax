@@ -26,6 +26,15 @@ function DropAccess({ fechaObjetivo, onAccesoPermitido, ocultarFormulario = fals
 
     useEffect(() => {
         const fechaObj = new Date(fechaObjetivo);
+
+        if (Number.isNaN(fechaObj.getTime())) {
+            setTiempoRestante("00:00:00:00");
+            setTiempoEnCero(true);
+            setAnimando(false);
+            if (onTiempoEnCero) onTiempoEnCero();
+            return;
+        }
+
         const ahora = new Date();
         const diferenciaTotal = fechaObj - ahora;
 
