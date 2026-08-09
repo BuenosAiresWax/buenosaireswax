@@ -170,7 +170,7 @@ function VinylClubPage() {
           return;
         }
       } catch (mpErr) {
-        console.warn("MercadoPago no configurado:", mpErr.message);
+        console.error("Error MercadoPago completo:", mpErr);
       }
 
       localStorage.setItem("vinylClubEmail", subscriberId);
