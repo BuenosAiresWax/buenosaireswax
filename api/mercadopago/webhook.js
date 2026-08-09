@@ -21,6 +21,14 @@ function getDb() {
 }
 
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-signature");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method === "GET") {
     return res.status(200).json({ status: "ok" });
   }
@@ -36,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "Invalid webhook payload" });
     }
 
-    if (body.type === "preapproval") {
+    if (body.type === "subscription_preapproval" || body.type === "preapproval") {
       const preapprovalId = body.data?.id;
 
       if (!preapprovalId) {
@@ -88,6 +96,44 @@ export default async function handler(req, res) {
       }
 
       await doc.ref.update(updates);
+
+      return res.status(200).json({ status: "processed" });
+    }
+
+    if (body.type === "payment") {
+      const db = getDb();
+      const preapprovalId = body.data?.preapproval_id;
+
+      if (!preapprovalId) {
+        return res.status(200).json({ status: "ignored" });
+      }
+
+      const snapshot = await db
+        .collection("clubvinilos")
+        .where("mercadopago_preapproval_id", "==", preapprovalId)
+        .limit(1)
+        .get();
+
+      if (snapshot.empty) {
+        return res.status(200).json({ status: "ignored" });
+      }
+
+      const doc = snapshot.docs[0];
+      const paymentId = body.data?.id;
+
+      const historialRef = doc.ref.collection("historialPagos").doc();
+      await historialRef.set({
+        fecha: new Date().toISOString(),
+        estado: body.data?.status || "unknown",
+        monto: body.data?.transaction_amount || 70000,
+        mercadopago_payment_id: paymentId || null,
+        type: "payment",
+      });
+
+      await doc.ref.update({
+        fechaUltimoPago: new Date().toISOString(),
+        fechaProximoCobro: body.data?.next_payment_date || null,
+      });
 
       return res.status(200).json({ status: "processed" });
     }

@@ -88,8 +88,6 @@ export default async function handler(req, res) {
       return res.status(mpResponse.status).json({
         message: "Error al crear la suscripción en MercadoPago.",
         details: mpError,
-        status: mpResponse.status,
-        tokenPrefix: MP_ACCESS_TOKEN ? MP_ACCESS_TOKEN.substring(0, 8) : "none",
       });
     }
 
