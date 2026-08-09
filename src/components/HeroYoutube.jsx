@@ -15,7 +15,7 @@ const heroBackgroundImage =
         .find(Boolean) || "/assets/img/hero-youtube.jpeg";
 
 const HeroYoutube = () => {
-    const videoId = "S3Tj8VsXPAk";
+    const videoId = "WYleJOwfIVg";
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
     return (
