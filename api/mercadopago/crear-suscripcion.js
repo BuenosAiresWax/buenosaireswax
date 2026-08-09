@@ -1,0 +1,110 @@
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+const MP_API_URL = "https://api.mercadopago.com/v1";
+
+let firebaseAdminApp;
+function getFirebaseAdmin() {
+  if (!firebaseAdminApp) {
+    firebaseAdminApp = initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      }),
+    });
+  }
+  return firebaseAdminApp;
+}
+
+function getDb() {
+  getFirebaseAdmin();
+  return getFirestore();
+}
+
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+
+  if (!MP_ACCESS_TOKEN) {
+    return res.status(500).json({
+      message: "MercadoPago no configurado. Agregá MP_ACCESS_TOKEN en las variables de entorno de Vercel.",
+    });
+  }
+
+  try {
+    const { email, nombre } = req.body;
+
+    if (!email || !nombre) {
+      return res.status(400).json({ message: "Email y nombre son requeridos." });
+    }
+
+    const subscriberId = email.trim().toLowerCase();
+    const db = getDb();
+    const docRef = db.collection("clubvinilos").doc(subscriberId);
+    const docSnap = await docRef.get();
+
+    if (docSnap.exists && docSnap.data().activo) {
+      return res.status(400).json({ message: "Ya tenés una suscripción activa." });
+    }
+
+    const callbackUrl = `${req.headers.origin || "https://buenosaireswax.vercel.app"}/#/vinyl-club`;
+    const backUrl = callbackUrl;
+
+    const mpResponse = await fetch(`${MP_API_URL}/preapproval`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify({
+        reason: "Vinyl Club BAWAX - Suscripción mensual",
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: "months",
+          transaction_amount: 70000,
+          currency_id: "ARS",
+        },
+        payer_email: email.trim(),
+        back_url: backUrl,
+        external_reference: subscriberId,
+        notification_url: `${req.headers.origin || "https://buenosaireswax.vercel.app"}/api/mercadopago/webhook`,
+      }),
+    });
+
+    if (!mpResponse.ok) {
+      const mpError = await mpResponse.json();
+      console.error("MercadoPago error:", mpError);
+      return res.status(mpResponse.status).json({
+        message: "Error al crear la suscripción en MercadoPago.",
+        details: mpError,
+      });
+    }
+
+    const preapproval = await mpResponse.json();
+
+    await docRef.update({
+      mercadopago_preapproval_id: preapproval.id,
+      mercadopago_status: preapproval.status,
+      pendiente: false,
+    });
+
+    return res.status(200).json({
+      init_point: preapproval.init_point,
+      preapproval_id: preapproval.id,
+    });
+  } catch (error) {
+    console.error("Error creating subscription:", error);
+    return res.status(500).json({ message: "Error interno del servidor." });
+  }
+}
