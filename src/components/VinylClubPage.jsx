@@ -191,7 +191,7 @@ function VinylClubPage() {
         <section className="vc-hero">
           <div className="vc-hero-overlay">
             <div className="vc-hero-content">
-              <h1>Vinyl Club</h1>
+              <h1>Club de Vinilos</h1>
               <h2>Suscripción activa</h2>
             </div>
           </div>
@@ -199,7 +199,7 @@ function VinylClubPage() {
         <div className="vc-section">
           <div className="vc-success-card">
             <div className="vc-success-icon">🎶</div>
-            <h2>Ya sos parte del Vinyl Club</h2>
+            <h2>Ya sos parte del Club de Vinilos</h2>
             <p>Tu suscripción está activa. Cada mes recibirás vinilos curados por BAWAX.</p>
           </div>
         </div>
@@ -213,7 +213,7 @@ function VinylClubPage() {
         <section className="vc-hero">
           <div className="vc-hero-overlay">
             <div className="vc-hero-content">
-              <h1>Vinyl Club</h1>
+              <h1>Club de Vinilos</h1>
               <h2>Suscripción</h2>
             </div>
           </div>
@@ -240,31 +240,31 @@ function VinylClubPage() {
       <section className="vc-hero">
         <div className="vc-hero-overlay">
           <div className="vc-hero-content">
-            <h1>Vinyl Club</h1>
-            <h2>Suscripción mensual de vinilos</h2>
+            <h1>Club de Vinilos</h1>
+            <h2>Suscribite al primer club de vinilos de musica electronica de Argentina</h2>
           </div>
         </div>
       </section>
 
       {/* Benefits */}
       <div className="vc-section">
-        <h2 className="vc-section-title">Suscribete y recibe mensualmente</h2>
+        <h2 className="vc-section-title">suscribete al club y recibe mensualmente</h2>
 
         <div className="vc-benefits">
           <div className="vc-benefit-card">
             <span className="vc-benefit-icon">🎶</span>
-            <h3>Vinilo curado por BAWAX</h3>
-            <p>Selección mensual de house, techno, deep y más. Discos elegidos por nuestro equipo.</p>
+            <h3>Vinilo curado por nosotros</h3>
+            <p>Seleccionamos los discos de deep house, house y techno especialmente para cada miembro del club.</p>
           </div>
           <div className="vc-benefit-card">
             <span className="vc-benefit-icon">🎁</span>
             <h3>Regalos especiales</h3>
-            <p>Stickers, accesorios y contenido exclusivo que solo reciben los miembros del club.</p>
+            <p>Slipmats, kits de limpieza, accesorios personalizados y más.</p>
           </div>
           <div className="vc-benefit-card">
             <span className="vc-benefit-icon">💎</span>
-            <h3>Contenido exclusivo</h3>
-            <p>Acceso anticipado a drops, ediciones limitadas y sorpresas mensuales.</p>
+            <h3>Accesos exclusivos</h3>
+            <p>Acceso exclusivo a todos los eventos de BAWAX</p>
           </div>
         </div>
 

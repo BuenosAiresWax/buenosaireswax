@@ -58,7 +58,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "Ya tenés una suscripción activa." });
     }
 
-    const callbackUrl = `${req.headers.origin || "https://buenosaireswax.vercel.app"}/#/vinyl-club`;
+    const callbackUrl = `${req.headers.origin || "https://buenosaireswax.vercel.app"}/#/club`;
     const backUrl = callbackUrl;
 
     const mpResponse = await fetch(`${MP_API_URL}/preapproval`, {

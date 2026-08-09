@@ -24,7 +24,7 @@ function AppLayout() {
   const navItems = [
     { to: "/drop", label: "Próximo Drop" },
     { to: "/tienda", label: "Tienda de Vinilos" },
-    { to: "/vinyl-club", label: "Vinyl Club" },
+    { to: "/club", label: "BAWAX CLUB" },
   ];
 
   useEffect(() => {
@@ -105,8 +105,8 @@ function AppLayout() {
     location.pathname === "/equipamiento" ||
     location.pathname.startsWith("/equipamiento/");
   const isVinylClubRoute =
-    location.pathname === "/vinyl-club" ||
-    location.pathname.startsWith("/vinyl-club/");
+    location.pathname === "/club" ||
+    location.pathname.startsWith("/club/");
 
   return (
     <div

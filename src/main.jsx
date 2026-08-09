@@ -40,7 +40,7 @@ createRoot(document.getElementById("root")).render(
                   </CatalogAccessGate>
                 }
               />
-              <Route path="vinyl-club" element={<VinylClubPage />} />
+              <Route path="club" element={<VinylClubPage />} />
             </Route>
             <Route path="/admin" element={<AdminRoute />} />
             <Route
@@ -48,7 +48,7 @@ createRoot(document.getElementById("root")).render(
               element={<AdminPedidosRealtimeRoute />}
             />
             <Route
-              path="/admin/vinyl-club"
+              path="/admin/club"
               element={<AdminVinylClubRoute />}
             />
           </Routes>
