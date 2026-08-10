@@ -104,7 +104,7 @@ export default function AdminVinylClub() {
     activos: suscriptores.filter((s) => s?.activo).length,
     cancelados: suscriptores.filter((s) => s?.mercadopago_status === "cancelled").length,
     pendientes: suscriptores.filter((s) => s?.pendiente).length,
-    ingresos: suscriptores.filter((s) => s?.activo).length * 70000,
+    ingresos: suscriptores.filter((s) => s?.activo).length * 100,
   };
 
   if (loading) {

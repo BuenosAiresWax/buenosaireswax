@@ -272,7 +272,7 @@ function VinylClubPage() {
         </div>
 
         <div className="vc-price-box">
-          <span className="vc-price-amount">$70.000</span>
+          <span className="vc-price-amount">$100</span>
           <span className="vc-price-period">/ mes</span>
         </div>
 
@@ -565,7 +565,7 @@ function VinylClubPage() {
                     Procesando...
                   </span>
                 ) : (
-                  "Suscribirme - $70.000/mes"
+                  "Suscribirme - $100/mes"
                 )}
               </button>
             )}
