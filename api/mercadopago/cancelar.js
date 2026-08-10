@@ -1,27 +1,7 @@
-import { initializeApp, cert, getApps } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getDb } from "../_lib/firebase-admin.js";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API_URL = "https://api.mercadopago.com";
-
-let firebaseAdminApp;
-function getFirebaseAdmin() {
-  if (!firebaseAdminApp) {
-    firebaseAdminApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      }),
-    });
-  }
-  return firebaseAdminApp;
-}
-
-function getDb() {
-  getFirebaseAdmin();
-  return getFirestore();
-}
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
