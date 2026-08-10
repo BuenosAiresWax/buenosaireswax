@@ -67,6 +67,12 @@ export default async function handler(req, res) {
     const callbackUrl = `${origin}/`;
     const backUrl = callbackUrl;
 
+    const webhookUrl = new URL(`${origin}/api/mercadopago/webhook`);
+    const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+    if (bypassSecret) {
+      webhookUrl.searchParams.set("x-vercel-protection-bypass", bypassSecret);
+    }
+
     const mpResponse = await fetch(`${MP_API_URL}/preapproval`, {
       method: "POST",
       headers: {
@@ -83,6 +89,7 @@ export default async function handler(req, res) {
         },
         payer_email: email.trim(),
         back_url: backUrl,
+        notification_url: webhookUrl.toString(),
         external_reference: subscriberId,
       }),
     });

@@ -39,6 +39,7 @@ export default async function handler(req, res) {
 
   try {
     const body = req.body;
+    console.log("Webhook received:", JSON.stringify({ type: body?.type, action: body?.action, id: body?.id, data: body?.data }));
 
     if (!body || !body.type) {
       return res.status(400).json({ message: "Invalid webhook payload" });
@@ -60,7 +61,7 @@ export default async function handler(req, res) {
 
       if (snapshot.empty) {
         console.warn("Webhook for unknown preapproval:", preapprovalId);
-        return res.status(200).json({ status: "ignored" });
+        return res.status(200).json({ status: "ignored", reason: "unknown_preapproval" });
       }
 
       const doc = snapshot.docs[0];
