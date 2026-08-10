@@ -164,17 +164,20 @@ function VinylClubPage() {
           nombre: nombre.trim(),
         });
 
-        if (result?.init_point) {
+        const checkoutUrl = result?.checkout_url || result?.init_point || result?.sandbox_init_point;
+
+        if (checkoutUrl) {
           localStorage.setItem("vinylClubEmail", subscriberId);
-          window.location.href = result.init_point;
+          window.location.href = checkoutUrl;
           return;
         }
+
+        throw new Error(result?.message || "MercadoPago no devolvió una URL de checkout válida.");
       } catch (mpErr) {
         console.warn("MercadoPago:", mpErr.message);
+        setError(mpErr.message || "No se pudo iniciar el checkout de MercadoPago.");
+        return;
       }
-
-      localStorage.setItem("vinylClubEmail", subscriberId);
-      setExito(true);
     } catch (err) {
       console.error(err);
       setError("Hubo un error al procesar tu suscripción. Intentá de nuevo.");

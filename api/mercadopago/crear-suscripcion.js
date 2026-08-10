@@ -58,8 +58,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "Ya tenés una suscripción activa." });
     }
 
-    const callbackUrl = `${req.headers.origin || "https://buenosaireswax.vercel.app"}/#/club`;
+    const forwardedProto = req.headers["x-forwarded-proto"];
+    const forwardedHost = req.headers["x-forwarded-host"];
+    const origin = forwardedProto && forwardedHost
+      ? `${forwardedProto}://${forwardedHost}`
+      : req.headers.origin || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://buenosaireswax.vercel.app");
+
+    const callbackUrl = `${origin}/#/club`;
     const backUrl = callbackUrl;
+    const notificationUrl = `${origin}/api/mercadopago/webhook`;
 
     const mpResponse = await fetch(`${MP_API_URL}/preapproval`, {
       method: "POST",
@@ -74,24 +81,41 @@ export default async function handler(req, res) {
           frequency_type: "months",
           transaction_amount: 70000,
           currency_id: "ARS",
+          start_date: new Date().toISOString(),
         },
         payer_email: email.trim(),
         back_url: backUrl,
         external_reference: subscriberId,
-        notification_url: `${req.headers.origin || "https://buenosaireswax.vercel.app"}/api/mercadopago/webhook`,
+        notification_url: notificationUrl,
       }),
     });
 
+    const responseText = await mpResponse.text();
+    let mpPayload = null;
+
+    try {
+      mpPayload = responseText ? JSON.parse(responseText) : null;
+    } catch {
+      mpPayload = { message: responseText || "Respuesta vacía de MercadoPago" };
+    }
+
     if (!mpResponse.ok) {
-      const mpError = await mpResponse.json();
-      console.error("MercadoPago error:", JSON.stringify(mpError));
+      console.error("MercadoPago error:", JSON.stringify(mpPayload));
       return res.status(mpResponse.status).json({
         message: "Error al crear la suscripción en MercadoPago.",
-        details: mpError,
+        details: mpPayload,
       });
     }
 
-    const preapproval = await mpResponse.json();
+    const preapproval = mpPayload || {};
+    const checkoutUrl = preapproval.init_point || preapproval.sandbox_init_point || preapproval.subscription_url || null;
+
+    if (!checkoutUrl) {
+      return res.status(502).json({
+        message: "MercadoPago no devolvió una URL de checkout válida.",
+        details: preapproval,
+      });
+    }
 
     await docRef.update({
       mercadopago_preapproval_id: preapproval.id,
@@ -100,7 +124,9 @@ export default async function handler(req, res) {
     });
 
     return res.status(200).json({
-      init_point: preapproval.init_point,
+      init_point: checkoutUrl,
+      sandbox_init_point: preapproval.sandbox_init_point || null,
+      checkout_url: checkoutUrl,
       preapproval_id: preapproval.id,
     });
   } catch (error) {
