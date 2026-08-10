@@ -64,7 +64,7 @@ export default async function handler(req, res) {
         auto_recurring: {
           frequency: 1,
           frequency_type: "months",
-          transaction_amount: 100,
+          transaction_amount: 70000,
           currency_id: "ARS",
         },
         payer_email: email.trim(),
