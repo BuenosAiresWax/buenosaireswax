@@ -67,6 +67,46 @@ export default async function handler(req, res) {
     const callbackUrl = `${origin}/`;
     const backUrl = callbackUrl;
 
+    const planPayload = {
+      reason: "Vinyl Club BAWAX - Suscripción mensual",
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: "months",
+        transaction_amount: 70000,
+        currency_id: "ARS",
+      },
+      back_url: backUrl,
+    };
+
+    const planResponse = await fetch(`${MP_API_URL}/preapproval_plan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify(planPayload),
+    });
+
+    const planResponseText = await planResponse.text();
+    let planMpPayload = null;
+
+    try {
+      planMpPayload = planResponseText ? JSON.parse(planResponseText) : null;
+    } catch {
+      planMpPayload = { message: planResponseText || "Respuesta vacía de MercadoPago" };
+    }
+
+    if (!planResponse.ok) {
+      console.error("MercadoPago plan error:", JSON.stringify(planMpPayload));
+      const mpMessage = planMpPayload?.message || planMpPayload?.error || "MercadoPago rechazó la creación del plan.";
+      return res.status(planResponse.status).json({
+        message: `MercadoPago rechazó la creación del plan: ${mpMessage}`,
+        details: planMpPayload,
+      });
+    }
+
+    const plan = planMpPayload || {};
+
     const mpResponse = await fetch(`${MP_API_URL}/preapproval`, {
       method: "POST",
       headers: {
@@ -75,14 +115,10 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         reason: "Vinyl Club BAWAX - Suscripción mensual",
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: "months",
-          transaction_amount: 70000,
-          currency_id: "ARS",
-        },
+        preapproval_plan_id: plan.id,
         payer_email: email.trim(),
         back_url: backUrl,
+        external_reference: subscriberId,
       }),
     });
 
@@ -96,7 +132,7 @@ export default async function handler(req, res) {
     }
 
     if (!mpResponse.ok) {
-      console.error("MercadoPago error:", JSON.stringify(mpPayload));
+      console.error("MercadoPago subscription error:", JSON.stringify(mpPayload));
       const mpMessage = mpPayload?.message || mpPayload?.error || "MercadoPago rechazó la solicitud.";
       return res.status(mpResponse.status).json({
         message: `MercadoPago rechazó la solicitud: ${mpMessage}`,
