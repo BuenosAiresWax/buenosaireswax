@@ -122,11 +122,11 @@ export default async function handler(req, res) {
       });
     }
 
-    await docRef.update({
+    await docRef.set({
       mercadopago_preapproval_id: preapproval.id,
       mercadopago_status: preapproval.status,
       pendiente: false,
-    });
+    }, { merge: true });
 
     return res.status(200).json({
       init_point: checkoutUrl,
@@ -135,7 +135,7 @@ export default async function handler(req, res) {
       preapproval_id: preapproval.id,
     });
   } catch (error) {
-    console.error("Error creating subscription:", error);
-    return res.status(500).json({ message: "Error interno del servidor." });
+    console.error("Error creating subscription:", error.message, error.stack);
+    return res.status(500).json({ message: "Error interno del servidor.", error: error.message });
   }
 }
