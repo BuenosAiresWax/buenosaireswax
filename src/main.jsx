@@ -7,10 +7,12 @@ import { CartProvider } from "./context/CartContext";
 import { PlayerProvider } from "./player/PlayerContext.jsx"; // <-- NUEVO
 import AdminRoute from "./components/AdminRoute.jsx";
 import AdminPedidosRealtimeRoute from "./components/AdminPedidosRealtimeRoute.jsx";
+import AdminVinylClubRoute from "./components/AdminVinylClubRoute.jsx";
 import ProductPage from "./components/ProductPage.jsx";
 import AppLayout from "./components/AppLayout.jsx";
 import CatalogPage from "./components/CatalogPage.jsx";
 import CatalogAccessGate from "./components/CatalogAccessGate.jsx";
+import VinylClubPage from "./components/VinylClubPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -39,18 +41,10 @@ createRoot(document.getElementById("root")).render(
                 }
               />
               <Route
-                path="equipamiento"
+                path="club"
                 element={
-                  <CatalogAccessGate sectionKey="equipamiento" sectionLabel="Equipamiento">
-                    <CatalogPage catalogKey="equipamiento" />
-                  </CatalogAccessGate>
-                }
-              />
-              <Route
-                path="equipamiento/producto/:id"
-                element={
-                  <CatalogAccessGate sectionKey="equipamiento" sectionLabel="Equipamiento">
-                    <ProductPage catalogKey="equipamiento" />
+                  <CatalogAccessGate sectionKey="club" sectionLabel="BAWAX Club" code={import.meta.env.VITE_CLUB_CODE}>
+                    <VinylClubPage />
                   </CatalogAccessGate>
                 }
               />
@@ -59,6 +53,10 @@ createRoot(document.getElementById("root")).render(
             <Route
               path="/admin/pedidos-catalogos"
               element={<AdminPedidosRealtimeRoute />}
+            />
+            <Route
+              path="/admin/club"
+              element={<AdminVinylClubRoute />}
             />
           </Routes>
         </HashRouter>

@@ -10,12 +10,13 @@ function hasSectionAccess(sectionKey) {
   return isAuth && savedVersion === ACCESS_VERSION;
 }
 
-function CatalogAccessGate({ sectionKey, sectionLabel, children }) {
+function CatalogAccessGate({ sectionKey, sectionLabel, code, children }) {
   // Tienda y Equipamiento abren siempre sin contraseña
   if (sectionKey === "tienda" || sectionKey === "equipamiento") {
     return children;
   }
 
+  const accessCode = code || STORE_ACCESS_CODE;
   const [autenticado, setAutenticado] = useState(() => hasSectionAccess(sectionKey));
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +24,7 @@ function CatalogAccessGate({ sectionKey, sectionLabel, children }) {
   const manejarSubmit = (e) => {
     e.preventDefault();
 
-    if (password === STORE_ACCESS_CODE) {
+    if (password === accessCode) {
       sessionStorage.setItem(`catalogAccess:${sectionKey}`, "true");
       sessionStorage.setItem(`catalogAccessVersion:${sectionKey}`, ACCESS_VERSION);
       setAutenticado(true);

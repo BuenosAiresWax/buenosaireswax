@@ -9,6 +9,7 @@ import AdminPedidos from "./AdminPedidos";
 import AdminProductos from "./AdminProductos";
 import AdminProductoNuevo from "./AdminProductoNuevo";
 import AdminOverview from "./AdminOverview";
+import AdminVinylClub from "./AdminVinylClub";
 
 import "../styles/adminDashboard.css";
 
@@ -64,6 +65,14 @@ function AdminDashboardContent() {
                     </button>
 
                     <button
+                        className={`tab-btn ${activeTab === "VinylClub" ? "active-tab" : ""}`}
+                        onClick={() => setActiveTab("VinylClub")}
+                    >
+                        <span className="tab-icon">🎧</span>
+                        <span>Vinyl Club</span>
+                    </button>
+
+                    <button
                         className="tab-btn tab-btn-realtime"
                         onClick={() => navigate("/admin/pedidos-catalogos")}
                     >
@@ -83,6 +92,7 @@ function AdminDashboardContent() {
                 {activeTab === "Pedidos" && <AdminPedidos />}
                 {activeTab === "Productos" && <AdminProductos />}
                 {activeTab === "CrearProducto" && <AdminProductoNuevo onNuevo={refetch} />}
+                {activeTab === "VinylClub" && <AdminVinylClub />}
             </div>
         </div>
     );
