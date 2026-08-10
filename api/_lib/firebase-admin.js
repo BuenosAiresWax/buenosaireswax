@@ -27,6 +27,14 @@ export function getFirebaseAdmin() {
         clientEmail: !!clientEmail,
         privateKey: !!privateKey,
       });
+    } else {
+      console.log("Firebase Admin env vars loaded:", {
+        projectId,
+        clientEmail,
+        privateKeyLength: privateKey.length,
+        privateKeyStarts: privateKey.substring(0, 30),
+        privateKeyHasNewlines: privateKey.includes("\n"),
+      });
     }
 
     firebaseAdminApp = initializeApp({
