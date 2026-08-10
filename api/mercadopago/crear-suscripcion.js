@@ -64,9 +64,8 @@ export default async function handler(req, res) {
       ? `${forwardedProto}://${forwardedHost}`
       : req.headers.origin || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://buenosaireswax.vercel.app");
 
-    const callbackUrl = `${origin}/#/club`;
+    const callbackUrl = `${origin}/`;
     const backUrl = callbackUrl;
-    const notificationUrl = `${origin}/api/mercadopago/webhook`;
 
     const mpResponse = await fetch(`${MP_API_URL}/preapproval`, {
       method: "POST",
@@ -81,12 +80,9 @@ export default async function handler(req, res) {
           frequency_type: "months",
           transaction_amount: 70000,
           currency_id: "ARS",
-          start_date: new Date().toISOString(),
         },
         payer_email: email.trim(),
         back_url: backUrl,
-        external_reference: subscriberId,
-        notification_url: notificationUrl,
       }),
     });
 
@@ -101,8 +97,9 @@ export default async function handler(req, res) {
 
     if (!mpResponse.ok) {
       console.error("MercadoPago error:", JSON.stringify(mpPayload));
+      const mpMessage = mpPayload?.message || mpPayload?.error || "MercadoPago rechazó la solicitud.";
       return res.status(mpResponse.status).json({
-        message: "Error al crear la suscripción en MercadoPago.",
+        message: `MercadoPago rechazó la solicitud: ${mpMessage}`,
         details: mpPayload,
       });
     }
