@@ -626,79 +626,39 @@
   }
 
   .vc-benefits {
-    display: flex;
-    grid-template-columns: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    gap: 0.85rem;
-    padding: 0 4vw 0.5rem;
-    margin-bottom: 0.5rem;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scroll-padding: 0 4vw;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .vc-benefits::-webkit-scrollbar {
-    display: none;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
   }
 
   .vc-benefit-card {
-    flex: 0 0 72vw;
-    min-width: 72vw;
-    padding: 1.5rem 1.25rem;
+    padding: 1rem;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    scroll-snap-align: center;
-    border-radius: 14px;
   }
 
   .vc-benefit-icon {
-    font-size: 2.2rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
     flex-shrink: 0;
-    width: 48px;
-    height: 48px;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
+    border-radius: 10px;
   }
 
   .vc-benefit-card h3 {
-    font-size: 16px;
-    margin-bottom: 0.4rem;
+    font-size: 13px;
+    margin-bottom: 0.2rem;
   }
 
   .vc-benefit-card p {
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  .vc-benefits-dots {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 1.75rem;
-  }
-
-  .vc-benefits-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transition: background 0.25s ease, width 0.25s ease;
-  }
-
-  .vc-benefits-dot.active {
-    width: 20px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
   }
 
   .vc-price-amount {

@@ -36,10 +36,8 @@ function VinylClubPage() {
   const [yaSuscrito, setYaSuscrito] = useState(false);
 
   const [touched, setTouched] = useState({});
-  const [activeDot, setActiveDot] = useState(0);
   const formRef = useRef(null);
   const stepRef = useRef(null);
-  const benefitsRef = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("vinylClubEmail");
@@ -71,33 +69,6 @@ function VinylClubPage() {
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-
-  const handleBenefitsScroll = useCallback(() => {
-    const el = benefitsRef.current;
-    if (!el) return;
-    const scrollCenter = el.scrollLeft + el.clientWidth / 2;
-    const cardWidth = el.scrollWidth / 3;
-    const index = Math.round(scrollCenter / cardWidth - 0.5);
-    setActiveDot(Math.max(0, Math.min(2, index)));
-  }, []);
-
-  useEffect(() => {
-    const el = benefitsRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = Number(entry.target.dataset.index);
-            if (!isNaN(idx)) setActiveDot(idx);
-          }
-        });
-      },
-      { root: el, threshold: 0.6 }
-    );
-    el.querySelectorAll(".vc-benefit-card").forEach((card) => observer.observe(card));
-    return () => observer.disconnect();
-  }, []);
 
   const markTouched = useCallback((field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -282,28 +253,22 @@ function VinylClubPage() {
       <div className="vc-section">
         <h2 className="vc-section-title">suscribete al club y recibe mensualmente</h2>
 
-        <div className="vc-benefits" ref={benefitsRef} onScroll={handleBenefitsScroll}>
-          <div className="vc-benefit-card" data-index="0">
+        <div className="vc-benefits">
+          <div className="vc-benefit-card">
             <span className="vc-benefit-icon">🎶</span>
             <h3>Vinilo curado por nosotros</h3>
             <p>Seleccionamos los discos de deep house, house y techno especialmente para cada miembro del club.</p>
           </div>
-          <div className="vc-benefit-card" data-index="1">
+          <div className="vc-benefit-card">
             <span className="vc-benefit-icon">🎁</span>
             <h3>Regalos especiales</h3>
             <p>Slipmats, kits de limpieza, accesorios personalizados y más.</p>
           </div>
-          <div className="vc-benefit-card" data-index="2">
+          <div className="vc-benefit-card">
             <span className="vc-benefit-icon">💎</span>
             <h3>Accesos exclusivos</h3>
             <p>Acceso exclusivo a todos los eventos de BAWAX</p>
           </div>
-        </div>
-
-        <div className="vc-benefits-dots">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className={`vc-benefits-dot${activeDot === i ? " active" : ""}`} />
-          ))}
         </div>
 
         <div className="vc-price-box">
