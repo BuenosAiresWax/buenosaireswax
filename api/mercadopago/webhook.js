@@ -1,23 +1,18 @@
-import { initializeApp, cert, getApps } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getDb } from "../_lib/firebase-admin.js";
 
-let firebaseAdminApp;
-function getFirebaseAdmin() {
-  if (!firebaseAdminApp) {
-    firebaseAdminApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      }),
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+
+async function fetchPreapprovalStatus(preapprovalId) {
+  try {
+    const res = await fetch(`https://api.mercadopago.com/preapproval/${preapprovalId}`, {
+      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    console.error("Error fetching preapproval from MP:", e.message);
+    return null;
   }
-  return firebaseAdminApp;
-}
-
-function getDb() {
-  getFirebaseAdmin();
-  return getFirestore();
 }
 
 export default async function handler(req, res) {
@@ -67,6 +62,14 @@ export default async function handler(req, res) {
       const doc = snapshot.docs[0];
       const data = doc.data();
 
+      let status = body.data?.status;
+
+      if (!status) {
+        const mpData = await fetchPreapprovalStatus(preapprovalId);
+        status = mpData?.status || data.mercadopago_status;
+        console.log("Fetched preapproval status from MP:", status, "for", preapprovalId);
+      }
+
       const statusMap = {
         authorized: { activo: true, pendiente: false },
         paused: { activo: false, pendiente: false },
@@ -74,24 +77,24 @@ export default async function handler(req, res) {
       };
 
       const updates = {
-        mercadopago_status: body.data.status || data.mercadopago_status,
-        ...(statusMap[body.data.status] || {}),
+        mercadopago_status: status,
+        ...(statusMap[status] || {}),
       };
 
-      if (body.data.status === "authorized" && !data.fechaPrimerPago) {
+      if (status === "authorized" && !data.fechaPrimerPago) {
         updates.fechaPrimerPago = new Date().toISOString();
       }
 
-      if (body.data.status === "authorized") {
+      if (status === "authorized") {
         updates.fechaUltimoPago = new Date().toISOString();
-        updates.fechaProximoCobro = body.data.next_payment_date || null;
+        updates.fechaProximoCobro = body.data?.next_payment_date || null;
 
         const historialRef = doc.ref.collection("historialPagos").doc();
         await historialRef.set({
           fecha: new Date().toISOString(),
           estado: "authorized",
-          monto: body.data.transaction_amount || 70000,
-          mercadopago_payment_id: body.data.payment_id || null,
+          monto: body.data?.transaction_amount || 100,
+          mercadopago_payment_id: body.data?.payment_id || null,
           type: "payment",
         });
       }
@@ -126,7 +129,7 @@ export default async function handler(req, res) {
       await historialRef.set({
         fecha: new Date().toISOString(),
         estado: body.data?.status || "unknown",
-        monto: body.data?.transaction_amount || 70000,
+        monto: body.data?.transaction_amount || 100,
         mercadopago_payment_id: paymentId || null,
         type: "payment",
       });

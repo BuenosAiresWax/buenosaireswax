@@ -40,14 +40,7 @@ createRoot(document.getElementById("root")).render(
                   </CatalogAccessGate>
                 }
               />
-              <Route
-                path="club"
-                element={
-                  <CatalogAccessGate sectionKey="club" sectionLabel="BAWAX Club" code={import.meta.env.VITE_CLUB_CODE}>
-                    <VinylClubPage />
-                  </CatalogAccessGate>
-                }
-              />
+              <Route path="club" element={<VinylClubPage />} />
             </Route>
             <Route path="/admin" element={<AdminRoute />} />
             <Route

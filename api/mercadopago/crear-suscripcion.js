@@ -1,27 +1,7 @@
-import { initializeApp, cert, getApps } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getDb } from "../_lib/firebase-admin.js";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API_URL = "https://api.mercadopago.com";
-
-let firebaseAdminApp;
-function getFirebaseAdmin() {
-  if (!firebaseAdminApp) {
-    firebaseAdminApp = initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      }),
-    });
-  }
-  return firebaseAdminApp;
-}
-
-function getDb() {
-  getFirebaseAdmin();
-  return getFirestore();
-}
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -84,7 +64,7 @@ export default async function handler(req, res) {
         auto_recurring: {
           frequency: 1,
           frequency_type: "months",
-          transaction_amount: 100,
+          transaction_amount: 70000,
           currency_id: "ARS",
         },
         payer_email: email.trim(),
@@ -122,11 +102,11 @@ export default async function handler(req, res) {
       });
     }
 
-    await docRef.update({
+    await docRef.set({
       mercadopago_preapproval_id: preapproval.id,
       mercadopago_status: preapproval.status,
       pendiente: false,
-    });
+    }, { merge: true });
 
     return res.status(200).json({
       init_point: checkoutUrl,
@@ -135,7 +115,7 @@ export default async function handler(req, res) {
       preapproval_id: preapproval.id,
     });
   } catch (error) {
-    console.error("Error creating subscription:", error);
-    return res.status(500).json({ message: "Error interno del servidor." });
+    console.error("Error creating subscription:", error.message, error.stack);
+    return res.status(500).json({ message: "Error interno del servidor.", error: error.message });
   }
 }
