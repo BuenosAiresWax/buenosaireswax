@@ -24,7 +24,7 @@ function AppLayout() {
   const navItems = [
     { to: "/drop", label: "Próximo Drop" },
     { to: "/tienda", label: "Tienda de Vinilos" },
-    { to: "/equipamiento", label: "Equipamiento" },
+    { to: "/club", label: "BAWAX CLUB" },
   ];
 
   useEffect(() => {
@@ -104,6 +104,9 @@ function AppLayout() {
   const isEquipamientoRoute =
     location.pathname === "/equipamiento" ||
     location.pathname.startsWith("/equipamiento/");
+  const isVinylClubRoute =
+    location.pathname === "/club" ||
+    location.pathname.startsWith("/club/");
 
   return (
     <div
@@ -149,8 +152,10 @@ function AppLayout() {
 
       <Footer />
 
-      {/* Player global persistente */}
-      {!isMobile && !isDropAccessActive && !isEquipamientoRoute && <PlayerBar />}
+      {/* Player global persistente - se oculta visualmente en rutas específicas, pero nunca se desmonta */}
+      <div style={{ display: (!isMobile && !isDropAccessActive && !isEquipamientoRoute && !isVinylClubRoute) ? "block" : "none" }}>
+        <PlayerBar />
+      </div>
     </div>
   );
 }

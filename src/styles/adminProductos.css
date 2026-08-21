@@ -268,6 +268,111 @@
     transform: scale(1.1);
 }
 
+/* Checkbox de selección por tarjeta (estético y pequeño) */
+.card-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-select input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #9b6bff;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+/* Selector 'Seleccionar todo' inline en la barra superior */
+.select-all-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ddd;
+    font-size: 0.9rem;
+    margin-right: 0.6rem;
+}
+
+.select-all-inline input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #5fd6ff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Botón de borrado masivo coherente con el resto del UI */
+.bulk-delete-btn {
+    background: linear-gradient(90deg, #ff7878, #ff5f5f);
+    color: #111;
+    border: none;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    margin-left: 0.6rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+}
+
+.bulk-delete-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255, 95, 95, 0.18);
+}
+
+.bulk-delete-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Contenedor que agrupa filtros + select all en la barra */
+.filtros-and-select {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.filtro-estados {
+    display: inline-flex;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.filtro-btn {
+    background: rgba(255, 255, 255, 0.03);
+    color: #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0.38rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.18s ease, transform 0.12s ease;
+}
+
+.filtro-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-1px);
+}
+
+.filtro-btn.activo {
+    background: linear-gradient(90deg, #9b6bff55, #5fd7ff55);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px rgba(155, 107, 255, 0.12);
+}
+
+@media (max-width: 900px) {
+    .filtro-estados {
+        gap: 0.35rem;
+    }
+    .filtro-btn {
+        padding: 0.33rem 0.5rem;
+        font-size: 0.82rem;
+    }
+}
+
 /* Campos editables */
 .input-edit,
 .textarea-edit {
@@ -644,5 +749,107 @@
     .btn-cancel {
         flex: 1;
         min-width: 120px;
+    }
+
+    /* Mobile: organizar filtros y acciones en columna para mejor usabilidad táctil */
+    .filtros-and-select {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    /* Filtros: usar scroll horizontal cuando hay varias opciones y mayor tamaño táctil */
+    .filtro-estados {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .filtro-estados::-webkit-scrollbar { height: 6px; }
+    .filtro-estados::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 6px; }
+
+    .filtro-btn {
+        min-width: 110px;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.95rem;
+    }
+
+    .select-all-inline {
+        justify-content: flex-start;
+        padding-left: 6px;
+        font-size: 1rem;
+    }
+
+    .bulk-delete-btn {
+        width: 100%;
+        margin-left: 0;
+        padding: 0.7rem;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+
+    /* Hacer checkboxes más grandes para dedos */
+    .card-select input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        accent-color: #9b6bff;
+    }
+
+    .select-all-inline input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Mover el checkbox a la esquina superior-izquierda (más accesible en móvil) */
+    .card-select {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        z-index: 6;
+        background: rgba(0,0,0,0.25);
+        padding: 4px;
+        border-radius: 6px;
+    }
+
+    /* Ajustar acciones a la esquina superior derecha ligeramente separado */
+    .card-actions {
+        top: 10px;
+        right: 10px;
+        gap: 8px;
+        z-index: 5;
+    }
+
+    /* Aumentar padding y tamaños en la tarjeta para mejor lectura táctil */
+    .producto-card {
+        padding: 1rem;
+        border-radius: 12px;
+        gap: 0.9rem;
+    }
+
+    .producto-imagen {
+        width: 130px;
+        height: 130px;
+    }
+
+    .producto-info h3 {
+        font-size: 1.15rem;
+    }
+
+    .search-input {
+        font-size: 1rem;
+        padding: 10px 40px 10px 38px;
+    }
+
+    /* Pequeña animación al aparecer la tarjeta */
+    .producto-card {
+        animation: cardEntrance 260ms ease both;
+    }
+
+    @keyframes cardEntrance {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 }

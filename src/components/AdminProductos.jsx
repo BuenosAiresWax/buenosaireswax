@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef } from "react";
-import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase/config";
 import { useAdminData } from "../context/AdminDataContext";
@@ -62,6 +62,8 @@ export default function ProductosAdmin() {
     const [uploadingImage, setUploadingImage] = useState(false);
     const [orden, setOrden] = useState("mayorPrecio");
     const [coleccionSeleccionada, setColeccionSeleccionada] = useState("productos");
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [filtroEstado, setFiltroEstado] = useState("todos");
 
     // Infinite scroll (se mantiene aunque ahora cargue todo del contexto)
     const loaderRef = useRef(null);
@@ -87,6 +89,17 @@ export default function ProductosAdmin() {
         }
 
         // ↕️ orden
+        // filtrar por estado antes de ordenar
+        if (filtroEstado && filtroEstado !== "todos") {
+            lista = lista.filter((p) => {
+                const disponibles = Math.max(0, (p.cantidad || 0) - (p.reservados || 0));
+                if (filtroEstado === "conStock") return disponibles > 1;
+                if (filtroEstado === "stockBajo") return disponibles === 1;
+                if (filtroEstado === "sinStock") return disponibles === 0;
+                return true;
+            });
+        }
+
         lista.sort((a, b) =>
             orden === "mayorPrecio"
                 ? (b.precio || 0) - (a.precio || 0)
@@ -94,12 +107,63 @@ export default function ProductosAdmin() {
         );
 
         return lista;
-    }, [productosMap[coleccionSeleccionada], busqueda, orden]);
+    }, [productosMap[coleccionSeleccionada], busqueda, orden, filtroEstado]);
     /* -----------------------------
        ORDEN
     ------------------------------ */
     const handleOrdenChange = (e) => {
         setOrden(e.target.value);
+    };
+
+    const isSelected = (id) => selectedIds.includes(id);
+
+    const toggleSelect = (id) => {
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    };
+
+    const toggleSelectAll = () => {
+        const ids = productosFiltrados.map((p) => p.id);
+        if (ids.length === 0) return;
+        const allSelected = ids.every((id) => selectedIds.includes(id));
+        setSelectedIds(allSelected ? [] : ids);
+    };
+
+    const handleBulkDelete = () => {
+        if (selectedIds.length === 0) return;
+
+        setModal({
+            type: "confirm",
+            message: `¿Eliminar ${selectedIds.length} productos seleccionados?`,
+            onConfirm: async () => {
+                setProcessing(true);
+                setModal({ type: "loading", message: "Eliminando productos..." });
+
+                try {
+                    const firebaseCollection = COLECCIONES[coleccionSeleccionada].firebaseCollection;
+                    const batch = writeBatch(db);
+                    selectedIds.forEach((id) => batch.delete(doc(db, firebaseCollection, id)));
+                    await batch.commit();
+
+                    await refetch();
+                    setSelectedIds([]);
+
+                    setTimeout(() => {
+                        setModal({
+                            type: "success",
+                            message: "Productos eliminados.",
+                            onClose: () => {
+                                setModal(null);
+                                setProcessing(false);
+                            },
+                        });
+                    }, 600);
+                } catch (err) {
+                    console.error(err);
+                    setModal({ type: "error", message: "No se pudo eliminar los productos.", onClose: () => setModal(null) });
+                    setProcessing(false);
+                }
+            },
+        });
     };
     /* -----------------------------
        EDICIÓN
@@ -273,6 +337,8 @@ export default function ProductosAdmin() {
                             setColeccionSeleccionada(key);
                             setBusqueda("");
                             setOrden("mayorPrecio");
+                            setSelectedIds([]);
+                            setFiltroEstado("todos");
                         }}
                     >
                         {coleccion.label}
@@ -301,6 +367,23 @@ export default function ProductosAdmin() {
                     )}
                 </div>
 
+                <div className="filtros-and-select">
+                    <div className="filtro-estados">
+                        <button className={`filtro-btn ${filtroEstado === "todos" ? "activo" : ""}`} onClick={() => setFiltroEstado("todos")}>Todos</button>
+                        <button className={`filtro-btn ${filtroEstado === "conStock" ? "activo" : ""}`} onClick={() => setFiltroEstado("conStock")}>Con stock</button>
+                        <button className={`filtro-btn ${filtroEstado === "stockBajo" ? "activo" : ""}`} onClick={() => setFiltroEstado("stockBajo")}>Stock bajo</button>
+                        <button className={`filtro-btn ${filtroEstado === "sinStock" ? "activo" : ""}`} onClick={() => setFiltroEstado("sinStock")}>Sin stock</button>
+                    </div>
+
+                    <label className="select-all-inline">
+                    <input
+                        type="checkbox"
+                        onChange={toggleSelectAll}
+                        checked={productosFiltrados.length > 0 && selectedIds.length === productosFiltrados.length}
+                    /> Seleccionar todo
+                    </label>
+                </div>
+
                 <select value={orden} onChange={handleOrdenChange}>
                     <option value="mayorPrecio">Mayor precio primero</option>
                     <option value="menorPrecio">Menor precio primero</option>
@@ -312,6 +395,15 @@ export default function ProductosAdmin() {
                     disabled={processing}
                 >
                     🔄 Refresh
+                </button>
+
+                <button
+                    className="bulk-delete-btn"
+                    onClick={handleBulkDelete}
+                    disabled={processing || selectedIds.length === 0}
+                    title={selectedIds.length === 0 ? "Seleccione productos" : "Eliminar seleccionados"}
+                >
+                    🗑️ Eliminar seleccionados ({selectedIds.length})
                 </button>
             </div>
 
@@ -339,6 +431,14 @@ export default function ProductosAdmin() {
                             >
                                 {!isEditing && (
                                     <div className="card-actions">
+                                        <label className="card-select">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected(producto.id)}
+                                                onChange={() => toggleSelect(producto.id)}
+                                                disabled={processing}
+                                            />
+                                        </label>
                                         <button
                                             className="edit-btn"
                                             onClick={() =>
