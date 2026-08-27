@@ -72,8 +72,8 @@ export default async function handler(req, res) {
 
       const statusMap = {
         authorized: { activo: true, pendiente: false },
-        paused: { activo: false, pendiente: false },
-        cancelled: { activo: false, pendiente: false },
+        paused: { activo: false, pendiente: true },
+        cancelled: { activo: false, pendiente: true },
       };
 
       const updates = {

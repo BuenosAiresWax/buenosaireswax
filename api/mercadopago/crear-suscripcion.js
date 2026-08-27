@@ -105,7 +105,6 @@ export default async function handler(req, res) {
     await docRef.set({
       mercadopago_preapproval_id: preapproval.id,
       mercadopago_status: preapproval.status,
-      pendiente: false,
     }, { merge: true });
 
     return res.status(200).json({
