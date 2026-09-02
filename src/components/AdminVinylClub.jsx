@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
+import * as XLSX from "xlsx";
 import "../styles/adminVinylClub.css";
 
 const CATEGORIAS_LABELS = {
@@ -43,6 +44,8 @@ export default function AdminVinylClub() {
   const [filtro, setFiltro] = useState("todos");
   const [busqueda, setBusqueda] = useState("");
   const [expandido, setExpandido] = useState(null);
+  const [mostrarMenuDescarga, setMostrarMenuDescarga] = useState(false);
+  const menuDescargaRef = useRef(null);
 
   useEffect(() => {
     let unsub;
@@ -75,6 +78,16 @@ export default function AdminVinylClub() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuDescargaRef.current && !menuDescargaRef.current.contains(e.target)) {
+        setMostrarMenuDescarga(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const suscriptoresFiltrados = suscriptores.filter((s) => {
     if (!s || typeof s !== "object") return false;
 
@@ -105,6 +118,54 @@ export default function AdminVinylClub() {
     cancelados: suscriptores.filter((s) => s?.mercadopago_status === "cancelled").length,
     pendientes: suscriptores.filter((s) => s?.pendiente).length,
     ingresos: suscriptores.filter((s) => s?.activo).length * 70000,
+  };
+
+  const construirFilasExcel = (lista) => {
+    return lista.map((s, i) => ({
+      "#": i + 1,
+      Nombre: s.nombre || "",
+      Email: s.correo || "",
+      Instagram: s.instagram || "",
+      DNI: s.dni || "",
+      Telefono: s.telefono || "",
+      Direccion: s.direccion || "",
+      Departamento: s.departamento || "",
+      Ciudad: s.ciudad || "",
+      "Codigo Postal": s.codigoPostal || "",
+      Preferencias: Array.isArray(s.preferencias)
+        ? s.preferencias.map((p) => CATEGORIAS_LABELS[p] || p).join(", ")
+        : "",
+      Estado: s.activo ? "Activo" : s.pendiente ? "Pendiente" : "Inactivo",
+      "MP Status": STATUS_LABELS[s.mercadopago_status] || s.mercadopago_status || "Sin estado",
+      "Fecha Alta": formatDate(s.fechaAlta),
+      "Primer Pago": formatDate(s.fechaPrimerPago),
+      "Ultimo Pago": formatDate(s.fechaUltimoPago),
+      "Proximo Cobro": formatDate(s.fechaProximoCobro),
+      "MP Preapproval ID": s.mercadopago_preapproval_id || "",
+    }));
+  };
+
+  const exportarExcel = (lista, nombreBase) => {
+    if (!lista.length) {
+      alert("No hay suscriptores para descargar con el filtro actual.");
+      return;
+    }
+    const filas = construirFilasExcel(lista);
+    const ws = XLSX.utils.json_to_sheet(filas);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Suscriptores");
+
+    const fecha = new Date();
+    const stamp = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}-${String(fecha.getDate()).padStart(2, "0")}`;
+    XLSX.writeFile(wb, `${nombreBase}-${stamp}.xlsx`);
+    setMostrarMenuDescarga(false);
+  };
+
+  const handleDescargarExcel = (tipo) => {
+    if (tipo === "todos") exportarExcel(suscriptores, "vinyl-club-todos");
+    if (tipo === "activos") exportarExcel(suscriptores.filter((s) => s?.activo), "vinyl-club-activos");
+    if (tipo === "pendientes") exportarExcel(suscriptores.filter((s) => s?.pendiente), "vinyl-club-pendientes");
+    if (tipo === "cancelados") exportarExcel(suscriptores.filter((s) => s?.mercadopago_status === "cancelled"), "vinyl-club-cancelados");
   };
 
   if (loading) {
@@ -165,13 +226,36 @@ export default function AdminVinylClub() {
             </button>
           ))}
         </div>
-        <input
-          className="vc-admin-search"
-          type="text"
-          placeholder="Buscar por nombre, email, Instagram o DNI..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
+        <div className="vc-admin-search-wrap">
+          <input
+            className="vc-admin-search"
+            type="text"
+            placeholder="Buscar por nombre, email, Instagram o DNI..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+          <div className="vc-admin-download-wrap" ref={menuDescargaRef}>
+            <button
+              className="vc-admin-download-btn"
+              title="Descargar Excel"
+              onClick={() => setMostrarMenuDescarga((prev) => !prev)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            </button>
+            {mostrarMenuDescarga && (
+              <div className="vc-admin-download-menu">
+                <button onClick={() => handleDescargarExcel("todos")}>Todos</button>
+                <button onClick={() => handleDescargarExcel("activos")}>Activos</button>
+                <button onClick={() => handleDescargarExcel("pendientes")}>Pendientes</button>
+                <button onClick={() => handleDescargarExcel("cancelados")}>Cancelados</button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="vc-admin-list">

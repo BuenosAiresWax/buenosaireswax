@@ -130,6 +130,120 @@
   border-color: #3b82f6;
 }
 
+/* download */
+.vc-admin-search-wrap {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  min-width: 200px;
+  position: relative;
+  background: #262626d7;
+  border: 1px solid #1d2124;
+  border-radius: 8px;
+  transition: border-color 0.18s;
+}
+
+.vc-admin-search-wrap:focus-within {
+  border-color: #3b82f6;
+}
+
+.vc-admin-search-wrap .vc-admin-search {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.vc-admin-search-wrap .vc-admin-search:focus {
+  border: none;
+}
+
+.vc-admin-download-wrap {
+  position: relative;
+  display: flex;
+}
+
+.vc-admin-download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 38px;
+  padding: 0 10px;
+  background: transparent;
+  color: #7a8aa2;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+}
+
+.vc-admin-download-btn:hover {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.vc-admin-download-btn svg {
+  flex-shrink: 0;
+}
+
+.vc-admin-download-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  background: #171b24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 160px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  animation: vc-menu-in 0.14s ease-out;
+}
+
+@keyframes vc-menu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.vc-admin-download-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #c8d4e6;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s;
+}
+
+.vc-admin-download-menu button:hover {
+  background: rgba(96, 165, 250, 0.1);
+  color: #60a5fa;
+}
+
+.vc-admin-download-menu button::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b82f6;
+  opacity: 0.4;
+  flex-shrink: 0;
+  transition: opacity 0.13s;
+}
+
+.vc-admin-download-menu button:hover::before {
+  opacity: 1;
+}
+
 /* list */
 .vc-admin-list {
   display: flex;
