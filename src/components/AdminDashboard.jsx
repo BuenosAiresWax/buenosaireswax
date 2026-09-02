@@ -77,7 +77,7 @@ function AdminDashboardContent() {
                         onClick={() => navigate("/admin/pedidos-catalogos")}
                     >
                         <span className="tab-icon">🔔</span>
-                        <span>Pedidos Tienda + Equipamiento</span>
+                        <span>Pedidos Tienda</span>
                     </button>
                 </div>
 

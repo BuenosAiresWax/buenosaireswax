@@ -78,6 +78,42 @@
     transform: translateY(-2px);
 }
 
+.pedidos-orden-selector {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.5fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) auto;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1.25rem;
+    padding: 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(15, 30, 26, 0.58);
+}
+
+.pedidos-orden-selector .busqueda-input,
+.pedidos-orden-selector select,
+.pedidos-orden-selector .refresh-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.pedidos-orden-selector .busqueda-input {
+    max-width: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pedidos-orden-selector select {
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+
 /* Tarjeta individual */
 .pedido-card {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
@@ -395,6 +431,22 @@
     .refresh-btn {
         width: 100%;
     }
+
+    .pedidos-orden-selector {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.65rem;
+        padding: 0.65rem;
+        background: rgba(15, 30, 26, 0.58);
+    }
+
+    .pedidos-orden-selector .busqueda-input {
+        grid-column: 1 / -1;
+        min-height: 44px;
+    }
+
+    .pedidos-orden-selector .refresh-btn {
+        grid-column: 1 / -1;
+    }
 }
 
 /* Responsive móvil */
@@ -422,3 +474,4 @@
         margin-left: 1.6rem;
     }
 }
+

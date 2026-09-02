@@ -722,7 +722,7 @@ export default function PedidosAdmin() {
                 </button>
             </div>
 
-            <div className="orden-selector">
+            <div className="pedidos-orden-selector">
                 <input
                     type="text"
                     placeholder="Buscar por comprador..."

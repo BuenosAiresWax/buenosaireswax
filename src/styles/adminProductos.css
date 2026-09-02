@@ -353,12 +353,15 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .filtro-estados {
     display: inline-flex;
     gap: 0.45rem;
     align-items: center;
+    min-width: 0;
 }
 
 .filtro-btn {
@@ -383,6 +386,20 @@
     color: #fff;
     border-color: transparent;
     box-shadow: 0 6px 18px rgba(155, 107, 255, 0.12);
+}
+
+.orden-selector {
+    padding: 0.7rem;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.orden-selector select,
+.refresh-btn,
+.bulk-delete-btn {
+    min-height: 38px;
 }
 
 @media (max-width: 900px) {
@@ -606,6 +623,7 @@
     align-items: center;
     flex: 1;
     max-width: 320px;
+    min-width: 220px;
 }
 
 .search-icon {
@@ -617,6 +635,7 @@
 }
 
 .search-input {
+    width: 100%;
     padding: 8px 36px 0px 34px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(255, 255, 255, 0);
@@ -698,12 +717,101 @@
 /* 📱 Responsive ajustes */
 @media (max-width: 600px) {
 
-    .edit-grid {
-        grid-template-columns: 1fr;
+    .productos-admin-container {
+        padding-inline: 0.75rem;
+    }
+
+    .orden-selector {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.7rem;
+        align-items: stretch;
+        margin-bottom: 1.25rem;
+        padding: 0.65rem;
+    }
+
+    .search-wrapper,
+    .filtros-and-select {
+        grid-column: 1 / -1;
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .search-wrapper {
+        min-height: 42px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .search-input {
+        width: 100%;
+        min-width: 0;
+        height: 42px;
+        padding: 8px 36px 8px 34px;
         border: none;
+        background: transparent;
+    }
+
+    .search-wrapper:focus-within {
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .filtros-and-select {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+        padding: 0.15rem 0;
+    }
+
+    .filtro-estados {
+        width: 100%;
+        gap: 0.45rem;
+        overflow-x: auto;
+        padding: 0.1rem 0.1rem 0.35rem;
+        scrollbar-width: thin;
+    }
+
+    .filtro-btn {
+        flex: 0 0 auto;
+        min-width: auto;
+        padding: 0.5rem 0.7rem;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    .select-all-inline {
+        min-height: 34px;
+        margin: 0;
+        padding: 0 0.1rem;
+        font-size: 0.88rem;
+    }
+
+    .orden-selector select,
+    .refresh-btn,
+    .bulk-delete-btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        margin: 0;
+        font-size: 0.88rem;
+    }
+
+    .orden-selector select {
+        padding: 0.5rem 0.65rem;
+    }
+
+    .bulk-delete-btn {
+        grid-column: 1 / -1;
+        padding: 0.65rem 0.75rem;
+        border-radius: 10px;
+    }
+
+    .edit-grid {
+        grid-template-columns: 1fr;
     }
 
     .productos-list {
@@ -773,46 +881,6 @@
     .btn-cancel {
         flex: 1;
         min-width: 120px;
-    }
-
-    /* Mobile: organizar filtros y acciones en columna para mejor usabilidad táctil */
-    .filtros-and-select {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.6rem;
-    }
-
-    /* Filtros: usar scroll horizontal cuando hay varias opciones y mayor tamaño táctil */
-    .filtro-estados {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        overflow-x: auto;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .filtro-estados::-webkit-scrollbar { height: 6px; }
-    .filtro-estados::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 6px; }
-
-    .filtro-btn {
-        min-width: 110px;
-        padding: 0.45rem 0.6rem;
-        font-size: 0.95rem;
-    }
-
-    .select-all-inline {
-        justify-content: flex-start;
-        padding-left: 6px;
-        font-size: 1rem;
-    }
-
-    .bulk-delete-btn {
-        width: 100%;
-        margin-left: 0;
-        padding: 0.7rem;
-        font-size: 1rem;
-        border-radius: 10px;
     }
 
     /* Hacer checkboxes más grandes para dedos */
