@@ -68,6 +68,16 @@ export default function ProductosAdmin() {
     // Infinite scroll (se mantiene aunque ahora cargue todo del contexto)
     const loaderRef = useRef(null);
 
+    const refetchKeepingScroll = async () => {
+        const scrollY = window.scrollY;
+
+        await refetch();
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => window.scrollTo(0, scrollY));
+        });
+    };
+
     /* Mapear datos según colección seleccionada */
     const productosMap = {
         productos,
@@ -144,7 +154,7 @@ export default function ProductosAdmin() {
                     selectedIds.forEach((id) => batch.delete(doc(db, firebaseCollection, id)));
                     await batch.commit();
 
-                    await refetch();
+                    await refetchKeepingScroll();
                     setSelectedIds([]);
 
                     setTimeout(() => {
@@ -254,7 +264,7 @@ export default function ProductosAdmin() {
                     const firebaseCollection = COLECCIONES[coleccionSeleccionada].firebaseCollection;
                     await updateDoc(doc(db, firebaseCollection, id), payload);
 
-                    await refetch();
+                    await refetchKeepingScroll();
 
                     setTimeout(() => {
                         setModal({
@@ -292,7 +302,7 @@ export default function ProductosAdmin() {
                 try {
                     const firebaseCollection = COLECCIONES[coleccionSeleccionada].firebaseCollection;
                     await deleteDoc(doc(db, firebaseCollection, id));
-                    await refetch();
+                    await refetchKeepingScroll();
 
                     setTimeout(() => {
                         setModal({
@@ -391,7 +401,7 @@ export default function ProductosAdmin() {
 
                 <button
                     className="refresh-btn"
-                    onClick={refetch}
+                    onClick={refetchKeepingScroll}
                     disabled={processing}
                 >
                     🔄 Refresh
@@ -437,7 +447,9 @@ export default function ProductosAdmin() {
                                                 checked={isSelected(producto.id)}
                                                 onChange={() => toggleSelect(producto.id)}
                                                 disabled={processing}
+                                                aria-label={`Seleccionar ${getTextOrFallback(producto.titulo, "producto")}`}
                                             />
+                                            <span>Seleccionar</span>
                                         </label>
                                         <button
                                             className="edit-btn"

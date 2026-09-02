@@ -236,8 +236,14 @@
     top: 8px;
     right: 8px;
     display: flex;
+    align-items: center;
     gap: 6px;
     opacity: 0;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: rgba(15, 15, 22, 0.72);
+    backdrop-filter: blur(10px);
     transition: opacity 0.25s ease;
     z-index: 3;
 }
@@ -273,6 +279,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.35rem;
+    min-height: 30px;
+    padding: 3px 6px;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.card-select:hover {
+    background: rgba(155, 107, 255, 0.22);
+    color: #fff;
+}
+
+.card-select span {
+    display: none;
 }
 
 .card-select input[type="checkbox"] {
@@ -700,6 +722,7 @@
     .producto-top {
         align-items: flex-start;
         gap: 0.7rem;
+        padding-top: 3.25rem;
     }
 
     .producto-info {
@@ -715,6 +738,7 @@
         opacity: 1;
         top: 10px;
         right: 10px;
+        gap: 6px;
     }
 
     .producto-imagen {
@@ -803,23 +827,25 @@
         height: 24px;
     }
 
-    /* Mover el checkbox a la esquina superior-izquierda (más accesible en móvil) */
     .card-select {
-        position: absolute;
-        left: 10px;
-        top: 10px;
-        z-index: 6;
-        background: rgba(0,0,0,0.25);
-        padding: 4px;
-        border-radius: 6px;
+        min-height: 34px;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.06);
     }
 
-    /* Ajustar acciones a la esquina superior derecha ligeramente separado */
+    .card-select span {
+        display: inline;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
     .card-actions {
         top: 10px;
         right: 10px;
         gap: 8px;
         z-index: 5;
+        padding: 5px;
+        border-radius: 13px;
     }
 
     /* Aumentar padding y tamaños en la tarjeta para mejor lectura táctil */
