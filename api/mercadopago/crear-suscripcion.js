@@ -3,51 +3,6 @@ import { getDb } from "../_lib/firebase-admin.js";
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API_URL = "https://api.mercadopago.com";
 
-function getPublicOrigin(req) {
-  const configuredOrigin = process.env.PUBLIC_APP_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (configuredOrigin) {
-    const origin = configuredOrigin.startsWith("http") ? configuredOrigin : `https://${configuredOrigin}`;
-    return origin.replace(/\/$/, "");
-  }
-
-  const forwardedHost = req.headers["x-forwarded-host"] || req.headers.host;
-  if (forwardedHost) {
-    return `https://${forwardedHost.split(",")[0].trim()}`;
-  }
-
-  const origin = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "https://buenosaireswax.vercel.app";
-  return origin.replace(/\/$/, "");
-}
-
-function getCheckoutUrl(payload) {
-  const candidates = [payload?.init_point, payload?.sandbox_init_point, payload?.subscription_url];
-
-  for (const candidate of candidates) {
-    if (!candidate) continue;
-
-    try {
-      const url = new URL(candidate);
-      const isMercadoPagoHost =
-        url.hostname === "mercadopago.com" ||
-        url.hostname.endsWith(".mercadopago.com") ||
-        url.hostname === "mercadopago.com.ar" ||
-        url.hostname.endsWith(".mercadopago.com.ar") ||
-        url.hostname === "mercadolibre.com" ||
-        url.hostname.endsWith(".mercadolibre.com") ||
-        url.hostname === "mercadolibre.com.ar" ||
-        url.hostname.endsWith(".mercadolibre.com.ar");
-
-      if (url.protocol === "https:" && isMercadoPagoHost) {
-        return url.toString();
-      }
-    } catch {}
-  }
-
-  return null;
-}
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -83,9 +38,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "Ya tenés una suscripción activa." });
     }
 
-    const origin = getPublicOrigin(req);
+    const forwardedProto = req.headers["x-forwarded-proto"];
+    const forwardedHost = req.headers["x-forwarded-host"];
+    const origin = forwardedProto && forwardedHost
+      ? `${forwardedProto}://${forwardedHost}`
+      : req.headers.origin || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://buenosaireswax.vercel.app");
 
-    const callbackUrl = `${origin}/#/club`;
+    const callbackUrl = `${origin}/`;
     const backUrl = callbackUrl;
 
     const webhookUrl = new URL(`${origin}/api/mercadopago/webhook`);
@@ -124,16 +83,8 @@ export default async function handler(req, res) {
       mpPayload = { message: responseText || "Respuesta vacía de MercadoPago" };
     }
 
-    console.log("MercadoPago subscription response:", JSON.stringify({
-      status: mpResponse.status,
-      ok: mpResponse.ok,
-      origin,
-      payloadKeys: mpPayload && typeof mpPayload === "object" ? Object.keys(mpPayload) : [],
-      preapprovalId: mpPayload?.id || null,
-      initPointHost: getCheckoutUrl(mpPayload)?.split("/")[2] || null,
-    }));
-
     if (!mpResponse.ok) {
+      console.error("MercadoPago subscription error:", JSON.stringify(mpPayload));
       const mpMessage = mpPayload?.message || mpPayload?.error || "MercadoPago rechazó la solicitud.";
       return res.status(mpResponse.status).json({
         message: `MercadoPago rechazó la solicitud: ${mpMessage}`,
@@ -142,14 +93,9 @@ export default async function handler(req, res) {
     }
 
     const preapproval = mpPayload || {};
-    const checkoutUrl = getCheckoutUrl(preapproval);
+    const checkoutUrl = preapproval.init_point || preapproval.sandbox_init_point || preapproval.subscription_url || null;
 
-    if (!checkoutUrl || !preapproval.id) {
-      console.error("MercadoPago returned an unusable subscription response:", JSON.stringify({
-        payloadKeys: Object.keys(preapproval),
-        preapprovalId: preapproval.id || null,
-        hasCheckoutUrl: Boolean(checkoutUrl),
-      }));
+    if (!checkoutUrl) {
       return res.status(502).json({
         message: "MercadoPago no devolvió una URL de checkout válida.",
         details: preapproval,
