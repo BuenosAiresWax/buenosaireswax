@@ -2,6 +2,7 @@ import { getDb } from "../_lib/firebase-admin.js";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API_URL = "https://api.mercadopago.com";
+const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
 function getCheckoutUrl(preapproval) {
   const isTestToken = MP_ACCESS_TOKEN.startsWith("TEST-");
@@ -69,13 +70,8 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       },
       body: JSON.stringify({
+        preapproval_plan_id: MP_PREAPPROVAL_PLAN_ID,
         reason: "Vinyl Club BAWAX - Suscripción mensual",
-        auto_recurring: {
-          frequency: 1,
-          frequency_type: "months",
-          transaction_amount: 70000,
-          currency_id: "ARS",
-        },
         payer_email: email.trim(),
         back_url: backUrl,
         notification_url: webhookUrl.toString(),
