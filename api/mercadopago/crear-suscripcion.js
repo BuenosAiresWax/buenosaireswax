@@ -3,6 +3,15 @@ import { getDb } from "../_lib/firebase-admin.js";
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API_URL = "https://api.mercadopago.com";
 
+function getCheckoutUrl(preapproval) {
+  const isTestToken = MP_ACCESS_TOKEN.startsWith("TEST-");
+  const candidates = isTestToken
+    ? [preapproval.sandbox_init_point, preapproval.init_point, preapproval.subscription_url]
+    : [preapproval.init_point, preapproval.sandbox_init_point, preapproval.subscription_url];
+
+  return candidates.find(Boolean) || null;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -93,7 +102,7 @@ export default async function handler(req, res) {
     }
 
     const preapproval = mpPayload || {};
-    const checkoutUrl = preapproval.init_point || preapproval.sandbox_init_point || preapproval.subscription_url || null;
+    const checkoutUrl = getCheckoutUrl(preapproval);
 
     if (!checkoutUrl) {
       return res.status(502).json({
@@ -101,6 +110,14 @@ export default async function handler(req, res) {
         details: preapproval,
       });
     }
+
+    console.log("MercadoPago checkout selected:", JSON.stringify({
+      environment: MP_ACCESS_TOKEN.startsWith("TEST-") ? "test" : "production",
+      hasInitPoint: Boolean(preapproval.init_point),
+      hasSandboxInitPoint: Boolean(preapproval.sandbox_init_point),
+      hasSubscriptionUrl: Boolean(preapproval.subscription_url),
+      preapprovalId: preapproval.id || null,
+    }));
 
     await docRef.set({
       mercadopago_preapproval_id: preapproval.id,
