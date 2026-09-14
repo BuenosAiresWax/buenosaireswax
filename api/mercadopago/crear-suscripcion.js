@@ -1,17 +1,6 @@
 import { getDb } from "../_lib/firebase-admin.js";
 
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const MP_API_URL = "https://api.mercadopago.com";
 const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
-
-function getCheckoutUrl(preapproval) {
-  const isTestToken = MP_ACCESS_TOKEN.startsWith("TEST-");
-  const candidates = isTestToken
-    ? [preapproval.sandbox_init_point, preapproval.init_point, preapproval.subscription_url]
-    : [preapproval.init_point, preapproval.sandbox_init_point, preapproval.subscription_url];
-
-  return candidates.find(Boolean) || null;
-}
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -24,12 +13,6 @@ export default async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
-  }
-
-  if (!MP_ACCESS_TOKEN) {
-    return res.status(500).json({
-      message: "MercadoPago no configurado. Agregá MP_ACCESS_TOKEN en las variables de entorno de Vercel.",
-    });
   }
 
   try {
@@ -48,83 +31,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "Ya tenés una suscripción activa." });
     }
 
-    const forwardedProto = req.headers["x-forwarded-proto"];
-    const forwardedHost = req.headers["x-forwarded-host"];
-    const origin = forwardedProto && forwardedHost
-      ? `${forwardedProto}://${forwardedHost}`
-      : req.headers.origin || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://buenosaireswax.vercel.app");
-
-    const callbackUrl = `${origin}/`;
-    const backUrl = callbackUrl;
-
-    const webhookUrl = new URL(`${origin}/api/mercadopago/webhook`);
-    const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
-    if (bypassSecret) {
-      webhookUrl.searchParams.set("x-vercel-protection-bypass", bypassSecret);
-    }
-
-    const mpResponse = await fetch(`${MP_API_URL}/preapproval`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify({
-        preapproval_plan_id: MP_PREAPPROVAL_PLAN_ID,
-        reason: "Vinyl Club BAWAX - Suscripción mensual",
-        payer_email: email.trim(),
-        back_url: backUrl,
-        notification_url: webhookUrl.toString(),
-        external_reference: subscriberId,
-      }),
-    });
-
-    const responseText = await mpResponse.text();
-    let mpPayload = null;
-
-    try {
-      mpPayload = responseText ? JSON.parse(responseText) : null;
-    } catch {
-      mpPayload = { message: responseText || "Respuesta vacía de MercadoPago" };
-    }
-
-    if (!mpResponse.ok) {
-      console.error("MercadoPago subscription error:", JSON.stringify(mpPayload));
-      const mpMessage = mpPayload?.message || mpPayload?.error || "MercadoPago rechazó la solicitud.";
-      return res.status(mpResponse.status).json({
-        message: `MercadoPago rechazó la solicitud: ${mpMessage}`,
-        details: mpPayload,
-      });
-    }
-
-    const preapproval = mpPayload || {};
-    const checkoutUrl = getCheckoutUrl(preapproval);
-
-    if (!checkoutUrl) {
-      return res.status(502).json({
-        message: "MercadoPago no devolvió una URL de checkout válida.",
-        details: preapproval,
-      });
-    }
-
-    console.log("MercadoPago checkout selected:", JSON.stringify({
-      environment: MP_ACCESS_TOKEN.startsWith("TEST-") ? "test" : "production",
-      hasInitPoint: Boolean(preapproval.init_point),
-      hasSandboxInitPoint: Boolean(preapproval.sandbox_init_point),
-      hasSubscriptionUrl: Boolean(preapproval.subscription_url),
-      preapprovalId: preapproval.id || null,
-    }));
-
     await docRef.set({
-      mercadopago_preapproval_id: preapproval.id,
-      mercadopago_status: preapproval.status,
+      mercadopago_plan_id: MP_PREAPPROVAL_PLAN_ID,
+      mercadopago_preapproval_id: null,
+      mercadopago_status: "pending",
     }, { merge: true });
+
+    const checkoutUrl = `https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=${MP_PREAPPROVAL_PLAN_ID}`;
 
     return res.status(200).json({
       init_point: checkoutUrl,
-      sandbox_init_point: preapproval.sandbox_init_point || null,
       checkout_url: checkoutUrl,
-      preapproval_id: preapproval.id,
+      preapproval_plan_id: MP_PREAPPROVAL_PLAN_ID,
     });
   } catch (error) {
     console.error("Error creating subscription:", error.message, error.stack);

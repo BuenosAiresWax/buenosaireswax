@@ -48,11 +48,35 @@ export default async function handler(req, res) {
       }
 
       const db = getDb();
-      const snapshot = await db
+      const mpData = await fetchPreapprovalStatus(preapprovalId);
+      const externalReference = mpData?.external_reference || body.data?.external_reference;
+      const payerEmail = mpData?.payer_email || body.data?.payer_email;
+
+      let snapshot = await db
         .collection("clubvinilos")
         .where("mercadopago_preapproval_id", "==", preapprovalId)
         .limit(1)
         .get();
+
+      if (snapshot.empty && externalReference) {
+        const subscriberRef = await db.collection("clubvinilos").doc(externalReference).get();
+        if (subscriberRef.exists) {
+          snapshot = {
+            empty: false,
+            docs: [subscriberRef],
+          };
+        }
+      }
+
+      if (snapshot.empty && payerEmail) {
+        const subscriberRef = await db.collection("clubvinilos").doc(payerEmail.trim().toLowerCase()).get();
+        if (subscriberRef.exists) {
+          snapshot = {
+            empty: false,
+            docs: [subscriberRef],
+          };
+        }
+      }
 
       if (snapshot.empty) {
         console.warn("Webhook for unknown preapproval:", preapprovalId);
@@ -62,13 +86,7 @@ export default async function handler(req, res) {
       const doc = snapshot.docs[0];
       const data = doc.data();
 
-      let status = body.data?.status;
-
-      if (!status) {
-        const mpData = await fetchPreapprovalStatus(preapprovalId);
-        status = mpData?.status || data.mercadopago_status;
-        console.log("Fetched preapproval status from MP:", status, "for", preapprovalId);
-      }
+      const status = body.data?.status || mpData?.status || data.mercadopago_status;
 
       const statusMap = {
         authorized: { activo: true, pendiente: false },
