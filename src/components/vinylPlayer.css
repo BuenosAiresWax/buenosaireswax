@@ -15,6 +15,11 @@
   padding-bottom: 5px;
 }
 
+.vinyl-player__tracklist--active h4 {
+  color: var(--wave-ok, #00ff88);
+  border-bottom-color: rgba(0, 255, 136, 0.5);
+}
+
 .vinyl-player__rows {
   display: flex;
   flex-direction: column;
@@ -45,11 +50,11 @@
 }
 
 .vinyl-player__track--current {
-  color: var(--wave-accent, #ffd24a);
+  color: var(--wave-accent, #fac775);
 }
 
 .vinyl-player__track--current:hover {
-  background: rgba(255, 210, 74, 0.06);
+  background: rgba(250, 199, 117, 0.06);
 }
 
 .vinyl-player__idx {
@@ -90,11 +95,11 @@
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: var(--wave-accent, #ffd24a);
-  border: 1px solid rgba(255, 210, 74, 0.35);
+  color: var(--wave-accent, #fac775);
+  border: 1px solid rgba(250, 199, 117, 0.35);
   padding: 2px 7px;
   border-radius: 999px;
-  background: rgba(255, 210, 74, 0.07);
+  background: rgba(250, 199, 117, 0.07);
   white-space: nowrap;
 }
 
@@ -112,15 +117,16 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--wave-accent, #ffd24a);
+  color: var(--wave-accent, #fac775);
 }
 
-/* equalizer (reproduciendo) */
+/* equalizer (reproduciendo) en verde, como el estado "available" del detalle */
 .vinyl-player__eq {
   display: inline-flex;
   align-items: flex-end;
   gap: 2px;
   height: 14px;
+  color: var(--wave-ok, #00ff88);
 }
 
 .vinyl-player__eq i {

@@ -220,7 +220,7 @@ export default function WavePlayer({ className = "" }) {
                         : "Pausado";
 
     return (
-        <div className={`playerbar waveplayer ${className}`.trim()}>
+        <div className={`playerbar waveplayer ${isActivePlaying ? "waveplayer--playing " : ""}${className}`.trim()}>
             <div className="waveplayer__disc" aria-hidden="true">
                 {currentTrack?.imagen || vinylMeta?.imagen ? (
                     <img

@@ -211,7 +211,17 @@ export default function TrackUploader({ value, onChange, disabled = false }) {
                     + Agregar track
                 </button>
 
-                {message && <span className="track-uploader__msg">{message}</span>}
+                {message && (
+                    <span
+                        className={`track-uploader__msg ${message.startsWith("✓")
+                            ? "track-uploader__msg--ok"
+                            : message.startsWith("✗")
+                                ? "track-uploader__msg--err"
+                                : ""}`}
+                    >
+                        {message}
+                    </span>
+                )}
             </div>
         </div>
     );

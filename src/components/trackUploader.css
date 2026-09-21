@@ -47,7 +47,8 @@
 }
 
 .track-item--ready {
-  border-color: rgba(255, 210, 74, 0.35);
+  border-color: rgba(0, 255, 136, 0.4);
+  background: rgba(0, 255, 136, 0.03);
 }
 
 .track-item__idx {
@@ -112,7 +113,7 @@
 .track-item__file-name {
   font-size: 12px;
   font-weight: 600;
-  color: var(--wave-accent, #ffd24a);
+  color: var(--wave-accent, #fac775);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -144,7 +145,7 @@
   height: 14px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.25);
-  border-top-color: var(--wave-accent, #ffd24a);
+  border-top-color: var(--wave-accent, #fac775);
   animation: track-uploader-spin 0.8s linear infinite;
 }
 
@@ -195,8 +196,8 @@
 }
 
 .track-uploader__add:hover:not(:disabled) {
-  border-color: rgba(255, 210, 74, 0.6);
-  background: rgba(255, 210, 74, 0.08);
+  border-color: rgba(250, 199, 117, 0.6);
+  background: rgba(250, 199, 117, 0.08);
 }
 
 .track-uploader__add:disabled {
@@ -207,6 +208,14 @@
 .track-uploader__msg {
   font-size: 12px;
   font-weight: 600;
+}
+
+.track-uploader__msg--ok {
+  color: var(--wave-ok, #00ff88);
+}
+
+.track-uploader__msg--err {
+  color: #ff8d8d;
 }
 
 .track-uploader--disabled {
