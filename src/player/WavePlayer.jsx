@@ -270,7 +270,10 @@ export default function WavePlayer({ className = "" }) {
                                 className={`waveplayer__bpm ${isActivePlaying ? "waveplayer__bpm--live" : ""}`}
                             >
                                 <span className="waveplayer__bpm-dot" />
-                                {Math.round(bpm)} BPM
+                                <span className="waveplayer__bpm-value">
+                                    {Math.round(bpm)}
+                                </span>
+                                <span className="waveplayer__bpm-label">BPM</span>
                             </div>
                         )}
                         {hasMetric && (
