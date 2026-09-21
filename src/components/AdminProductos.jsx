@@ -3,6 +3,7 @@ import { doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase/config";
 import { useAdminData } from "../context/AdminDataContext";
+import TrackUploader from "./TrackUploader";
 
 import "../styles/adminProductos.css";
 import "../styles/admin.css";
@@ -29,6 +30,7 @@ const DEFAULT_PRODUCT_VALUES = {
     cantidad: 0,
     reservados: 0,
     imagen: "",
+    trackList: [],
 };
 
 const parseNumericValue = (value) => {
@@ -592,6 +594,19 @@ export default function ProductosAdmin() {
                                                             />
                                                         </label>
                                                     ))}
+                                                </div>
+
+                                                <div className="edit-tracks">
+                                                    <TrackUploader
+                                                        value={formData.trackList || []}
+                                                        onChange={(trackList) =>
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                trackList,
+                                                            }))
+                                                        }
+                                                        disabled={processing}
+                                                    />
                                                 </div>
 
                                                 <div className="stock-info edit-stock">

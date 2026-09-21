@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import Footer from "./Footer";
-import PlayerBar from "../player/PlayerBar";
+import WavePlayer from "../player/WavePlayer";
 import { isDropAccessWindowActive } from "../utils/dropSchedule";
 
 import logo from "../../assets/logo/header-logo.png";
@@ -154,7 +154,7 @@ function AppLayout() {
 
       {/* Player global persistente - se oculta visualmente en rutas específicas, pero nunca se desmonta */}
       <div style={{ display: (!isMobile && !isDropAccessActive && !isEquipamientoRoute && !isVinylClubRoute) ? "block" : "none" }}>
-        <PlayerBar />
+        <WavePlayer />
       </div>
     </div>
   );

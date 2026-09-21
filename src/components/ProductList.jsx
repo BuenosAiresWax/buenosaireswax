@@ -17,7 +17,7 @@ import Filters from "./Filters";
 import Notificacion from "./Notificacion";
 import Spinner from "./Spinner";
 import YouTubePopup from "./YouTubePopup";
-import PlayerBar from "../player/PlayerBar";
+import WavePlayer from "../player/WavePlayer";
 import { attachCatalogMeta, getCatalogConfig } from "../utils/catalog";
 
 import "../styles/ProductList.css";
@@ -920,7 +920,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
           </div>
 
         <div className="product-list">
-          {isMobile && <PlayerBar className="playerbar--mobile-inline" />}
+          {isMobile && <WavePlayer className="playerbar--mobile-inline" />}
 
           {productosLimitados.length === 0 ? (
             <div className="product-item no-results">

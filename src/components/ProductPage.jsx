@@ -1,11 +1,10 @@
 import { useEffect, useState, useContext } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { CartContext } from "../context/CartContext";
-import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
-import { isPlayableSoundCloudUrl, normalizeSoundCloudUrl } from "../player/soundcloudUrl";
-import PlayerBar from "../player/PlayerBar";
+import WavePlayer from "../player/WavePlayer";
+import VinylPlayer from "./VinylPlayer";
 import PurchaseModal from "./PurchaseModal";
 import CartPopupButton from "./CartPopupButton";
 import LoaderOverlay from "./LoaderOverlay";
@@ -25,7 +24,6 @@ function ProductPage({ catalogKey = "drop" }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
-  const { setTrack, currentTrackUrl } = useContext(PlayerContext); // <-- NUEVO
   const catalog = getCatalogConfig(catalogKey);
 
   const [producto, setProducto] = useState(null);
@@ -230,12 +228,12 @@ function ProductPage({ catalogKey = "drop" }) {
   const cartActionLabel = isEquipamientoCatalog
     ? "Consultar disponibilidad"
     : "Añadir al carrito";
-  const escuchaUrl = (producto.escucha || "").trim();
-  const normalizedEscuchaUrl = normalizeSoundCloudUrl(escuchaUrl);
+  const trackList = Array.isArray(producto.trackList) ? producto.trackList : [];
   const canPlayProduct =
     !isEquipamientoCatalog &&
-    isPlayableSoundCloudUrl(escuchaUrl);
-  const shouldShowProductPlayer = canPlayProduct || Boolean(currentTrackUrl);
+    trackList.some((track) =>
+      Boolean(track?.audioUrl && /^https?:\/\//i.test(String(track.audioUrl).trim())),
+    );
   const pricing = getProductPricing(producto);
   const showSaleBadge = pricing.esSale;
   const showNewInBadge = isNewInProduct(producto);
@@ -251,17 +249,6 @@ function ProductPage({ catalogKey = "drop" }) {
 
   const handleRemove = () => {
     removeFromCart({ id, collectionName: catalog.collectionName });
-  };
-
-  const handlePlay = () => {
-    if (!canPlayProduct) return;
-
-    setTrack(normalizedEscuchaUrl, true, {
-      titulo: producto.titulo,
-      autor: producto.autor,
-      imagen: producto.imagen,
-      sello: producto.sello,
-    });
   };
 
   return (
@@ -289,8 +276,8 @@ function ProductPage({ catalogKey = "drop" }) {
             alt={producto.titulo}
             className="detail-image"
           />
-          {isMobile && shouldShowProductPlayer && (
-            <PlayerBar className="playerbar--mobile-inline playerbar--product-below-image" />
+          {isMobile && canPlayProduct && (
+            <WavePlayer className="playerbar--mobile-inline playerbar--product-below-image" />
           )}
         </div>
 
@@ -299,8 +286,11 @@ function ProductPage({ catalogKey = "drop" }) {
           <h1 className="detail-title">{producto.titulo}</h1>
           <h3 className="detail-artist">{producto.autor}</h3>
 
-          {/* TRACKLIST */}
-          {producto.tracks && (
+          {/* VINYL PLAYER (waveform + tracklist) */}
+          {canPlayProduct && <VinylPlayer producto={producto} />}
+
+          {/* TRACKLIST (texto, cuando no hay audio cargado) */}
+          {!canPlayProduct && producto.tracks && (
             <div className="tracklist">
               <h4>TRACKLIST</h4>
               {producto.tracks.map((track, i) => (
@@ -323,13 +313,6 @@ function ProductPage({ catalogKey = "drop" }) {
               <span className="tag-vinyl">Vinyl</span>
             </div>
           </div>
-
-          {/* Botón que controla el PLAYER GLOBAL */}
-          {canPlayProduct && (
-            <button className="detail-play-btn" onClick={handlePlay}>
-              🔊 Reproducir
-            </button>
-          )}
         </div>
 
         {/* RIGHT - META */}

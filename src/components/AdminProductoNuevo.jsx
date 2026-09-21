@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebase/config";
+import TrackUploader from "./TrackUploader";
 import "../styles/adminProductoNuevo.css";
 
 const INITIAL_FORM = {
@@ -16,6 +17,7 @@ const INITIAL_FORM = {
     sello: "",
     cantidad: 0,
     reservados: 0,
+    trackList: [],
 };
 
 const COLECCIONES = {
@@ -251,6 +253,18 @@ export default function AdminProductoNuevo({ onNuevo }) {
                                 />
                             </label>
                         </div>
+                    </fieldset>
+
+                    <fieldset className="np-fieldset np-tracks">
+                        <legend className="np-legend">Tracks / Audio (player con wave + BPM)</legend>
+
+                        <TrackUploader
+                            value={formData.trackList || []}
+                            onChange={(trackList) =>
+                                setFormData((prev) => ({ ...prev, trackList }))
+                            }
+                            disabled={loading}
+                        />
                     </fieldset>
 
                     <fieldset className="np-fieldset np-imagen">

@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { PlayerContext } from "../player/PlayerContext.jsx"; // <-- NUEVO
-import { isPlayableSoundCloudUrl, normalizeSoundCloudUrl } from "../player/soundcloudUrl";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -20,9 +19,9 @@ const LIST_SCROLL_STORAGE_KEY = "bawax:product-list-scroll";
 
 function ProductItem({ producto: productoProp, mostrarMensaje }) {
   const showQuickButtons = false;
-  const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
+  const { cartItems, addToCart } = useContext(CartContext);
   const player = useContext(PlayerContext);
-  const setTrack = player?.setTrack ?? (() => {}); // <-- NUEVO
+  const loadVinyl = player?.loadVinyl ?? (() => {}); // <-- NUEVO
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -76,11 +75,6 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     mostrarMensaje("Producto añadido al carrito");
   };
 
-  const handleRemove = () => {
-    removeFromCart(productoProp);
-    mostrarMensaje("Producto eliminado del carrito");
-  };
-
   const handleCardClick = (e) => {
     if (
       e.target.closest(".add-button") ||
@@ -120,9 +114,11 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     productoProp.catalogKey === "equipamiento" ||
     producto.catalogKey === "equipamiento" ||
     producto.collectionName === "equipamiento";
-  const escuchaUrl = (producto.escucha || "").trim();
-  const normalizedEscuchaUrl = normalizeSoundCloudUrl(escuchaUrl);
-  const canShowPlayButton = !isEquipamientoCatalog && isPlayableSoundCloudUrl(escuchaUrl);
+  const trackList = Array.isArray(producto.trackList) ? producto.trackList : [];
+  const hasPlayableTrack = trackList.some((track) =>
+    track?.audioUrl && /^https?:\/\//i.test(String(track.audioUrl).trim()),
+  );
+  const canShowPlayButton = !isEquipamientoCatalog && hasPlayableTrack;
   const cartActionLabel = isEquipamientoCatalog
     ? "Consultar disponibilidad"
     : "Agregar al carrito";
@@ -146,6 +142,22 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     }
   };
 
+  const handlePlay = () => {
+    if (!canShowPlayButton) return;
+
+    loadVinyl({
+      key: `${producto.collectionName}:${producto.id}`,
+      meta: {
+        titulo: producto.titulo,
+        autor: producto.autor,
+        imagen: producto.imagen,
+        sello: producto.sello,
+      },
+      tracks: trackList,
+      autoplay: true,
+    });
+  };
+
   /* ================================
    SCHEMA: manejado por ProductList.jsx
 =============================== */
@@ -160,7 +172,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
         />
 
         {/* Botón rápido ESCUCHAR (oculto temporalmente) */}
-        {showQuickButtons && (
+        {showQuickButtons && canShowPlayButton && (
           <button
             type="button"
             className="play-button"
@@ -168,12 +180,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              setTrack(normalizedEscuchaUrl, true, {
-                titulo: producto.titulo,
-                autor: producto.autor,
-                imagen: producto.imagen,
-                sello: producto.sello,
-              });
+              handlePlay();
             }}
           >
             🔊
@@ -264,12 +271,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setTrack(normalizedEscuchaUrl, true, {
-                  titulo: producto.titulo,
-                  autor: producto.autor,
-                  imagen: producto.imagen,
-                  sello: producto.sello,
-                });
+                handlePlay();
               }}
             >
               <span aria-hidden="true">🔊</span>

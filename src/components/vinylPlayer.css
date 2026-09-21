@@ -1,0 +1,177 @@
+/* =========================================================
+   VINYL PLAYER - TRACKLIST
+   Módulo de tracklist interactiva embebida en la página de
+   producto, integrada con la dinámica visual del detalle
+   (misma lógica que la TRACKLIST de texto).
+   La barra global inferior maneja waveform/BPM/playback.
+========================================================= */
+.vinyl-player__tracklist {
+  margin-bottom: 20px;
+}
+
+.vinyl-player__tracklist h4 {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+.vinyl-player__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.vinyl-player__track {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px;
+  border: none;
+  border-bottom: 1px solid #222;
+  background: transparent;
+  color: var(--color-letra);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    padding-left 0.18s ease;
+}
+
+.vinyl-player__track:hover {
+  background: rgba(255, 255, 255, 0.04);
+  padding-left: 10px;
+}
+
+.vinyl-player__track--current {
+  color: var(--wave-accent, #ffd24a);
+}
+
+.vinyl-player__track--current:hover {
+  background: rgba(255, 210, 74, 0.06);
+}
+
+.vinyl-player__idx {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.45;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.vinyl-player__track--current .vinyl-player__idx {
+  color: var(--wave-accent);
+  opacity: 1;
+}
+
+.vinyl-player__track-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.vinyl-player__track-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.vinyl-player__track-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.vinyl-player__bpm {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--wave-accent, #ffd24a);
+  border: 1px solid rgba(255, 210, 74, 0.35);
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 210, 74, 0.07);
+  white-space: nowrap;
+}
+
+.vinyl-player__dur {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+.vinyl-player__track-status {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--wave-accent, #ffd24a);
+}
+
+/* equalizer (reproduciendo) */
+.vinyl-player__eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.vinyl-player__eq i {
+  width: 2.5px;
+  border-radius: 2px;
+  background: currentColor;
+  animation: vinyl-player-eq 1s ease-in-out infinite;
+}
+
+.vinyl-player__eq i:nth-child(1) {
+  height: 6px;
+  animation-delay: 0s;
+}
+
+.vinyl-player__eq i:nth-child(2) {
+  height: 12px;
+  animation-delay: 0.25s;
+}
+
+.vinyl-player__eq i:nth-child(3) {
+  height: 8px;
+  animation-delay: 0.5s;
+}
+
+.vinyl-player__eq i:nth-child(4) {
+  height: 13px;
+  animation-delay: 0.1s;
+}
+
+@keyframes vinyl-player-eq {
+  0%,
+  100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* responsive */
+@media (max-width: 640px) {
+  .vinyl-player__track {
+    gap: 8px;
+    padding: 9px 4px;
+  }
+
+  .vinyl-player__track:hover {
+    padding-left: 6px;
+  }
+
+  .vinyl-player__bpm {
+    display: none;
+  }
+}

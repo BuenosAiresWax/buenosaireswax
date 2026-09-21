@@ -1,0 +1,215 @@
+/* =========================================================
+   TRACK UPLOADER (admin)
+========================================================= */
+.track-uploader {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.track-uploader__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.track-uploader__title {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.track-uploader__hint {
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+.track-uploader__empty {
+  font-size: 12px;
+  opacity: 0.6;
+  margin: 4px 0 12px;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.track-item--ready {
+  border-color: rgba(255, 210, 74, 0.35);
+}
+
+.track-item__idx {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.45;
+  min-width: 22px;
+}
+
+.track-item__fields {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.track-item__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.track-item__field > input {
+  margin-top: 2px;
+}
+
+.track-item__field--bpm {
+  width: 90px;
+}
+
+.track-item__field--file {
+  flex: 1;
+  min-width: 180px;
+}
+
+.track-item__fields input[type="text"],
+.track-item__fields input[type="number"] {
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--color-letra, #e4e4e4);
+  font-size: 12px;
+}
+
+.track-item__file-input {
+  padding: 7px 0;
+  font-size: 11px;
+}
+
+.track-item__file-ready {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.track-item__file-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wave-accent, #ffd24a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+}
+
+.track-item__dur {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+  font-weight: 700;
+}
+
+.track-item__status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(10, 10, 10, 0.82);
+  border-radius: 10px;
+  font-size: 12px;
+  z-index: 2;
+}
+
+.track-item__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--wave-accent, #ffd24a);
+  animation: track-uploader-spin 0.8s linear infinite;
+}
+
+@keyframes track-uploader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.track-item__remove {
+  flex-shrink: 0;
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid rgba(255, 107, 107, 0.4);
+  color: #ff8d8d;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.track-item__remove:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.25);
+}
+
+.track-item__remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.track-uploader__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.track-uploader__add {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: var(--color-letra, #e4e4e4);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.track-uploader__add:hover:not(:disabled) {
+  border-color: rgba(255, 210, 74, 0.6);
+  background: rgba(255, 210, 74, 0.08);
+}
+
+.track-uploader__add:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.track-uploader__msg {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.track-uploader--disabled {
+  opacity: 0.65;
+  pointer-events: none;
+}
