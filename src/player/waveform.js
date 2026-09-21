@@ -159,6 +159,64 @@ export function getPeaksForUrl(url, buckets) {
   return promise;
 }
 
+const peaksJsonCache = new Map();
+const peaksJsonPending = new Map();
+
+/**
+ * Obtiene los peaks de un track de forma eficiente, en este orden:
+ * 1. Array de peaks ya guardado en Firestore (tracks viejos).
+ * 2. Archivo JSON en Storage (peaksUrl), descargado bajo demanda y cacheado.
+ * 3. Cálculo bajo demanda desde el audio (fallback definitivo).
+ */
+export function getPeaksForTrack(track, buckets) {
+  const audioUrl = track?.audioUrl;
+  const stored = Array.isArray(track?.peaks) && track.peaks.length
+    ? track.peaks
+    : null;
+
+  if (stored) return Promise.resolve(stored);
+
+  const peaksUrl = track?.peaksUrl;
+
+  if (
+    typeof window !== "undefined" &&
+    typeof fetch === "function" &&
+    peaksUrl
+  ) {
+    if (peaksJsonCache.has(peaksUrl)) {
+      return Promise.resolve(peaksJsonCache.get(peaksUrl));
+    }
+
+    if (peaksJsonPending.has(peaksUrl)) {
+      return peaksJsonPending.get(peaksUrl);
+    }
+
+    const promise = (async () => {
+      try {
+        const response = await fetch(peaksUrl);
+        if (!response.ok) throw new Error("HTTP");
+
+        const data = await response.json();
+        const parsed = Array.isArray(data?.peaks) ? data.peaks : null;
+        if (!parsed || !parsed.length) throw new Error("empty");
+
+        peaksJsonCache.set(peaksUrl, parsed);
+        return parsed;
+      } catch {
+        // Si el JSON falla (ej: track viejo), se calcula desde el audio.
+        return getPeaksForUrl(audioUrl, buckets);
+      } finally {
+        peaksJsonPending.delete(peaksUrl);
+      }
+    })();
+
+    peaksJsonPending.set(peaksUrl, promise);
+    return promise;
+  }
+
+  return getPeaksForUrl(audioUrl, buckets);
+}
+
 /**
  * Dibuja la forma de onda en un canvas con la parte reproducida resaltada.
  */

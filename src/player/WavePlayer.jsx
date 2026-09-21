@@ -6,7 +6,7 @@ import {
     useState,
 } from "react";
 import { PlayerContext } from "./PlayerContext.jsx";
-import { drawWaveform, formatTime, getPeaksForUrl } from "./waveform.js";
+import { drawWaveform, formatTime, getPeaksForTrack } from "./waveform.js";
 import "./wavePlayer.css";
 
 export default function WavePlayer({ className = "" }) {
@@ -49,23 +49,26 @@ export default function WavePlayer({ className = "" }) {
 
     useEffect(() => {
         setPeaks([]);
-        setPeaksLoading(false);
 
-        if (!audioUrl) return;
+        if (!audioUrl) {
+            setPeaksLoading(false);
+            return;
+        }
 
         let cancelled = false;
 
-        const peaksFromTrack = Array.isArray(currentTrack?.peaks)
+        const storedPeaks = Array.isArray(currentTrack?.peaks)
             ? currentTrack.peaks
             : null;
 
-        if (peaksFromTrack && peaksFromTrack.length) {
-            setPeaks(peaksFromTrack);
+        if (storedPeaks && storedPeaks.length) {
+            setPeaksLoading(false);
+            setPeaks(storedPeaks);
             return;
         }
 
         setPeaksLoading(true);
-        getPeaksForUrl(audioUrl).then((computed) => {
+        getPeaksForTrack(currentTrack).then((computed) => {
             if (cancelled) return;
             setPeaksLoading(false);
             if (computed && computed.length) setPeaks(computed);
