@@ -23,7 +23,6 @@ const normalizeTrackList = (value) => {
         bpm: Number(track?.bpm) || null,
         duracion: Number(track?.duracion) || 0,
         audioUrl: track?.audioUrl || "",
-        peaksUrl: track?.peaksUrl || "",
         peaks: Array.isArray(track?.peaks) ? track.peaks : [],
         autor: track?.autor || "",
     }));
@@ -61,24 +60,12 @@ export default function TrackUploader({ value, onChange, disabled = false }) {
             });
             const audioUrl = await getDownloadURL(storageRef);
 
-            // Se sube también un JSON con la forma de onda junto al audio, así el
-            // documento del producto en Firestore queda liviano (sin el array de peaks).
-            const peaksRef = ref(storage, `${storagePath}.json`);
-            await uploadBytes(
-                peaksRef,
-                new Blob([JSON.stringify({ peaks, duration })], {
-                    type: "application/json",
-                }),
-            );
-            const peaksUrl = await getDownloadURL(peaksRef);
-
             const next = items.map((track, i) =>
                 i === index
                     ? {
                           ...track,
                           audioUrl,
-                          peaksUrl,
-                          peaks: [],
+                          peaks,
                           duracion: duration,
                           titulo: track.titulo || stripExtension(file.name),
                       }
@@ -112,7 +99,7 @@ export default function TrackUploader({ value, onChange, disabled = false }) {
     const addTrack = () => {
         setItems([
             ...items,
-            { titulo: "", bpm: null, duracion: 0, audioUrl: "", peaksUrl: "", peaks: [], autor: "" },
+            { titulo: "", bpm: null, duracion: 0, audioUrl: "", peaks: [], autor: "" },
         ]);
     };
 
