@@ -1,4 +1,6 @@
-const DEFAULT_BUCKETS = 360;
+const DEFAULT_BUCKETS_PER_SECOND = 2.2;
+const MIN_BUCKETS = 240;
+const MAX_BUCKETS = 1600;
 
 let sharedAudioContext = null;
 
@@ -16,49 +18,70 @@ export function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function resolveBuckets(audioBuffer, buckets) {
+  if (buckets && Number.isFinite(buckets) && buckets > 0) {
+    return buckets;
+  }
+  const duration = audioBuffer ? audioBuffer.duration : 218;
+  return clamp(
+    Math.round(duration * DEFAULT_BUCKETS_PER_SECOND),
+    MIN_BUCKETS,
+    MAX_BUCKETS,
+  );
+}
+
 /**
- * Genera un array de picos de amplitud (0..1) a partir de un AudioBuffer.
- * Es la forma de onda "estática" que se usa para reconocer el track.
+ * Genera un array de amplitudes (0..1) a partir de un AudioBuffer.
+ * Usa una mezcla RMS + pico por barra para conservar la dinámica real
+ * del track (intros, breaks, construcciones y drops se distinguen bien),
+ * y adapta la cantidad de barras a la duración del audio.
  */
-export function createPeaksFromBuffer(audioBuffer, buckets = DEFAULT_BUCKETS) {
+export function createPeaksFromBuffer(audioBuffer, buckets) {
   if (!audioBuffer) return [];
 
-  const channelDataArray = [];
-  for (let ch = 0; ch < audioBuffer.numberOfChannels; ch += 1) {
-    channelDataArray.push(audioBuffer.getChannelData(ch));
-  }
-
+  const count = resolveBuckets(audioBuffer, buckets);
+  const channelCount = audioBuffer.numberOfChannels;
   const totalSamples = audioBuffer.length;
-  const samplesPerBucket = Math.max(1, Math.floor(totalSamples / buckets));
 
-  const peaks = new Array(buckets).fill(0);
+  const sumSquares = new Array(count).fill(0);
+  const peaks = new Array(count).fill(0);
+  const counts = new Array(count).fill(0);
 
-  for (let i = 0; i < buckets; i += 1) {
-    const start = i * samplesPerBucket;
-    const end = Math.min(totalSamples, start + samplesPerBucket);
-
-    let bucketMax = 0;
-    for (let s = start; s < end; s += 1) {
-      let sampleAbs = 0;
-      for (let c = 0; c < channelDataArray.length; c += 1) {
-        const value = Math.abs(channelDataArray[c][s]);
-        if (value > sampleAbs) sampleAbs = value;
-      }
-      if (sampleAbs > bucketMax) bucketMax = sampleAbs;
+  for (let s = 0; s < totalSamples; s += 1) {
+    let sq = 0;
+    let bucketPeak = 0;
+    for (let c = 0; c < channelCount; c += 1) {
+      const value = audioBuffer.getChannelData(c)[s];
+      sq += value * value;
+      const abs = Math.abs(value);
+      if (abs > bucketPeak) bucketPeak = abs;
     }
 
-    peaks[i] = Math.sqrt(bucketMax);
+    const i = Math.min(count - 1, Math.floor((s / totalSamples) * count));
+    sumSquares[i] += sq / channelCount;
+    if (bucketPeak > peaks[i]) peaks[i] = bucketPeak;
+    counts[i] += 1;
+  }
+
+  const raw = new Array(count);
+  for (let i = 0; i < count; i += 1) {
+    const samples = Math.max(1, counts[i]);
+    const rms = Math.sqrt(sumSquares[i] / samples);
+    // RMS amplificado para que se vea el "cuerpo" del tema, combinandolo
+    // con el pico para que los beats/drops mantengan definición.
+    const rmsVisible = Math.min(1, rms * 1.8);
+    raw[i] = Math.min(1, 0.55 * rmsVisible + 0.45 * peaks[i]);
   }
 
   let globalMax = 0;
-  for (let i = 0; i < peaks.length; i += 1) {
-    if (peaks[i] > globalMax) globalMax = peaks[i];
+  for (let i = 0; i < raw.length; i += 1) {
+    if (raw[i] > globalMax) globalMax = raw[i];
   }
 
-  const normalized = peaks.map((value) => {
+  const normalized = raw.map((value) => {
     const v = globalMax > 0 ? value / globalMax : 0;
-    const boosted = Math.min(1, Math.max(0.04, Math.pow(v, 0.8)));
-    return Math.round(boosted * 1000) / 1000;
+    const floored = Math.max(0.015, v);
+    return Math.round(floored * 1000) / 1000;
   });
 
   // Suavizado pequeño para evitar cortes bruscos entre buckets
@@ -75,7 +98,7 @@ export function createPeaksFromBuffer(audioBuffer, buckets = DEFAULT_BUCKETS) {
 /**
  * Calcula peaks + duración a partir de un File (usado en el admin al subir audio).
  */
-export async function computePeaksFromFile(file, buckets = DEFAULT_BUCKETS) {
+export async function computePeaksFromFile(file) {
   const context = getAudioContext();
   if (!context) {
     throw new Error("Web Audio API no disponible en este navegador");
@@ -85,7 +108,7 @@ export async function computePeaksFromFile(file, buckets = DEFAULT_BUCKETS) {
   const audioBuffer = await context.decodeAudioData(arrayBuffer);
 
   return {
-    peaks: createPeaksFromBuffer(audioBuffer, buckets),
+    peaks: createPeaksFromBuffer(audioBuffer),
     duration: audioBuffer.duration,
   };
 }
@@ -97,7 +120,7 @@ const peaksUrlPending = new Map();
  * Obtiene (y cachea) los peaks de una URL de audio. Útil cuando un track
  * se cargó sin peaks (ej: subido por script) - se calculan bajo demanda.
  */
-export function getPeaksForUrl(url, buckets = DEFAULT_BUCKETS) {
+export function getPeaksForUrl(url, buckets) {
   if (typeof window === "undefined" || typeof fetch !== "function") {
     return Promise.resolve(null);
   }
