@@ -19,6 +19,7 @@ import Spinner from "./Spinner";
 import YouTubePopup from "./YouTubePopup";
 import WavePlayer from "../player/WavePlayer";
 import { attachCatalogMeta, getCatalogConfig } from "../utils/catalog";
+import { fixUrl } from "../utils/imageUrl";
 
 import "../styles/ProductList.css";
 
@@ -569,7 +570,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
 
               name: producto.titulo,
 
-              image: producto.imagen ? [producto.imagen] : [],
+              image: producto.imagen ? [fixUrl(producto.imagen)] : [],
 
               description: `${producto.descripcion || ""} ${producto.estilo || ""}`,
 

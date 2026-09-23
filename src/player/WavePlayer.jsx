@@ -7,6 +7,7 @@ import {
 } from "react";
 import { PlayerContext } from "./PlayerContext.jsx";
 import { drawWaveform, formatTime, getPeaksForTrack } from "./waveform.js";
+import { fixUrl } from "../utils/imageUrl";
 import "./wavePlayer.css";
 
 export default function WavePlayer({ className = "" }) {
@@ -227,7 +228,7 @@ export default function WavePlayer({ className = "" }) {
             <div className="waveplayer__disc" aria-hidden="true">
                 {currentTrack?.imagen || vinylMeta?.imagen ? (
                     <img
-                        src={currentTrack?.imagen || vinylMeta?.imagen}
+                        src={fixUrl(currentTrack?.imagen || vinylMeta?.imagen)}
                         alt={currentTrack?.titulo || vinylMeta?.titulo || "Track"}
                         className={`waveplayer__disc-img ${isActivePlaying ? "waveplayer__disc-img--spin" : ""}`}
                     />

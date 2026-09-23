@@ -5,6 +5,7 @@ import {
   getProductCollectionName,
   isCollectionIncludedInCheckout,
 } from "../utils/catalog";
+import { fixUrl } from "../utils/imageUrl";
 
 import "../styles/CartPopupButton.css";
 
@@ -93,7 +94,7 @@ export default function CartPopupButton({
               <div key={item.cartKey || getCartItemKey(item)} className="cart-item">
                 {item?.imagen ? (
                   <img
-                    src={item.imagen}
+                    src={fixUrl(item.imagen)}
                     alt={item?.titulo || "Producto sin nombre"}
                     className="cart-item-image"
                   />

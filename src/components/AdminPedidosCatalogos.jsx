@@ -14,6 +14,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase/config";
 import { normalizarFecha } from "../utils/fechas";
+import { fixUrl } from "../utils/imageUrl";
 import "../styles/adminPedidosCatalogos.css";
 
 function mapPedidoDoc(doc, collectionName) {
@@ -151,7 +152,7 @@ function PedidoCard({ pedido, onCancel, cancelando }) {
                 {pedido.productos?.map((prod, idx) => (
                     <div key={`${pedido.uniqueId}-${idx}`} className="apc-producto-row">
                         {prod.imagen && (
-                            <img src={prod.imagen} alt={prod.titulo} className="apc-producto-imagen" />
+                            <img src={fixUrl(prod.imagen)} alt={prod.titulo} className="apc-producto-imagen" />
                         )}
                         <div className="apc-producto-info">
                             <div className="apc-producto-titulo-autor">

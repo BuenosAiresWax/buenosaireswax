@@ -17,6 +17,7 @@ import {
   getProductPricing,
   isNewInProduct,
 } from "../utils/catalog";
+import { fixUrl, resolveProductImage } from "../utils/imageUrl";
 
 import "../styles/ProductPage.css";
 
@@ -94,7 +95,7 @@ function ProductPage({ catalogKey = "drop" }) {
         sku: id,
         url: productUrl,
         name: producto.titulo,
-        image: producto.imagen ? [producto.imagen] : [],
+        image: producto.imagen ? [fixUrl(producto.imagen)] : [],
         description: producto.descripcion,
         brand: {
           "@type": "Brand",
@@ -272,7 +273,7 @@ function ProductPage({ catalogKey = "drop" }) {
         {/* LEFT - IMAGEN */}
         <div className="detail-left">
           <img
-            src={producto.imagen}
+            src={resolveProductImage(producto.imagen)}
             alt={producto.titulo}
             className="detail-image"
           />

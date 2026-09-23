@@ -1,6 +1,7 @@
 import { useContext, useMemo } from "react";
 import { PlayerContext } from "../player/PlayerContext.jsx";
 import { formatTime } from "../player/waveform.js";
+import { fixUrl } from "../utils/imageUrl";
 import "./vinylPlayer.css";
 
 const normalizeTracks = (trackList) => {
@@ -42,7 +43,7 @@ export default function VinylPlayer({ producto }) {
     const vinylMeta = {
         titulo: producto?.titulo || "",
         autor: producto?.autor || "",
-        imagen: producto?.imagen || "",
+        imagen: fixUrl(producto?.imagen || ""),
         sello: producto?.sello || "",
     };
 

@@ -10,6 +10,7 @@ import {
   getProductCollectionName,
   isCollectionIncludedInCheckout,
 } from "../utils/catalog";
+import { resolveProductImage } from "../utils/imageUrl";
 import "../styles/PurchaseModal.css";
 
 function PurchaseModal({ onClose, catalogKey = "drop" }) {
@@ -567,7 +568,7 @@ ${
                           className={`cart-item ${productosAgotados.includes(getCartItemKey(item)) ? "agotado" : ""}`}
                         >
                           <div className="cart-item__main">
-                            <img className="cart-item__img" src={item.imagen} alt={item?.titulo || ""} />
+                            <img className="cart-item__img" src={resolveProductImage(item.imagen)} alt={item?.titulo || ""} />
                             <div className="cart-item__details">
                               <span className="cart-item__title">{item?.titulo || "Producto sin nombre"}</span>
                               <div className="cart-item__meta">
