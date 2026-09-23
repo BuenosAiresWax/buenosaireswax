@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import useSoundCloudScript from "./useSoundCloudScript";
 import { PlayerContext } from "./PlayerContext.jsx";
+import { fixUrl } from "../utils/imageUrl";
 import "./playerBar.css";
 
 /**
@@ -276,7 +277,7 @@ export default function PlayerBar({ className = "" }) {
                 <div className="playerbar__thumbnail">
                     {hasPlayableTrack && currentTrackMetadata?.imagen ? (
                         <img 
-                            src={currentTrackMetadata.imagen} 
+                            src={fixUrl(currentTrackMetadata.imagen)} 
                             alt={currentTrackMetadata.titulo || "Track"}
                             className="playerbar__image"
                         />

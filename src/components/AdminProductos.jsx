@@ -3,6 +3,7 @@ import { doc, updateDoc, deleteDoc, writeBatch } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../firebase/config";
 import { useAdminData } from "../context/AdminDataContext";
+import { fixUrl } from "../utils/imageUrl";
 
 import "../styles/adminProductos.css";
 import "../styles/admin.css";
@@ -480,7 +481,7 @@ export default function ProductosAdmin() {
                                 <div className="producto-top">
                                     {producto.imagen ? (
                                         <img
-                                            src={producto.imagen}
+                                            src={fixUrl(producto.imagen)}
                                             alt={producto.titulo}
                                             className="producto-imagen"
                                         />
@@ -565,7 +566,7 @@ export default function ProductosAdmin() {
                                                 {formData.imagen && (
                                                     <p>
                                                         <strong>URL actual:</strong>{" "}
-                                                        <a href={formData.imagen} target="_blank" rel="noreferrer">
+                                                        <a href={fixUrl(formData.imagen)} target="_blank" rel="noreferrer">
                                                             Abrir imagen
                                                         </a>
                                                     </p>
@@ -669,7 +670,7 @@ export default function ProductosAdmin() {
                                                 <p>
                                                     <strong>Imagen:</strong>{" "}
                                                     {producto.imagen ? (
-                                                        <a href={producto.imagen} target="_blank" rel="noreferrer">
+                                                        <a href={fixUrl(producto.imagen)} target="_blank" rel="noreferrer">
                                                             Ver URL de imagen
                                                         </a>
                                                     ) : (

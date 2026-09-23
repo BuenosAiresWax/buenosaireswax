@@ -15,6 +15,7 @@ import {
   getProductPricing,
   isNewInProduct,
 } from "../utils/catalog";
+import { fixUrl, resolveProductImage } from "../utils/imageUrl";
 
 const LIST_SCROLL_STORAGE_KEY = "bawax:product-list-scroll";
 
@@ -154,7 +155,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
     <div className="product-card" onClick={handleCardClick}>
       <div className="image">
         <img
-          src={producto.imagen}
+          src={resolveProductImage(producto.imagen)}
           alt={producto.titulo}
           className={stockDisponible <= 0 ? "agotadoImagen" : ""}
         />
@@ -171,7 +172,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
               setTrack(normalizedEscuchaUrl, true, {
                 titulo: producto.titulo,
                 autor: producto.autor,
-                imagen: producto.imagen,
+                imagen: fixUrl(producto.imagen),
                 sello: producto.sello,
               });
             }}
@@ -267,7 +268,7 @@ function ProductItem({ producto: productoProp, mostrarMensaje }) {
                 setTrack(normalizedEscuchaUrl, true, {
                   titulo: producto.titulo,
                   autor: producto.autor,
-                  imagen: producto.imagen,
+                  imagen: fixUrl(producto.imagen),
                   sello: producto.sello,
                 });
               }}
