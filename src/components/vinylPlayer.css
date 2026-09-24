@@ -10,7 +10,7 @@
 }
 
 .vinyl-player__tracklist h4 {
-  margin-bottom: 10px;
+  margin-bottom: 0;
   border-bottom: 1px solid #333;
   padding-bottom: 5px;
 }
@@ -32,7 +32,7 @@
   gap: 12px;
   padding: 10px 6px;
   border: none;
-  border-bottom: 1px solid #222;
+  border-bottom: 1px solid #333;
   background: transparent;
   color: var(--color-letra);
   font-size: 14px;

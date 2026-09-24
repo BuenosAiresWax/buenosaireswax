@@ -284,8 +284,10 @@ function ProductPage({ catalogKey = "drop" }) {
 
         {/* CENTER - INFO */}
         <div className="detail-center">
-          <h1 className="detail-title">{producto.titulo}</h1>
-          <h3 className="detail-artist">{producto.autor}</h3>
+          <div className="detail-heading">
+            <h1 className="detail-title">{producto.titulo}</h1>
+            <h3 className="detail-artist">{producto.autor}</h3>
+          </div>
 
           {/* VINYL PLAYER (waveform + tracklist) */}
           {canPlayProduct && <VinylPlayer producto={producto} />}

@@ -13,6 +13,8 @@ import "./wavePlayer.css";
 export default function WavePlayer({ className = "" }) {
     const player = useContext(PlayerContext);
     const {
+        tracks,
+        currentTrackIndex,
         currentTrack,
         vinylMeta,
         isPlaying,
@@ -25,6 +27,7 @@ export default function WavePlayer({ className = "" }) {
         seek,
         goNext,
         goPrev,
+        setTrackIndex,
         canGoNext,
         canGoPrev,
     } = player;
@@ -266,36 +269,66 @@ export default function WavePlayer({ className = "" }) {
                     </div>
 
                     <div className="waveplayer__metrics">
-                        {hasBpm && (
-                            <div
-                                className={`waveplayer__bpm ${isActivePlaying ? "waveplayer__bpm--live" : ""}`}
-                            >
-                                <span className="waveplayer__bpm-dot" />
-                                <span className="waveplayer__bpm-value">
-                                    {Math.round(bpm)}
-                                </span>
-                                <span className="waveplayer__bpm-label">BPM</span>
+                        {tracks.length > 0 && (
+                            <div className="waveplayer__track-picker">
+                                <select
+                                    className="waveplayer__track-select"
+                                    value={currentTrackIndex >= 0 ? currentTrackIndex : ""}
+                                    disabled={!!error}
+                                    onChange={(event) => {
+                                        const index = Number(event.target.value);
+                                        if (Number.isInteger(index) && index >= 0) {
+                                            setTrackIndex(index, true);
+                                        }
+                                    }}
+                                    title="Cambiar de track"
+                                    aria-label="Cambiar de track"
+                                >
+                                    {currentTrackIndex < 0 && (
+                                        <option value="" disabled>
+                                            Elegir track
+                                        </option>
+                                    )}
+                                    {tracks.map((track, index) => (
+                                        <option key={index} value={index}>
+                                            {track.titulo || `Track ${index + 1}`}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         )}
-                        {hasMetric && (
-                            <div className="waveplayer__time">
-                                <span>{formatTime(playheadRef.current)}</span>
-                                <span className="waveplayer__time-sep">/</span>
-                                <span>{formatTime(duration)}</span>
-                            </div>
-                        )}
-                    </div>
+                        <div className="waveplayer__side">
+                            {hasBpm && (
+                                <div
+                                    className={`waveplayer__bpm ${isActivePlaying ? "waveplayer__bpm--live" : ""}`}
+                                >
+                                    <span className="waveplayer__bpm-dot" />
+                                    <span className="waveplayer__bpm-value">
+                                        {Math.round(bpm)}
+                                    </span>
+                                    <span className="waveplayer__bpm-label">BPM</span>
+                                </div>
+                            )}
+                            {hasMetric && (
+                                <div className="waveplayer__time">
+                                    <span>{formatTime(playheadRef.current)}</span>
+                                    <span className="waveplayer__time-sep">/</span>
+                                    <span>{formatTime(duration)}</span>
+                                </div>
+                            )}
+</div>
                 </div>
+            </div>
 
-                <div
-                    ref={waveWrapRef}
-                    className={`waveplayer__wave-wrap ${!currentTrack ? "waveplayer__wave-wrap--empty" : ""}`}
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerCancel={handlePointerUp}
-                    onPointerLeave={handlePointerLeave}
-                >
+                    <div
+                        ref={waveWrapRef}
+                        className={`waveplayer__wave-wrap ${!currentTrack ? "waveplayer__wave-wrap--empty" : ""}`}
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
+                        onPointerLeave={handlePointerLeave}
+                    >
                     <canvas ref={canvasRef} className="waveplayer__wave-canvas" />
 
                     {hoverTime !== null && (

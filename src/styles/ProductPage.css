@@ -54,15 +54,22 @@
 }
 
 /* CENTER */
+.detail-heading {
+  display: flex;
+  flex-direction: column;
+}
+
 .detail-title {
   font-size: 28px;
   margin-top: 0;
-  margin-bottom: 5px;
+  margin-bottom: 20px;
+  order: 1;
 }
 
 .detail-artist {
   color: #aaa;
-  margin-bottom: 20px;
+  margin: 0 0 6px;
+  order: -1;
 }
 
 .detail-sale-badge {
@@ -343,6 +350,14 @@
   .breadcrumb {
     margin-top: 2rem;
     margin-bottom: 0;
+  }
+
+  .detail-heading {
+    display: block;
+  }
+
+  .detail-title {
+    margin-bottom: 5px;
   }
 
   .detail-artist {
