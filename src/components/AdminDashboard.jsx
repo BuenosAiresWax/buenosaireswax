@@ -10,6 +10,7 @@ import AdminProductos from "./AdminProductos";
 import AdminProductoNuevo from "./AdminProductoNuevo";
 import AdminOverview from "./AdminOverview";
 import AdminVinylClub from "./AdminVinylClub";
+import AdminSiteFeatures from "./AdminSiteFeatures";
 
 import "../styles/adminDashboard.css";
 
@@ -73,6 +74,14 @@ function AdminDashboardContent() {
                     </button>
 
                     <button
+                        className={`tab-btn ${activeTab === "Sitio" ? "active-tab" : ""}`}
+                        onClick={() => setActiveTab("Sitio")}
+                    >
+                        <span className="tab-icon">🌐</span>
+                        <span>Sitio</span>
+                    </button>
+
+                    <button
                         className="tab-btn tab-btn-realtime"
                         onClick={() => navigate("/admin/pedidos-catalogos")}
                     >
@@ -93,6 +102,7 @@ function AdminDashboardContent() {
                 {activeTab === "Productos" && <AdminProductos />}
                 {activeTab === "CrearProducto" && <AdminProductoNuevo onNuevo={refetch} />}
                 {activeTab === "VinylClub" && <AdminVinylClub />}
+                {activeTab === "Sitio" && <AdminSiteFeatures />}
             </div>
         </div>
     );

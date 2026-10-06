@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import PlayerBar from "../player/PlayerBar";
 import { isDropAccessWindowActive } from "../utils/dropSchedule";
+import { useSiteFeatures } from "../context/SiteFeaturesContext";
 
 import logo from "../../assets/logo/header-logo.png";
 
@@ -16,13 +17,14 @@ function hasValidAccess() {
 
 function AppLayout() {
   const location = useLocation();
+  const { features } = useSiteFeatures();
   const [autenticado, setAutenticado] = useState(() => hasValidAccess());
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
 
   const navItems = [
-    { to: "/drop", label: "Próximo Drop" },
+    ...(features.drop ? [{ to: "/drop", label: "Próximo Drop" }] : []),
     { to: "/tienda", label: "Tienda de Vinilos" },
     { to: "/club", label: "BAWAX CLUB" },
   ];
@@ -100,7 +102,10 @@ function AppLayout() {
   }, []);
 
   const isDropAccessActive =
-    location.pathname === "/" && !autenticado && isDropAccessWindowActive();
+    features.drop &&
+    location.pathname === "/" &&
+    !autenticado &&
+    isDropAccessWindowActive();
   const isEquipamientoRoute =
     location.pathname === "/equipamiento" ||
     location.pathname.startsWith("/equipamiento/");

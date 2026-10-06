@@ -9,6 +9,7 @@ import HeroSlider from "./components/HeroSlider";
 import CatalogPage from "./components/CatalogPage";
 import CatalogAccessGate from "./components/CatalogAccessGate";
 import { DROP_DATE, isDropAccessWindowActive, parseDropDate } from "./utils/dropSchedule";
+import { useSiteFeatures } from "./context/SiteFeaturesContext";
 
 import "./styles/styles.css";
 
@@ -22,6 +23,7 @@ const ACCESS_VERSION = import.meta.env.VITE_ACCESS_VERSION;
 ================================ */
 
 function App({ forceDrop = false }) {
+  const { features } = useSiteFeatures();
   const [autenticado, setAutenticado] = useState(() => {
     const isAuth = localStorage.getItem("autenticado") === "true";
     const savedVersion = localStorage.getItem("accessVersion");
@@ -62,6 +64,58 @@ function App({ forceDrop = false }) {
     const endDate = dropDate
       ? new Date(dropDate.getTime() + 28 * 24 * 60 * 60 * 1000).toISOString()
       : undefined;
+
+    const dropSchemas = features.drop
+      ? [
+          {
+            "@context": "https://schema.org",
+            "@type": "Event",
+            "@id": `${baseUrl}/#vinyl-drop`,
+            name: `BAWAX Vinyl Drop – ${dropMonth}`,
+            description:
+              "Nuevo drop mensual de discos de vinilo en Buenos Aires Wax. Ediciones seleccionadas para DJs y coleccionistas. Acceso exclusivo anticipado.",
+            startDate,
+            endDate,
+            eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+            eventStatus: "https://schema.org/EventScheduled",
+            location: {
+              "@type": "VirtualLocation",
+              url: baseUrl,
+            },
+            organizer: {
+              "@id": `${baseUrl}/#organization`,
+            },
+            performer: {
+              "@type": "Organization",
+              name: "Varios artistas y sellos",
+            },
+            offers: {
+              "@type": "Offer",
+              url: baseUrl,
+              price: "0",
+              priceCurrency: "ARS",
+              availability: "https://schema.org/OnlineOnly",
+              validFrom: startDate,
+            },
+            image: [`${baseUrl}/social-preview.jpg`],
+          },
+
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "@id": `${baseUrl}/#drop-list`,
+            name: `BAWAX Vinyl Drop – ${dropMonth}`,
+            description: "Listado de discos disponibles en el drop.",
+            itemListOrder: "https://schema.org/ItemListUnordered",
+            numberOfItems: productos.length,
+            itemListElement: productos.map((producto, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: producto.nombre || "Vinyl Record",
+            })),
+          },
+        ]
+      : [];
 
     const schema = [
       {
@@ -117,53 +171,7 @@ function App({ forceDrop = false }) {
         },
       },
 
-      {
-        "@context": "https://schema.org",
-        "@type": "Event",
-        "@id": `${baseUrl}/#vinyl-drop`,
-        name: `BAWAX Vinyl Drop – ${dropMonth}`,
-        description:
-          "Nuevo drop mensual de discos de vinilo en Buenos Aires Wax. Ediciones seleccionadas para DJs y coleccionistas. Acceso exclusivo anticipado.",
-        startDate,
-        endDate,
-        eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
-        eventStatus: "https://schema.org/EventScheduled",
-        location: {
-          "@type": "VirtualLocation",
-          url: baseUrl,
-        },
-        organizer: {
-          "@id": `${baseUrl}/#organization`,
-        },
-        performer: {
-          "@type": "Organization",
-          name: "Varios artistas y sellos",
-        },
-        offers: {
-          "@type": "Offer",
-          url: baseUrl,
-          price: "0",
-          priceCurrency: "ARS",
-          availability: "https://schema.org/OnlineOnly",
-          validFrom: startDate,
-        },
-        image: [`${baseUrl}/social-preview.jpg`],
-      },
-
-      {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        "@id": `${baseUrl}/#drop-list`,
-        name: `BAWAX Vinyl Drop – ${dropMonth}`,
-        description: "Listado de discos disponibles en el drop.",
-        itemListOrder: "https://schema.org/ItemListUnordered",
-        numberOfItems: productos.length,
-        itemListElement: productos.map((producto, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          name: producto.nombre || "Vinyl Record",
-        })),
-      },
+      ...dropSchemas,
     ];
 
     const script = document.createElement("script");
@@ -175,7 +183,7 @@ function App({ forceDrop = false }) {
     return () => {
       document.head.removeChild(script);
     };
-  }, [productos]);
+  }, [productos, features.drop]);
 
   /* --------------------------------
      FIREBASE PRODUCTS
@@ -203,6 +211,22 @@ function App({ forceDrop = false }) {
     localStorage.setItem("accessVersion", ACCESS_VERSION);
     window.dispatchEvent(new Event("bawax-auth-changed"));
   };
+
+  if (!features.drop) {
+    return (
+      <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
+        <CatalogPage catalogKey="tienda" />
+        <CartPopupButton
+          onOpen={() => setMostrarModal(true)}
+          catalogKey="tienda"
+          isHidden={mostrarModal}
+        />
+        {mostrarModal && (
+          <PurchaseModal onClose={() => setMostrarModal(false)} catalogKey="tienda" />
+        )}
+      </CatalogAccessGate>
+    );
+  }
 
   if (!forceDrop) {
     if (!ventanaDropActiva) {

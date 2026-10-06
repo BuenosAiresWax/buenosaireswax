@@ -19,6 +19,7 @@ import Spinner from "./Spinner";
 import YouTubePopup from "./YouTubePopup";
 import PlayerBar from "../player/PlayerBar";
 import { attachCatalogMeta, getCatalogConfig } from "../utils/catalog";
+import { useSiteFeatures } from "../context/SiteFeaturesContext";
 import { fixUrl } from "../utils/imageUrl";
 
 import "../styles/ProductList.css";
@@ -90,6 +91,7 @@ const getSavedFilters = (storageKey) => {
 
 const ProductList = ({ catalogKey = "drop" }) => {
   const { cartItems } = useContext(CartContext);
+  const { features } = useSiteFeatures();
   const location = useLocation();
   const navigationType = useNavigationType();
   const catalog = useMemo(() => getCatalogConfig(catalogKey), [catalogKey]);
@@ -944,7 +946,7 @@ const ProductList = ({ catalogKey = "drop" }) => {
 
       <Notificacion mensaje={mensaje} visible={visible} />
 
-      <YouTubePopup />
+      {features.youtubePopup && <YouTubePopup />}
 
       {isLoadingMore && (
         <div style={{ padding: "2rem", textAlign: "center" }}>

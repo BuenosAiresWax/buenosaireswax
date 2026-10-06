@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Hero from "./Hero";
 import HeroYoutube from "./HeroYoutube";
+import { useSiteFeatures } from "../context/SiteFeaturesContext";
 import "../styles/HeroSlider.css";
-
-const slides = [<Hero key="1" />, <HeroYoutube key="2" />];
 
 const SWIPE_THRESHOLD = 50; // px mínimo para considerar swipe
 const SLIDE_DURATION = 8000; // duración slide en ms
 
 const HeroSlider = () => {
+    const { features } = useSiteFeatures();
     const [current, setCurrent] = useState(0);
     const [progress, setProgress] = useState(0);
     const timeoutRef = useRef(null);
@@ -17,6 +17,17 @@ const HeroSlider = () => {
     const startX = useRef(null);
     const isDragging = useRef(false);
     const startTime = useRef(null);
+
+    const slides = useMemo(
+        () =>
+            features.youtubeBanner
+                ? [<Hero key="1" />, <HeroYoutube key="2" />]
+                : [<Hero key="1" />],
+        [features.youtubeBanner],
+    );
+
+    const safeLength = Math.max(slides.length, 1);
+    const activeIndex = current % safeLength;
 
     useEffect(() => {
         startAutoPlay();
@@ -33,7 +44,7 @@ const HeroSlider = () => {
         animateProgress();
 
         timeoutRef.current = setTimeout(() => {
-            setCurrent((prev) => (prev + 1) % slides.length);
+            setCurrent((prev) => (prev + 1) % safeLength);
         }, SLIDE_DURATION);
     };
 
@@ -65,9 +76,9 @@ const HeroSlider = () => {
         const diffX = endX - startX.current;
 
         if (diffX > SWIPE_THRESHOLD) {
-            setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+            setCurrent((prev) => (prev === 0 ? safeLength - 1 : prev - 1));
         } else if (diffX < -SWIPE_THRESHOLD) {
-            setCurrent((prev) => (prev + 1) % slides.length);
+            setCurrent((prev) => (prev + 1) % safeLength);
         }
         isDragging.current = false;
     };
@@ -86,19 +97,21 @@ const HeroSlider = () => {
             }}
         >
             {slides.map((slide, i) => (
-                <div key={i} className={`slide ${i === current ? "active" : ""}`}>
+                <div key={i} className={`slide ${i === activeIndex ? "active" : ""}`}>
                     {slide}
                 </div>
             ))}
 
-            <div className="progress-bar-container-position">
-                <div className="progress-bar-container">
-                    <div
-                        className="progress-bar"
-                        style={{ transform: `scaleX(${progress})` }}
-                    />
+            {slides.length > 1 && (
+                <div className="progress-bar-container-position">
+                    <div className="progress-bar-container">
+                        <div
+                            className="progress-bar"
+                            style={{ transform: `scaleX(${progress})` }}
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

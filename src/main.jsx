@@ -5,6 +5,8 @@ import "./index.css";
 import App from "./App.jsx";
 import { CartProvider } from "./context/CartContext";
 import { PlayerProvider } from "./player/PlayerContext.jsx"; // <-- NUEVO
+import { SiteFeaturesProvider } from "./context/SiteFeaturesContext";
+import DropGate from "./components/DropGate.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import AdminPedidosRealtimeRoute from "./components/AdminPedidosRealtimeRoute.jsx";
 import AdminVinylClubRoute from "./components/AdminVinylClubRoute.jsx";
@@ -18,41 +20,57 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <CartProvider>
       <PlayerProvider>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<AppLayout />}>
-              <Route index element={<App />} />
-              <Route path="drop" element={<App forceDrop />} />
-              <Route path="producto/:id" element={<ProductPage catalogKey="drop" />} />
+        <SiteFeaturesProvider>
+          <HashRouter>
+            <Routes>
+              <Route path="/" element={<AppLayout />}>
+                <Route index element={<App />} />
+                <Route
+                  path="drop"
+                  element={
+                    <DropGate>
+                      <App forceDrop />
+                    </DropGate>
+                  }
+                />
+                <Route
+                  path="producto/:id"
+                  element={
+                    <DropGate>
+                      <ProductPage catalogKey="drop" />
+                    </DropGate>
+                  }
+                />
+                <Route
+                  path="tienda"
+                  element={
+                    <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
+                      <CatalogPage catalogKey="tienda" />
+                    </CatalogAccessGate>
+                  }
+                />
+                <Route
+                  path="tienda/producto/:id"
+                  element={
+                    <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
+                      <ProductPage catalogKey="tienda" />
+                    </CatalogAccessGate>
+                  }
+                />
+                <Route path="club" element={<VinylClubPage />} />
+              </Route>
+              <Route path="/admin" element={<AdminRoute />} />
               <Route
-                path="tienda"
-                element={
-                  <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
-                    <CatalogPage catalogKey="tienda" />
-                  </CatalogAccessGate>
-                }
+                path="/admin/pedidos-catalogos"
+                element={<AdminPedidosRealtimeRoute />}
               />
               <Route
-                path="tienda/producto/:id"
-                element={
-                  <CatalogAccessGate sectionKey="tienda" sectionLabel="Tienda de Vinilos">
-                    <ProductPage catalogKey="tienda" />
-                  </CatalogAccessGate>
-                }
+                path="/admin/club"
+                element={<AdminVinylClubRoute />}
               />
-              <Route path="club" element={<VinylClubPage />} />
-            </Route>
-            <Route path="/admin" element={<AdminRoute />} />
-            <Route
-              path="/admin/pedidos-catalogos"
-              element={<AdminPedidosRealtimeRoute />}
-            />
-            <Route
-              path="/admin/club"
-              element={<AdminVinylClubRoute />}
-            />
-          </Routes>
-        </HashRouter>
+            </Routes>
+          </HashRouter>
+        </SiteFeaturesProvider>
       </PlayerProvider>
     </CartProvider>
   </StrictMode>,
