@@ -16,7 +16,7 @@ import "../styles/adminDashboard.css";
 
 // Wrapper para poder usar el contexto dentro de AdminProductoNuevo
 function AdminDashboardContent() {
-    const { refetch } = useAdminData(); // ⬅ obtenemos refetch del contexto
+    const { refetch } = useAdminData();
     const auth = getAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("Overview");

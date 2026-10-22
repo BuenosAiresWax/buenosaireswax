@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSiteFeatures } from "../context/SiteFeaturesContext";
 
 import "../styles/adminSiteFeatures.css";
@@ -17,6 +17,7 @@ const FEATURES = [
     title: "Banner de YouTube",
     description:
       "Muestra el segundo slide de YouTube dentro del slider principal (home y tienda).",
+    extra: true,
   },
   {
     key: "youtubePopup",
@@ -24,14 +25,18 @@ const FEATURES = [
     title: "Popup de YouTube",
     description:
       "Muestra el video emergente de YouTube sobre el listado de productos (tienda y drop).",
+    extra: true,
   },
 ];
 
 export default function AdminSiteFeatures() {
   const { features, initialized, saveError, clearSaveError, setFeature } =
     useSiteFeatures();
+  const [localFeatures, setLocalFeatures] = useState(features);
   const [savingKey, setSavingKey] = useState(null);
   const [savedKey, setSavedKey] = useState(null);
+
+  const setFeatures = setLocalFeatures;
 
   const handleToggle = async (key, value) => {
     setSavingKey(key);
@@ -46,9 +51,41 @@ export default function AdminSiteFeatures() {
       setSavedKey(key);
       window.setTimeout(() => {
         setSavedKey((prev) => (prev === key ? null : prev));
-      }, 2500);
+      }, 2000);
     }
   };
+
+  const handleChange = async (key, value) => {
+    setSavingKey(key);
+    setSavedKey(null);
+    clearSaveError();
+    const ok = await setFeature(key, value);
+    setSavingKey(null);
+    if (ok) {
+      setSavedKey(key);
+      window.setTimeout(() => {
+        setSavedKey((prev) => (prev === key ? null : prev));
+      }, 2000);
+    }
+  };
+
+  const handleSaveExtra = async (key) => {
+    setSavingKey(key);
+    setSavedKey(null);
+    clearSaveError();
+    const ok = await setFeature(key, features[key]);
+    setSavingKey(null);
+    if (ok) {
+      setSavedKey(key);
+      window.setTimeout(() => {
+        setSavedKey((prev) => (prev === key ? null : prev));
+      }, 2000);
+    }
+  };
+
+  useEffect(() => {
+    setLocalFeatures(features);
+  }, [features]);
 
   if (!initialized) {
     return (
@@ -72,9 +109,10 @@ export default function AdminSiteFeatures() {
 
       <div className="sf-list">
         {FEATURES.map((feature) => {
-          const activo = Boolean(features[feature.key]);
-          const guardando = savingKey === feature.key;
-          const guardado = savedKey === feature.key;
+  const data = localFeatures || features;
+  const activo = Boolean(data[feature.key]);
+  const guardando = savingKey === feature.key;
+  const guardado = savedKey === feature.key;
 
           return (
             <div className="sf-item" key={feature.key}>
@@ -103,6 +141,149 @@ export default function AdminSiteFeatures() {
                         ? "Visible"
                         : "Oculto"}
                 </span>
+
+                {feature.extra && (
+                  <div className="sf-extra">
+                    {feature.key === "youtubeBanner" && (
+                      <>
+                        <div className="sf-extra-row">
+                          <label className="sf-label">
+                            Título del banner
+                            <input
+                              className="sf-input"
+                              type="text"
+                              value={data.youtubeBannerTitle || ""}
+                          onChange={(e) => {
+                            setLocalFeatures((prev) => ({ ...(prev || features), youtubeBannerTitle: e.target.value }));
+                          }}
+                          onBlur={(e) => {
+                            setFeature("youtubeBannerTitle", e.target.value || "");
+                          }}
+                            />
+                          </label>
+                        </div>
+                        <div className="sf-extra-row">
+                          <label className="sf-label">
+                            ID del video de YouTube
+                            <input
+                              className="sf-input"
+                              type="text"
+                              value={data.youtubeBannerVideoId || ""}
+                              onChange={(e) => {
+                                setLocalFeatures((prev) => ({ ...(prev || features), youtubeBannerVideoId: e.target.value }));
+                              }}
+                              onBlur={(e) => {
+                                setFeature("youtubeBannerVideoId", e.target.value || "");
+                              }}
+                              placeholder="Ej: WYleJOwfIVg"
+                            />
+                          </label>
+                        </div>
+                        <div className="sf-extra-row">
+                          <label className="sf-label">
+                            Imagen del banner (URL o subir)
+                            <input
+                              className="sf-input"
+                              type="text"
+                              value={data.youtubeBannerImage || ""}
+                              onChange={(e) => {
+                                setLocalFeatures((prev) => ({ ...(prev || features), youtubeBannerImage: e.target.value }));
+                              }}
+                              onBlur={(e) => {
+                                setFeature("youtubeBannerImage", e.target.value || "");
+                              }}
+                              placeholder="https://... o dejar vacío para usar miniatura de YouTube"
+                            />
+                          </label>
+                        </div>
+                        <div className="sf-extra-actions">
+                          <button
+                            type="button"
+                            className="sf-save-btn"
+                            disabled={savingKey === "youtubeBanner"}
+                            onClick={async () => {
+                              setSavingKey("youtubeBanner");
+                              setSavedKey(null);
+                              clearSaveError();
+                              const ok1 = await setFeature("youtubeBannerTitle", data.youtubeBannerTitle || "");
+                              const ok2 = await setFeature("youtubeBannerVideoId", data.youtubeBannerVideoId || "");
+                              const ok3 = await setFeature("youtubeBannerImage", data.youtubeBannerImage || "");
+                              setSavingKey(null);
+                              if (ok1 && ok2 && ok3) {
+                                setSavedKey("youtubeBanner");
+                                window.setTimeout(() => {
+                                  setSavedKey((prev) => (prev === "youtubeBanner" ? null : prev));
+                                }, 2000);
+                              }
+                            }}
+                          >
+                            {savingKey === "youtubeBanner" ? "Guardando..." : savedKey === "youtubeBanner" ? "Guardado" : "Guardar"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {feature.key === "youtubePopup" && (
+                      <>
+                        <div className="sf-extra-row">
+                          <label className="sf-label">
+                            Título del popup
+                            <input
+                              className="sf-input"
+                              type="text"
+                              value={data.youtubePopupTitle || ""}
+                          onChange={(e) => {
+                            setLocalFeatures((prev) => ({ ...(prev || features), youtubePopupTitle: e.target.value }));
+                          }}
+                          onBlur={(e) => {
+                            setFeature("youtubePopupTitle", e.target.value || "");
+                          }}
+                            />
+                          </label>
+                        </div>
+                        <div className="sf-extra-row">
+                          <label className="sf-label">
+                            ID del video de YouTube
+                            <input
+                              className="sf-input"
+                              type="text"
+                              value={data.youtubePopupVideoId || ""}
+                          onChange={(e) => {
+                            setLocalFeatures((prev) => ({ ...(prev || features), youtubePopupVideoId: e.target.value }));
+                          }}
+                          onBlur={(e) => {
+                            setFeature("youtubePopupVideoId", e.target.value || "");
+                          }}
+                          placeholder="Ej: WYleJOwfIVg"
+                            />
+                          </label>
+                        </div>
+                        <div className="sf-extra-actions">
+                          <button
+                            type="button"
+                            className="sf-save-btn"
+                            disabled={savingKey === "youtubePopup"}
+                            onClick={async () => {
+                              setSavingKey("youtubePopup");
+                              setSavedKey(null);
+                              clearSaveError();
+                              const ok1 = await setFeature("youtubePopupTitle", data.youtubePopupTitle || "");
+                              const ok2 = await setFeature("youtubePopupVideoId", data.youtubePopupVideoId || "");
+                              setSavingKey(null);
+                              if (ok1 && ok2) {
+                                setSavedKey("youtubePopup");
+                                window.setTimeout(() => {
+                                  setSavedKey((prev) => (prev === "youtubePopup" ? null : prev));
+                                }, 2000);
+                              }
+                            }}
+                          >
+                            {savingKey === "youtubePopup" ? "Guardando..." : savedKey === "youtubePopup" ? "Guardado" : "Guardar"}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               <button

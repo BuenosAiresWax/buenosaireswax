@@ -26,11 +26,39 @@ export function SiteFeaturesProvider({ children }) {
 
     const unsubscribe = onSnapshot(
       referencia,
-      (snapshot) => {
-        setFeatures(
-          normalizeSiteFeatures(snapshot.exists() ? snapshot.data() : {}),
-        );
+      async (snapshot) => {
+        const rawData = snapshot.exists() ? snapshot.data() : {};
+        const normalized = normalizeSiteFeatures(rawData);
+        setFeatures(normalized);
         setInitialized(true);
+
+        const missing = {};
+        if (typeof rawData.youtubeBannerTitle !== "string" || !rawData.youtubeBannerTitle.trim()) {
+          missing.youtubeBannerTitle = DEFAULT_SITE_FEATURES.youtubeBannerTitle;
+        }
+        if (typeof rawData.youtubeBannerVideoId !== "string" || !rawData.youtubeBannerVideoId.trim()) {
+          missing.youtubeBannerVideoId = DEFAULT_SITE_FEATURES.youtubeBannerVideoId;
+        }
+        if (typeof rawData.youtubePopupTitle !== "string" || !rawData.youtubePopupTitle.trim()) {
+          missing.youtubePopupTitle = DEFAULT_SITE_FEATURES.youtubePopupTitle;
+        }
+        if (typeof rawData.youtubePopupVideoId !== "string" || !rawData.youtubePopupVideoId.trim()) {
+          missing.youtubePopupVideoId = DEFAULT_SITE_FEATURES.youtubePopupVideoId;
+        }
+        if (typeof rawData.youtubeBanner !== "boolean") {
+          missing.youtubeBanner = DEFAULT_SITE_FEATURES.youtubeBanner;
+        }
+        if (typeof rawData.youtubePopup !== "boolean") {
+          missing.youtubePopup = DEFAULT_SITE_FEATURES.youtubePopup;
+        }
+
+        if (Object.keys(missing).length > 0) {
+          try {
+            await setDoc(referencia, missing, { merge: true });
+          } catch {
+            // ignore
+          }
+        }
       },
       () => {
         setFeatures(DEFAULT_SITE_FEATURES);
@@ -51,9 +79,10 @@ export function SiteFeaturesProvider({ children }) {
     setSaveError(null);
 
     try {
+      const payload = typeof DEFAULT_SITE_FEATURES[key] === "boolean" ? { [key]: Boolean(value) } : { [key]: value };
       await setDoc(
         doc(db, SITE_FEATURES_COLLECTION, SITE_FEATURES_DOC_ID),
-        { [key]: Boolean(value) },
+        payload,
         { merge: true },
       );
       return true;
