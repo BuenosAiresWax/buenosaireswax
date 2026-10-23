@@ -42,7 +42,7 @@ async function fetchAuthorizedPaymentByPaymentId(paymentId) {
 
 async function fetchAuthorizedPayments(preapprovalId) {
   const data = await fetchMp(
-    `/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}&limit=20`
+    `/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}`
   );
   return data?.results || [];
 }

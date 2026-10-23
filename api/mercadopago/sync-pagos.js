@@ -56,11 +56,9 @@ async function fetchMpResult(path) {
 async function obtenerFacturas(preapprovalId) {
   const facturas = [];
   let offset = 0;
-  const limit = 20;
-
   while (true) {
     const { data, error } = await fetchMpResult(
-      `/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}&limit=${limit}&offset=${offset}`
+      `/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}&offset=${offset}`
     );
 
     if (error) {
