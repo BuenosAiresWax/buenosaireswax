@@ -100,16 +100,12 @@ async function sincronizarSuscriptor(db, email) {
   const pagadas = facturas.filter(facturaPagada);
   const batch = db.batch();
   const historialRef = docRef.collection("historialPagos");
-  const historialSnap = await historialRef.get();
-  const idsValidos = new Set();
 
   pagadas.forEach((factura) => {
     const fecha = toIso(factura.debit_date) || toIso(factura.date_created);
     if (!fecha) return;
 
     const id = historialId(factura);
-    idsValidos.add(id);
-
     const monto = Number(factura.transaction_amount);
 
     batch.set(
@@ -129,14 +125,6 @@ async function sincronizarSuscriptor(db, email) {
     );
   });
 
-  let eliminados = 0;
-  historialSnap.docs.forEach((doc) => {
-    if (!idsValidos.has(doc.id)) {
-      batch.delete(doc.ref);
-      eliminados++;
-    }
-  });
-
   const fechas = pagadas
     .map((factura) => toIso(factura.debit_date) || toIso(factura.date_created))
     .filter(Boolean)
@@ -150,10 +138,16 @@ async function sincronizarSuscriptor(db, email) {
 
   const updates = {
     mercadopago_preapproval_id: preapprovalId,
-    fechaPrimerPago,
-    fechaUltimoPago,
-    fechaProximoCobro,
   };
+
+  if (fechas.length > 0) {
+    updates.fechaPrimerPago = fechaPrimerPago;
+    updates.fechaUltimoPago = fechaUltimoPago;
+  }
+
+  if (fechaProximoCobro) {
+    updates.fechaProximoCobro = fechaProximoCobro;
+  }
 
   if (preapproval?.status === "authorized" && fechas.length > 0) {
     updates.activo = true;
@@ -168,7 +162,7 @@ async function sincronizarSuscriptor(db, email) {
     email,
     actualizado: true,
     pagos: pagadas.length,
-    eliminados,
+    eliminados: 0,
     fechaPrimerPago,
     fechaUltimoPago,
     fechaProximoCobro,

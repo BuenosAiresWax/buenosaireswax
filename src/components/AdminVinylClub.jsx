@@ -548,9 +548,6 @@ export default function AdminVinylClub() {
             const estadosPagoConfirmado = new Set(["approved", "processed"]);
             const historialPagos = (historiales[s.id] || []).filter((pago) => {
               if (String(pago.id).startsWith("preapproval_")) return false;
-              if (!estadosPagoConfirmado.has(String(pago.estado || "").toLowerCase())) {
-                return false;
-              }
               const clave = pago.mercadopago_payment_id
                 ? `payment_${pago.mercadopago_payment_id}`
                 : `${pago.fecha}_${pago.monto}`;
@@ -558,6 +555,20 @@ export default function AdminVinylClub() {
               clavesHistorial.add(clave);
               return true;
             });
+
+            const fechasResumen = [s.fechaPrimerPago, s.fechaUltimoPago].filter(
+              (fecha, index, lista) => fecha && lista.indexOf(fecha) === index
+            );
+            const historialVisible =
+              historialPagos.length > 0
+                ? historialPagos
+                : fechasResumen.map((fecha, index) => ({
+                    id: `resumen_${index}`,
+                    fecha,
+                    estado: s.mercadopago_status || (s.activo ? "authorized" : "pending"),
+                    monto: null,
+                    resumen: true,
+                  }));
             return (
               <div
                 key={s.id}
@@ -638,34 +649,40 @@ export default function AdminVinylClub() {
                       <div className="vc-admin-history-title">Historial de pagos</div>
                       {cargandoHistorial === s.id ? (
                         <div className="vc-admin-history-empty">Cargando pagos...</div>
-                      ) : historialPagos.length === 0 ? (
+                      ) : historialVisible.length === 0 ? (
                         <div className="vc-admin-history-empty">
-                          Sin pagos aprobados. Usá “Actualizar pagos” para reconstruir el
-                          historial desde MercadoPago.
+                          Sin fechas de pago registradas.
                         </div>
                       ) : (
                         <div className="vc-admin-history-list">
-                          {historialPagos.map((pago) => (
-                            <div className="vc-admin-history-item" key={pago.id}>
-                              <span className="vc-admin-history-fecha">
-                                {formatDate(pago.fecha)}
-                              </span>
-                              <span className="vc-admin-history-monto">
-                                {formatMonto(pago.monto, pago.moneda)}
-                              </span>
-                              <span
-                                className={`vc-admin-history-estado ${
-                                  pago.estado === "approved" ||
-                                  pago.estado === "authorized" ||
-                                  pago.estado === "processed"
-                                    ? "pagado"
-                                    : ""
-                                }`}
-                              >
-                                {formatEstadoPago(pago.estado)}
-                              </span>
-                            </div>
-                          ))}
+                          {historialVisible.map((pago) => {
+                            const confirmado = estadosPagoConfirmado.has(
+                              String(pago.estado || "").toLowerCase()
+                            );
+                            return (
+                              <div className="vc-admin-history-item" key={pago.id}>
+                                <span className="vc-admin-history-fecha">
+                                  {formatDate(pago.fecha)}
+                                </span>
+                                <span className="vc-admin-history-monto">
+                                  {confirmado && !pago.resumen
+                                    ? formatMonto(pago.monto, pago.moneda)
+                                    : "—"}
+                                </span>
+                                <span
+                                  className={`vc-admin-history-estado ${
+                                    pago.estado === "approved" ||
+                                    pago.estado === "authorized" ||
+                                    pago.estado === "processed"
+                                      ? "pagado"
+                                      : ""
+                                  }`}
+                                >
+                                  {formatEstadoPago(pago.estado)}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
