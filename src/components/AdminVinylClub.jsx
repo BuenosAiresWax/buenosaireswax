@@ -388,7 +388,8 @@ export default function AdminVinylClub() {
     let actualizados = 0;
     let errores = 0;
     let pagos = 0;
-    let eliminados = 0;
+    let primerError = "";
+    let primerMotivo = "";
 
     for (let i = 0; i < emails.length; i += tamanoLote) {
       const lote = emails.slice(i, i + tamanoLote);
@@ -397,10 +398,20 @@ export default function AdminVinylClub() {
         actualizados += resultado.actualizados || 0;
         errores += resultado.errores || 0;
         pagos += resultado.pagos || 0;
-        eliminados += resultado.eliminados || 0;
+
+        const fallidos = (resultado.resultados || []).filter((r) => !r.actualizado);
+        if (fallidos.length > 0) {
+          console.warn("Sincronización con errores:", fallidos);
+          if (!primerMotivo) {
+            primerMotivo = `${fallidos[0].email}: ${
+              fallidos[0].motivo || "sin detalle"
+            }`;
+          }
+        }
       } catch (err) {
         console.error("Error sincronizando lote de pagos:", err);
         errores += lote.length;
+        if (!primerError) primerError = err.message;
       }
       setSyncProgreso(`${Math.min(i + tamanoLote, emails.length)}/${emails.length}`);
     }
@@ -408,8 +419,11 @@ export default function AdminVinylClub() {
     setSincronizando(false);
     setSyncProgreso("");
     setHistoriales({});
+    const detalle = primerError || primerMotivo;
     alert(
-      `Sincronización finalizada.\nActualizados: ${actualizados}\nPagos reales: ${pagos}\nRegistros antiguos depurados: ${eliminados}\nCon error: ${errores}`
+      `Sincronización finalizada.\nActualizados: ${actualizados}\nPagos reales: ${pagos}\nCon error: ${errores}${
+        detalle ? `\n\nDetalle: ${detalle}` : ""
+      }`
     );
   };
 

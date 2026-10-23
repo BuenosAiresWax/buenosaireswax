@@ -52,7 +52,9 @@ export async function sincronizarPagos(emails) {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || "Error al sincronizar pagos");
+    throw new Error(
+      error.message || `Error al sincronizar pagos (HTTP ${response.status})`
+    );
   }
 
   return response.json();
