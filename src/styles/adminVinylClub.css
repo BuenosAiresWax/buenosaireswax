@@ -54,6 +54,10 @@
   color: #eab308;
 }
 
+.vc-admin-stat-abandoned .vc-admin-stat-value {
+  color: #f97316;
+}
+
 .vc-admin-stat-cancelled .vc-admin-stat-value {
   color: #ef4444;
 }
@@ -373,12 +377,62 @@
 /* responsive */
 @media (max-width: 768px) {
   .vc-admin-stats {
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    grid-template-columns: none;
+    gap: 8px;
+    margin: 0 -10px;
+    padding: 2px 10px 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .vc-admin-stats::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vc-admin-stat-card {
+    flex: 0 0 auto;
+    width: 142px;
+    min-width: 142px;
+    scroll-snap-align: start;
+  }
+
+  .vc-admin-stat-value {
+    font-size: 1.35rem;
   }
 
   .vc-admin-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
+  }
+
+  .vc-admin-filters {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vc-admin-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vc-admin-filter-btn {
+    flex: 0 0 auto;
+  }
+
+  .vc-admin-search-wrap {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .vc-admin-search {
+    min-width: 0;
   }
 
   .vc-admin-row-header {

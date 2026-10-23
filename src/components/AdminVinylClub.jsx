@@ -10,12 +10,6 @@ const CATEGORIAS_LABELS = {
   deep: "Deep",
 };
 
-const STATUS_COLORS = {
-  authorized: "#22c55e",
-  paused: "#eab308",
-  cancelled: "#ef4444",
-};
-
 const STATUS_LABELS = {
   authorized: "Activa",
   paused: "Pausada",
@@ -35,6 +29,78 @@ function formatDate(iso) {
   } catch {
     return "—";
   }
+}
+
+function esActivo(s) {
+  return s?.activo === true;
+}
+
+function esCancelado(s) {
+  return !esActivo(s) && s?.mercadopago_status === "cancelled";
+}
+
+function esPendiente(s) {
+  return s?.pendiente === true && !esActivo(s) && !esCancelado(s);
+}
+
+function esAbandonado(s) {
+  return (
+    !esActivo(s) &&
+    !esCancelado(s) &&
+    !esPendiente(s) &&
+    s?.mercadopago_status === "pending"
+  );
+}
+
+function normalizarEmail(valor) {
+  return String(valor || "").trim().toLowerCase();
+}
+
+function normalizarDni(valor) {
+  return String(valor || "").replace(/\D/g, "");
+}
+
+function getEstado(s) {
+  if (esActivo(s)) return { label: "Activo", color: "#22c55e" };
+  if (esCancelado(s)) return { label: "Cancelado", color: "#ef4444" };
+  if (esPendiente(s)) {
+    if (s?.mercadopago_status === "paused") {
+      return { label: "Pausado", color: "#eab308" };
+    }
+    return { label: "Pendiente", color: "#eab308" };
+  }
+  if (esAbandonado(s)) return { label: "Abandonado", color: "#f97316" };
+  return { label: "Inactivo", color: "#666" };
+}
+
+function prioridadSuscriptor(s) {
+  if (esActivo(s)) return 4;
+  if (esPendiente(s)) return 3;
+  if (s?.mercadopago_status === "paused") return 2;
+  if (esCancelado(s)) return 1;
+  return 0;
+}
+
+function fechaAltaMs(s) {
+  const t = new Date(s?.fechaAlta || 0).getTime();
+  return Number.isNaN(t) ? 0 : t;
+}
+
+function esMejorCandidato(candidato, actual) {
+  const prioridadCandidato = prioridadSuscriptor(candidato);
+  const prioridadActual = prioridadSuscriptor(actual);
+  if (prioridadCandidato !== prioridadActual) {
+    return prioridadCandidato > prioridadActual;
+  }
+  return fechaAltaMs(candidato) > fechaAltaMs(actual);
+}
+
+function claveSuscriptor(s) {
+  const dni = normalizarDni(s?.dni);
+  if (dni) return `dni:${dni}`;
+  const email = normalizarEmail(s?.correo || s?.id);
+  if (email) return `email:${email}`;
+  return `id:${s?.id}`;
 }
 
 export default function AdminVinylClub() {
@@ -88,12 +154,33 @@ export default function AdminVinylClub() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const suscriptoresFiltrados = suscriptores.filter((s) => {
+  const suscriptoresUnicos = (() => {
+    const porIdentidad = new Map();
+    suscriptores.forEach((s) => {
+      if (!s || typeof s !== "object") return;
+      const clave = claveSuscriptor(s);
+      const actual = porIdentidad.get(clave);
+      if (!actual || esMejorCandidato(s, actual)) {
+        porIdentidad.set(clave, s);
+      }
+    });
+    return Array.from(porIdentidad.values());
+  })();
+
+  const activos = suscriptoresUnicos.filter(esActivo);
+  const cancelados = suscriptoresUnicos.filter(esCancelado);
+  const pendientes = suscriptoresUnicos.filter(esPendiente);
+  const abandonados = suscriptoresUnicos.filter(esAbandonado);
+  const idsPendientes = new Set(pendientes.map((s) => s.id));
+  const idsAbandonados = new Set(abandonados.map((s) => s.id));
+
+  const suscriptoresFiltrados = suscriptoresUnicos.filter((s) => {
     if (!s || typeof s !== "object") return false;
 
-    if (filtro === "activos" && !s.activo) return false;
-    if (filtro === "cancelados" && s.mercadopago_status !== "cancelled") return false;
-    if (filtro === "pendientes" && !s.pendiente) return false;
+    if (filtro === "activos" && !esActivo(s)) return false;
+    if (filtro === "cancelados" && !esCancelado(s)) return false;
+    if (filtro === "pendientes" && !idsPendientes.has(s.id)) return false;
+    if (filtro === "abandonados" && !idsAbandonados.has(s.id)) return false;
 
     if (busqueda.trim()) {
       const q = busqueda.toLowerCase();
@@ -113,11 +200,12 @@ export default function AdminVinylClub() {
   });
 
   const stats = {
-    total: suscriptores.length,
-    activos: suscriptores.filter((s) => s?.activo).length,
-    cancelados: suscriptores.filter((s) => s?.mercadopago_status === "cancelled").length,
-    pendientes: suscriptores.filter((s) => s?.pendiente).length,
-    ingresos: suscriptores.filter((s) => s?.activo).length * 70000,
+    total: suscriptoresUnicos.length,
+    activos: activos.length,
+    cancelados: cancelados.length,
+    pendientes: pendientes.length,
+    abandonados: abandonados.length,
+    ingresos: activos.length * 70000,
   };
 
   const construirFilasExcel = (lista) => {
@@ -135,7 +223,15 @@ export default function AdminVinylClub() {
       Preferencias: Array.isArray(s.preferencias)
         ? s.preferencias.map((p) => CATEGORIAS_LABELS[p] || p).join(", ")
         : "",
-      Estado: s.activo ? "Activo" : s.pendiente ? "Pendiente" : "Inactivo",
+      Estado: esActivo(s)
+        ? "Activo"
+        : esCancelado(s)
+          ? "Cancelado"
+          : esPendiente(s)
+            ? "Pendiente"
+            : esAbandonado(s)
+              ? "Abandonado"
+              : "Inactivo",
       "MP Status": STATUS_LABELS[s.mercadopago_status] || s.mercadopago_status || "Sin estado",
       "Fecha Alta": formatDate(s.fechaAlta),
       "Primer Pago": formatDate(s.fechaPrimerPago),
@@ -162,10 +258,11 @@ export default function AdminVinylClub() {
   };
 
   const handleDescargarExcel = (tipo) => {
-    if (tipo === "todos") exportarExcel(suscriptores, "vinyl-club-todos");
-    if (tipo === "activos") exportarExcel(suscriptores.filter((s) => s?.activo), "vinyl-club-activos");
-    if (tipo === "pendientes") exportarExcel(suscriptores.filter((s) => s?.pendiente), "vinyl-club-pendientes");
-    if (tipo === "cancelados") exportarExcel(suscriptores.filter((s) => s?.mercadopago_status === "cancelled"), "vinyl-club-cancelados");
+    if (tipo === "todos") exportarExcel(suscriptoresUnicos, "vinyl-club-todos");
+    if (tipo === "activos") exportarExcel(activos, "vinyl-club-activos");
+    if (tipo === "pendientes") exportarExcel(pendientes, "vinyl-club-pendientes");
+    if (tipo === "abandonados") exportarExcel(abandonados, "vinyl-club-abandonados");
+    if (tipo === "cancelados") exportarExcel(cancelados, "vinyl-club-cancelados");
   };
 
   if (loading) {
@@ -202,6 +299,10 @@ export default function AdminVinylClub() {
           <div className="vc-admin-stat-value">{stats.pendientes}</div>
           <div className="vc-admin-stat-label">Pendientes</div>
         </div>
+        <div className="vc-admin-stat-card vc-admin-stat-abandoned">
+          <div className="vc-admin-stat-value">{stats.abandonados}</div>
+          <div className="vc-admin-stat-label">Abandonados</div>
+        </div>
         <div className="vc-admin-stat-card vc-admin-stat-cancelled">
           <div className="vc-admin-stat-value">{stats.cancelados}</div>
           <div className="vc-admin-stat-label">Cancelados</div>
@@ -216,7 +317,7 @@ export default function AdminVinylClub() {
 
       <div className="vc-admin-controls">
         <div className="vc-admin-filters">
-          {["todos", "activos", "pendientes", "cancelados"].map((f) => (
+          {["todos", "activos", "pendientes", "abandonados", "cancelados"].map((f) => (
             <button
               key={f}
               className={`vc-admin-filter-btn ${filtro === f ? "active" : ""}`}
@@ -251,6 +352,7 @@ export default function AdminVinylClub() {
                 <button onClick={() => handleDescargarExcel("todos")}>Todos</button>
                 <button onClick={() => handleDescargarExcel("activos")}>Activos</button>
                 <button onClick={() => handleDescargarExcel("pendientes")}>Pendientes</button>
+                <button onClick={() => handleDescargarExcel("abandonados")}>Abandonados</button>
                 <button onClick={() => handleDescargarExcel("cancelados")}>Cancelados</button>
               </div>
             )}
@@ -261,92 +363,93 @@ export default function AdminVinylClub() {
       <div className="vc-admin-list">
         {suscriptoresFiltrados.length === 0 ? (
           <div className="vc-admin-empty">
-            {suscriptores.length === 0
+            {suscriptoresUnicos.length === 0
               ? "No hay suscriptores todavía. La colección clubvinilos está vacía."
               : "No hay suscriptores con estos filtros."}
           </div>
         ) : (
-          suscriptoresFiltrados.map((s) => (
-            <div
-              key={s.id}
-              className={`vc-admin-row ${expandido === s.id ? "expanded" : ""}`}
-            >
+          suscriptoresFiltrados.map((s) => {
+            const estado = getEstado(s);
+            return (
               <div
-                className="vc-admin-row-header"
-                onClick={() => setExpandido(expandido === s.id ? null : s.id)}
+                key={s.id}
+                className={`vc-admin-row ${expandido === s.id ? "expanded" : ""}`}
               >
-                <div className="vc-admin-row-left">
-                  <div className="vc-admin-row-name">{s.nombre || "Sin nombre"}</div>
-                  <div className="vc-admin-row-meta">
-                    {s.correo || "—"} | @{s.instagram || "sin ig"} | DNI: {s.dni || "—"}
+                <div
+                  className="vc-admin-row-header"
+                  onClick={() => setExpandido(expandido === s.id ? null : s.id)}
+                >
+                  <div className="vc-admin-row-left">
+                    <div className="vc-admin-row-name">{s.nombre || "Sin nombre"}</div>
+                    <div className="vc-admin-row-meta">
+                      {s.correo || "—"} | @{s.instagram || "sin ig"} | DNI: {s.dni || "—"}
+                    </div>
+                  </div>
+                  <div className="vc-admin-row-right">
+                    <span
+                      className="vc-admin-status-badge"
+                      style={{ background: estado.color }}
+                    >
+                      {estado.label}
+                    </span>
+                    <span className="vc-admin-expand-icon">
+                      {expandido === s.id ? "▲" : "▼"}
+                    </span>
                   </div>
                 </div>
-                <div className="vc-admin-row-right">
-                  <span
-                    className="vc-admin-status-badge"
-                    style={{
-                      background: STATUS_COLORS[s.mercadopago_status] || "#666",
-                    }}
-                  >
-                    {STATUS_LABELS[s.mercadopago_status] || s.mercadopago_status || "Pendiente"}
-                  </span>
-                  <span className="vc-admin-expand-icon">
-                    {expandido === s.id ? "▲" : "▼"}
-                  </span>
-                </div>
-              </div>
 
-              {expandido === s.id && (
-                <div className="vc-admin-row-detail">
-                  <div className="vc-admin-detail-grid">
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">Teléfono</span>
-                      <span>{s.telefono || "—"}</span>
-                    </div>
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">Dirección</span>
-                      <span>
-                        {s.direccion || "—"}
-                        {s.departamento ? `, ${s.departamento}` : ""}
-                        {s.ciudad ? `, ${s.ciudad}` : ""}
-                        {s.codigoPostal ? ` (${s.codigoPostal})` : ""}
-                      </span>
-                    </div>
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">Preferencias</span>
-                      <span>
-                        {Array.isArray(s.preferencias) && s.preferencias.length > 0
-                          ? s.preferencias.map((p) => CATEGORIAS_LABELS[p] || p).join(", ")
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">Fecha alta</span>
-                      <span>{formatDate(s.fechaAlta)}</span>
-                    </div>
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">Primer pago</span>
-                      <span>{formatDate(s.fechaPrimerPago)}</span>
-                    </div>
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">Último pago</span>
-                      <span>{formatDate(s.fechaUltimoPago)}</span>
-                    </div>
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">Próximo cobro</span>
-                      <span>{formatDate(s.fechaProximoCobro)}</span>
-                    </div>
-                    <div className="vc-admin-detail-item">
-                      <span className="vc-admin-detail-label">ID MercadoPago</span>
-                      <span className="vc-admin-mp-id">
-                        {s.mercadopago_preapproval_id || "—"}
-                      </span>
+                {expandido === s.id && (
+                  <div className="vc-admin-row-detail">
+                    <div className="vc-admin-detail-grid">
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">Teléfono</span>
+                        <span>{s.telefono || "—"}</span>
+                      </div>
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">Dirección</span>
+                        <span>
+                          {s.direccion || "—"}
+                          {s.departamento ? `, ${s.departamento}` : ""}
+                          {s.ciudad ? `, ${s.ciudad}` : ""}
+                          {s.codigoPostal ? ` (${s.codigoPostal})` : ""}
+                        </span>
+                      </div>
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">Preferencias</span>
+                        <span>
+                          {Array.isArray(s.preferencias) && s.preferencias.length > 0
+                            ? s.preferencias.map((p) => CATEGORIAS_LABELS[p] || p).join(", ")
+                            : "—"}
+                        </span>
+                      </div>
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">Fecha alta</span>
+                        <span>{formatDate(s.fechaAlta)}</span>
+                      </div>
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">Primer pago</span>
+                        <span>{formatDate(s.fechaPrimerPago)}</span>
+                      </div>
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">Último pago</span>
+                        <span>{formatDate(s.fechaUltimoPago)}</span>
+                      </div>
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">Próximo cobro</span>
+                        <span>{formatDate(s.fechaProximoCobro)}</span>
+                      </div>
+                      <div className="vc-admin-detail-item">
+                        <span className="vc-admin-detail-label">ID MercadoPago</span>
+                        <span className="vc-admin-mp-id">
+                          {s.mercadopago_preapproval_id || "—"}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </div>
