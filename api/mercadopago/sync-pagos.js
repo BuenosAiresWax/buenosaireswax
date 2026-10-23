@@ -56,7 +56,7 @@ async function fetchMpResult(path) {
 async function obtenerFacturas(preapprovalId) {
   const facturas = [];
   let offset = 0;
-  const limit = 50;
+  const limit = 20;
 
   while (true) {
     const { data, error } = await fetchMpResult(
