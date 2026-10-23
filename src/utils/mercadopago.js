@@ -42,3 +42,18 @@ export async function cancelarSuscripcion(email) {
 
   return response.json();
 }
+
+export async function sincronizarPagos(emails) {
+  const response = await fetch(`${API_BASE}/sync-pagos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ emails }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || "Error al sincronizar pagos");
+  }
+
+  return response.json();
+}

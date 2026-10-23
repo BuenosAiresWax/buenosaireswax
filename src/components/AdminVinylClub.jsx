@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
+import { sincronizarPagos } from "../utils/mercadopago";
 import * as XLSX from "xlsx";
 import "../styles/adminVinylClub.css";
 
@@ -15,6 +16,18 @@ const STATUS_LABELS = {
   paused: "Pausada",
   cancelled: "Cancelada",
 };
+
+const CUOTA_MENSUAL = 70000;
+const DIAS_PAGO_VIGENTE = 31;
+
+const FILTROS = [
+  { id: "todos", label: "Todos" },
+  { id: "activos", label: "Activos reales" },
+  { id: "sin-pago", label: "Sin pago" },
+  { id: "pendientes", label: "Pendientes" },
+  { id: "abandonados", label: "Abandonados" },
+  { id: "cancelados", label: "Cancelados" },
+];
 
 function formatDate(iso) {
   if (!iso) return "—";
@@ -31,8 +44,56 @@ function formatDate(iso) {
   }
 }
 
+function formatMonto(monto, moneda = "ARS") {
+  const n = Number(monto);
+  if (!Number.isFinite(n)) return "—";
+  return n.toLocaleString("es-AR", {
+    style: "currency",
+    currency: moneda || "ARS",
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatEstadoPago(estado) {
+  const labels = {
+    approved: "Aprobado",
+    authorized: "Autorizado",
+    processed: "Procesado",
+    pending: "Pendiente",
+    in_process: "En proceso",
+    rejected: "Rechazado",
+    cancelled: "Cancelado",
+    refunded: "Reembolsado",
+    charged_back: "Contracargo",
+  };
+  return labels[estado] || estado || "—";
+}
+
 function esActivo(s) {
   return s?.activo === true;
+}
+
+function pagoVigente(s) {
+  const iso = s?.fechaUltimoPago;
+  if (!iso) return false;
+
+  const pago = new Date(iso);
+  if (Number.isNaN(pago.getTime())) return false;
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  pago.setHours(0, 0, 0, 0);
+
+  const dias = Math.floor((hoy - pago) / (1000 * 60 * 60 * 24));
+  return dias >= 0 && dias <= DIAS_PAGO_VIGENTE;
+}
+
+function esActivoReal(s) {
+  return esActivo(s) && pagoVigente(s);
+}
+
+function esActivoSinPago(s) {
+  return esActivo(s) && !pagoVigente(s);
 }
 
 function esCancelado(s) {
@@ -61,7 +122,8 @@ function normalizarDni(valor) {
 }
 
 function getEstado(s) {
-  if (esActivo(s)) return { label: "Activo", color: "#22c55e" };
+  if (esActivoReal(s)) return { label: "Activo", color: "#22c55e" };
+  if (esActivoSinPago(s)) return { label: "Sin pago", color: "#f59e0b" };
   if (esCancelado(s)) return { label: "Cancelado", color: "#ef4444" };
   if (esPendiente(s)) {
     if (s?.mercadopago_status === "paused") {
@@ -111,6 +173,10 @@ export default function AdminVinylClub() {
   const [busqueda, setBusqueda] = useState("");
   const [expandido, setExpandido] = useState(null);
   const [mostrarMenuDescarga, setMostrarMenuDescarga] = useState(false);
+  const [sincronizando, setSincronizando] = useState(false);
+  const [syncProgreso, setSyncProgreso] = useState("");
+  const [historiales, setHistoriales] = useState({});
+  const [cargandoHistorial, setCargandoHistorial] = useState(null);
   const menuDescargaRef = useRef(null);
 
   useEffect(() => {
@@ -154,6 +220,35 @@ export default function AdminVinylClub() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!expandido || historiales[expandido]) return;
+
+    let activo = true;
+    setCargandoHistorial(expandido);
+
+    getDocs(collection(db, "clubvinilos", expandido, "historialPagos"))
+      .then((snap) => {
+        if (!activo) return;
+        const items = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+        setHistoriales((prev) => ({ ...prev, [expandido]: items }));
+      })
+      .catch((err) => {
+        console.error("Error fetching historialPagos:", err);
+        if (activo) {
+          setHistoriales((prev) => ({ ...prev, [expandido]: [] }));
+        }
+      })
+      .finally(() => {
+        if (activo) setCargandoHistorial(null);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [expandido, historiales]);
+
   const suscriptoresUnicos = (() => {
     const porIdentidad = new Map();
     suscriptores.forEach((s) => {
@@ -167,7 +262,8 @@ export default function AdminVinylClub() {
     return Array.from(porIdentidad.values());
   })();
 
-  const activos = suscriptoresUnicos.filter(esActivo);
+  const activos = suscriptoresUnicos.filter(esActivoReal);
+  const sinPago = suscriptoresUnicos.filter(esActivoSinPago);
   const cancelados = suscriptoresUnicos.filter(esCancelado);
   const pendientes = suscriptoresUnicos.filter(esPendiente);
   const abandonados = suscriptoresUnicos.filter(esAbandonado);
@@ -177,7 +273,8 @@ export default function AdminVinylClub() {
   const suscriptoresFiltrados = suscriptoresUnicos.filter((s) => {
     if (!s || typeof s !== "object") return false;
 
-    if (filtro === "activos" && !esActivo(s)) return false;
+    if (filtro === "activos" && !esActivoReal(s)) return false;
+    if (filtro === "sin-pago" && !esActivoSinPago(s)) return false;
     if (filtro === "cancelados" && !esCancelado(s)) return false;
     if (filtro === "pendientes" && !idsPendientes.has(s.id)) return false;
     if (filtro === "abandonados" && !idsAbandonados.has(s.id)) return false;
@@ -202,10 +299,11 @@ export default function AdminVinylClub() {
   const stats = {
     total: suscriptoresUnicos.length,
     activos: activos.length,
+    sinPago: sinPago.length,
     cancelados: cancelados.length,
     pendientes: pendientes.length,
     abandonados: abandonados.length,
-    ingresos: activos.length * 70000,
+    ingresos: activos.length * CUOTA_MENSUAL,
   };
 
   const construirFilasExcel = (lista) => {
@@ -223,15 +321,17 @@ export default function AdminVinylClub() {
       Preferencias: Array.isArray(s.preferencias)
         ? s.preferencias.map((p) => CATEGORIAS_LABELS[p] || p).join(", ")
         : "",
-      Estado: esActivo(s)
+      Estado: esActivoReal(s)
         ? "Activo"
-        : esCancelado(s)
-          ? "Cancelado"
-          : esPendiente(s)
-            ? "Pendiente"
-            : esAbandonado(s)
-              ? "Abandonado"
-              : "Inactivo",
+        : esActivoSinPago(s)
+          ? "Sin pago"
+          : esCancelado(s)
+            ? "Cancelado"
+            : esPendiente(s)
+              ? "Pendiente"
+              : esAbandonado(s)
+                ? "Abandonado"
+                : "Inactivo",
       "MP Status": STATUS_LABELS[s.mercadopago_status] || s.mercadopago_status || "Sin estado",
       "Fecha Alta": formatDate(s.fechaAlta),
       "Primer Pago": formatDate(s.fechaPrimerPago),
@@ -260,9 +360,57 @@ export default function AdminVinylClub() {
   const handleDescargarExcel = (tipo) => {
     if (tipo === "todos") exportarExcel(suscriptoresUnicos, "vinyl-club-todos");
     if (tipo === "activos") exportarExcel(activos, "vinyl-club-activos");
+    if (tipo === "sin-pago") exportarExcel(sinPago, "vinyl-club-sin-pago");
     if (tipo === "pendientes") exportarExcel(pendientes, "vinyl-club-pendientes");
     if (tipo === "abandonados") exportarExcel(abandonados, "vinyl-club-abandonados");
     if (tipo === "cancelados") exportarExcel(cancelados, "vinyl-club-cancelados");
+  };
+
+  const handleSincronizarPagos = async () => {
+    const emails = Array.from(
+      new Set(
+        suscriptoresUnicos
+          .filter((s) => s?.mercadopago_preapproval_id)
+          .map((s) => normalizarEmail(s.correo || s.id))
+          .filter(Boolean)
+      )
+    );
+
+    if (emails.length === 0) {
+      alert("No hay suscripciones de MercadoPago para sincronizar.");
+      return;
+    }
+
+    setSincronizando(true);
+    setSyncProgreso(`0/${emails.length}`);
+
+    const tamanoLote = 5;
+    let actualizados = 0;
+    let errores = 0;
+    let pagos = 0;
+    let eliminados = 0;
+
+    for (let i = 0; i < emails.length; i += tamanoLote) {
+      const lote = emails.slice(i, i + tamanoLote);
+      try {
+        const resultado = await sincronizarPagos(lote);
+        actualizados += resultado.actualizados || 0;
+        errores += resultado.errores || 0;
+        pagos += resultado.pagos || 0;
+        eliminados += resultado.eliminados || 0;
+      } catch (err) {
+        console.error("Error sincronizando lote de pagos:", err);
+        errores += lote.length;
+      }
+      setSyncProgreso(`${Math.min(i + tamanoLote, emails.length)}/${emails.length}`);
+    }
+
+    setSincronizando(false);
+    setSyncProgreso("");
+    setHistoriales({});
+    alert(
+      `Sincronización finalizada.\nActualizados: ${actualizados}\nPagos reales: ${pagos}\nRegistros antiguos depurados: ${eliminados}\nCon error: ${errores}`
+    );
   };
 
   if (loading) {
@@ -293,7 +441,11 @@ export default function AdminVinylClub() {
         </div>
         <div className="vc-admin-stat-card vc-admin-stat-active">
           <div className="vc-admin-stat-value">{stats.activos}</div>
-          <div className="vc-admin-stat-label">Activos</div>
+          <div className="vc-admin-stat-label">Activos reales</div>
+        </div>
+        <div className="vc-admin-stat-card vc-admin-stat-overdue">
+          <div className="vc-admin-stat-value">{stats.sinPago}</div>
+          <div className="vc-admin-stat-label">Sin pago</div>
         </div>
         <div className="vc-admin-stat-card vc-admin-stat-pending">
           <div className="vc-admin-stat-value">{stats.pendientes}</div>
@@ -317,16 +469,37 @@ export default function AdminVinylClub() {
 
       <div className="vc-admin-controls">
         <div className="vc-admin-filters">
-          {["todos", "activos", "pendientes", "abandonados", "cancelados"].map((f) => (
+          {FILTROS.map((f) => (
             <button
-              key={f}
-              className={`vc-admin-filter-btn ${filtro === f ? "active" : ""}`}
-              onClick={() => setFiltro(f)}
+              key={f.id}
+              className={`vc-admin-filter-btn ${filtro === f.id ? "active" : ""}`}
+              onClick={() => setFiltro(f.id)}
             >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              {f.label}
             </button>
           ))}
         </div>
+        <button
+          className="vc-admin-sync-btn"
+          onClick={handleSincronizarPagos}
+          disabled={sincronizando}
+        >
+          <svg
+            className={sincronizando ? "vc-admin-sync-icon spinning" : "vc-admin-sync-icon"}
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9" />
+            <path d="M21 3v6h-6" />
+          </svg>
+          {sincronizando ? `Actualizando ${syncProgreso}` : "Actualizar pagos"}
+        </button>
         <div className="vc-admin-search-wrap">
           <input
             className="vc-admin-search"
@@ -350,7 +523,8 @@ export default function AdminVinylClub() {
             {mostrarMenuDescarga && (
               <div className="vc-admin-download-menu">
                 <button onClick={() => handleDescargarExcel("todos")}>Todos</button>
-                <button onClick={() => handleDescargarExcel("activos")}>Activos</button>
+                <button onClick={() => handleDescargarExcel("activos")}>Activos reales</button>
+                <button onClick={() => handleDescargarExcel("sin-pago")}>Sin pago</button>
                 <button onClick={() => handleDescargarExcel("pendientes")}>Pendientes</button>
                 <button onClick={() => handleDescargarExcel("abandonados")}>Abandonados</button>
                 <button onClick={() => handleDescargarExcel("cancelados")}>Cancelados</button>
@@ -370,6 +544,20 @@ export default function AdminVinylClub() {
         ) : (
           suscriptoresFiltrados.map((s) => {
             const estado = getEstado(s);
+            const clavesHistorial = new Set();
+            const estadosPagoConfirmado = new Set(["approved", "processed"]);
+            const historialPagos = (historiales[s.id] || []).filter((pago) => {
+              if (String(pago.id).startsWith("preapproval_")) return false;
+              if (!estadosPagoConfirmado.has(String(pago.estado || "").toLowerCase())) {
+                return false;
+              }
+              const clave = pago.mercadopago_payment_id
+                ? `payment_${pago.mercadopago_payment_id}`
+                : `${pago.fecha}_${pago.monto}`;
+              if (clavesHistorial.has(clave)) return false;
+              clavesHistorial.add(clave);
+              return true;
+            });
             return (
               <div
                 key={s.id}
@@ -444,6 +632,42 @@ export default function AdminVinylClub() {
                           {s.mercadopago_preapproval_id || "—"}
                         </span>
                       </div>
+                    </div>
+
+                    <div className="vc-admin-history">
+                      <div className="vc-admin-history-title">Historial de pagos</div>
+                      {cargandoHistorial === s.id ? (
+                        <div className="vc-admin-history-empty">Cargando pagos...</div>
+                      ) : historialPagos.length === 0 ? (
+                        <div className="vc-admin-history-empty">
+                          Sin pagos aprobados. Usá “Actualizar pagos” para reconstruir el
+                          historial desde MercadoPago.
+                        </div>
+                      ) : (
+                        <div className="vc-admin-history-list">
+                          {historialPagos.map((pago) => (
+                            <div className="vc-admin-history-item" key={pago.id}>
+                              <span className="vc-admin-history-fecha">
+                                {formatDate(pago.fecha)}
+                              </span>
+                              <span className="vc-admin-history-monto">
+                                {formatMonto(pago.monto, pago.moneda)}
+                              </span>
+                              <span
+                                className={`vc-admin-history-estado ${
+                                  pago.estado === "approved" ||
+                                  pago.estado === "authorized" ||
+                                  pago.estado === "processed"
+                                    ? "pagado"
+                                    : ""
+                                }`}
+                              >
+                                {formatEstadoPago(pago.estado)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

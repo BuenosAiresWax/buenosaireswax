@@ -1,18 +1,127 @@
 import { getDb } from "../_lib/firebase-admin.js";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+const MP_API_URL = "https://api.mercadopago.com";
 
-async function fetchPreapprovalStatus(preapprovalId) {
+async function fetchMp(path) {
+  if (!MP_ACCESS_TOKEN) return null;
+
   try {
-    const res = await fetch(`https://api.mercadopago.com/preapproval/${preapprovalId}`, {
+    const res = await fetch(`${MP_API_URL}${path}`, {
       headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`MercadoPago ${path} returned ${res.status}`);
+      return null;
+    }
     return await res.json();
   } catch (e) {
-    console.error("Error fetching preapproval from MP:", e.message);
+    console.error(`Error fetching MercadoPago ${path}:`, e.message);
     return null;
   }
+}
+
+function fetchPreapprovalStatus(preapprovalId) {
+  return fetchMp(`/preapproval/${preapprovalId}`);
+}
+
+function fetchPayment(paymentId) {
+  return fetchMp(`/v1/payments/${paymentId}`);
+}
+
+function fetchAuthorizedPayment(authorizedPaymentId) {
+  return fetchMp(`/authorized_payments/${authorizedPaymentId}`);
+}
+
+async function fetchAuthorizedPaymentByPaymentId(paymentId) {
+  const data = await fetchMp(
+    `/authorized_payments/search?payment_id=${encodeURIComponent(paymentId)}`
+  );
+  return data?.results?.[0] || null;
+}
+
+async function fetchAuthorizedPayments(preapprovalId) {
+  const data = await fetchMp(
+    `/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}&limit=50`
+  );
+  return data?.results || [];
+}
+
+function facturaPagada(factura) {
+  const pagoEstado = factura?.payment?.status;
+  if (pagoEstado) return pagoEstado === "approved" || pagoEstado === "authorized";
+  return ["processed", "approved", "authorized"].includes(factura?.status);
+}
+
+function fechaFactura(factura) {
+  return toIso(factura?.debit_date) || toIso(factura?.date_created);
+}
+
+function toIso(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function fechaMasReciente(actual, nueva) {
+  const actualIso = toIso(actual);
+  const nuevaIso = toIso(nueva);
+  if (!actualIso) return nuevaIso;
+  if (!nuevaIso) return actualIso;
+  return new Date(actualIso) > new Date(nuevaIso) ? actualIso : nuevaIso;
+}
+
+function fechaMasAntigua(actual, nueva) {
+  const actualIso = toIso(actual);
+  const nuevaIso = toIso(nueva);
+  if (!actualIso) return nuevaIso;
+  if (!nuevaIso) return actualIso;
+  return new Date(actualIso) < new Date(nuevaIso) ? actualIso : nuevaIso;
+}
+
+function siguienteMes(fecha) {
+  const iso = toIso(fecha);
+  if (!iso) return null;
+  const date = new Date(iso);
+  date.setMonth(date.getMonth() + 1);
+  return date.toISOString();
+}
+
+async function buscarSuscriptor(db, { preapprovalId, externalReference, payerEmail }) {
+  if (preapprovalId) {
+    const snapshot = await db
+      .collection("clubvinilos")
+      .where("mercadopago_preapproval_id", "==", preapprovalId)
+      .limit(1)
+      .get();
+    if (!snapshot.empty) return snapshot.docs[0];
+  }
+
+  if (externalReference) {
+    const ref = await db
+      .collection("clubvinilos")
+      .doc(String(externalReference).trim().toLowerCase())
+      .get();
+    if (ref.exists) return ref;
+  }
+
+  if (payerEmail) {
+    const ref = await db
+      .collection("clubvinilos")
+      .doc(String(payerEmail).trim().toLowerCase())
+      .get();
+    if (ref.exists) return ref;
+  }
+
+  return null;
+}
+
+async function guardarHistorial(docRef, historialId, datos) {
+  if (!historialId) return;
+  await docRef
+    .collection("historialPagos")
+    .doc(String(historialId))
+    .set(datos, { merge: true });
 }
 
 export default async function handler(req, res) {
@@ -52,40 +161,18 @@ export default async function handler(req, res) {
       const externalReference = mpData?.external_reference || body.data?.external_reference;
       const payerEmail = mpData?.payer_email || body.data?.payer_email;
 
-      let snapshot = await db
-        .collection("clubvinilos")
-        .where("mercadopago_preapproval_id", "==", preapprovalId)
-        .limit(1)
-        .get();
+      const doc = await buscarSuscriptor(db, {
+        preapprovalId,
+        externalReference,
+        payerEmail,
+      });
 
-      if (snapshot.empty && externalReference) {
-        const subscriberRef = await db.collection("clubvinilos").doc(externalReference).get();
-        if (subscriberRef.exists) {
-          snapshot = {
-            empty: false,
-            docs: [subscriberRef],
-          };
-        }
-      }
-
-      if (snapshot.empty && payerEmail) {
-        const subscriberRef = await db.collection("clubvinilos").doc(payerEmail.trim().toLowerCase()).get();
-        if (subscriberRef.exists) {
-          snapshot = {
-            empty: false,
-            docs: [subscriberRef],
-          };
-        }
-      }
-
-      if (snapshot.empty) {
+      if (!doc) {
         console.warn("Webhook for unknown preapproval:", preapprovalId);
         return res.status(200).json({ status: "ignored", reason: "unknown_preapproval" });
       }
 
-      const doc = snapshot.docs[0];
       const data = doc.data();
-
       const status = body.data?.status || mpData?.status || data.mercadopago_status;
 
       const statusMap = {
@@ -96,25 +183,45 @@ export default async function handler(req, res) {
 
       const updates = {
         mercadopago_status: status,
+        mercadopago_preapproval_id: data.mercadopago_preapproval_id || preapprovalId,
         ...(statusMap[status] || {}),
       };
 
-      if (status === "authorized" && !data.fechaPrimerPago) {
-        updates.fechaPrimerPago = new Date().toISOString();
-      }
-
       if (status === "authorized") {
-        updates.fechaUltimoPago = new Date().toISOString();
-        updates.fechaProximoCobro = body.data?.next_payment_date || null;
+        const facturas = (await fetchAuthorizedPayments(preapprovalId))
+          .filter(facturaPagada)
+          .map((factura) => ({ ...factura, fecha: fechaFactura(factura) }))
+          .filter((factura) => factura.fecha)
+          .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-        const historialRef = doc.ref.collection("historialPagos").doc();
-        await historialRef.set({
-          fecha: new Date().toISOString(),
-          estado: "authorized",
-          monto: body.data?.transaction_amount || 100,
-          mercadopago_payment_id: body.data?.payment_id || null,
-          type: "payment",
-        });
+        if (facturas.length > 0) {
+          const ultimaFactura = facturas[facturas.length - 1];
+          updates.fechaPrimerPago = facturas[0].fecha;
+          updates.fechaUltimoPago = ultimaFactura.fecha;
+          updates.fechaProximoCobro =
+            toIso(mpData?.next_payment_date) || siguienteMes(ultimaFactura.fecha);
+        } else if (mpData?.next_payment_date) {
+          updates.fechaProximoCobro = toIso(mpData.next_payment_date);
+        }
+
+        await Promise.all(
+          facturas.map((factura) => {
+            const historialId = factura.payment?.id
+              ? `payment_${factura.payment.id}`
+              : `authorized_${factura.id}`;
+            return guardarHistorial(doc.ref, historialId, {
+              fecha: factura.fecha,
+              estado: factura.payment?.status || factura.status || "authorized",
+              monto: Number(factura.transaction_amount) || 0,
+              moneda: factura.currency_id || "ARS",
+              mercadopago_payment_id: factura.payment?.id || null,
+              mercadopago_authorized_payment_id: factura.id || null,
+              mercadopago_preapproval_id: preapprovalId,
+              type: "payment",
+              actualizadoEn: new Date().toISOString(),
+            });
+          })
+        );
       }
 
       await doc.ref.update(updates);
@@ -122,40 +229,174 @@ export default async function handler(req, res) {
       return res.status(200).json({ status: "processed" });
     }
 
+    if (
+      body.type === "subscription_authorized_payment" ||
+      body.type === "authorized_payment"
+    ) {
+      const db = getDb();
+      const authorizedPaymentId = body.data?.id;
+
+      if (!authorizedPaymentId) {
+        return res.status(200).json({ status: "ignored" });
+      }
+
+      const authorizedPayment = await fetchAuthorizedPayment(authorizedPaymentId);
+      const preapprovalId =
+        authorizedPayment?.preapproval_id || body.data?.preapproval_id;
+      const externalReference =
+        authorizedPayment?.external_reference || body.data?.external_reference;
+
+      const doc = await buscarSuscriptor(db, {
+        preapprovalId,
+        externalReference,
+        payerEmail: null,
+      });
+
+      if (!doc) {
+        console.warn(
+          "Authorized payment webhook for unknown subscriber:",
+          authorizedPaymentId
+        );
+        return res.status(200).json({ status: "ignored", reason: "unknown_subscriber" });
+      }
+
+      const data = doc.data();
+      const paymentId = authorizedPayment?.payment?.id;
+      const estado =
+        authorizedPayment?.payment?.status ||
+        authorizedPayment?.status ||
+        body.data?.status ||
+        "unknown";
+      const fechaPago =
+        toIso(authorizedPayment?.debit_date) ||
+        toIso(authorizedPayment?.date_created) ||
+        toIso(body.data?.debit_date) ||
+        new Date().toISOString();
+      const monto = Number(
+        authorizedPayment?.transaction_amount ?? body.data?.transaction_amount ?? 0
+      );
+
+      await guardarHistorial(
+        doc.ref,
+        paymentId ? `payment_${paymentId}` : `authorized_${authorizedPaymentId}`,
+        {
+          fecha: fechaPago,
+          estado,
+          monto,
+          moneda: authorizedPayment?.currency_id || body.data?.currency_id || "ARS",
+          mercadopago_payment_id: paymentId || null,
+          mercadopago_authorized_payment_id: authorizedPayment?.id || authorizedPaymentId,
+          mercadopago_preapproval_id: preapprovalId || data.mercadopago_preapproval_id || null,
+          type: "payment",
+          actualizadoEn: new Date().toISOString(),
+        }
+      );
+
+      const pagoAprobado = authorizedPayment?.payment?.status
+        ? ["approved", "authorized"].includes(authorizedPayment.payment.status)
+        : ["processed", "approved", "authorized"].includes(authorizedPayment?.status);
+
+      if (pagoAprobado) {
+        const preapproval = preapprovalId
+          ? await fetchPreapprovalStatus(preapprovalId)
+          : null;
+
+        await doc.ref.update({
+          fechaPrimerPago: fechaMasAntigua(data.fechaPrimerPago, fechaPago),
+          fechaUltimoPago: fechaMasReciente(data.fechaUltimoPago, fechaPago),
+          fechaProximoCobro:
+            toIso(preapproval?.next_payment_date) || siguienteMes(fechaPago),
+          mercadopago_status: "authorized",
+          mercadopago_preapproval_id:
+            data.mercadopago_preapproval_id || preapprovalId || null,
+          activo: true,
+          pendiente: false,
+        });
+      }
+
+      return res.status(200).json({ status: "processed" });
+    }
+
     if (body.type === "payment") {
       const db = getDb();
-      const preapprovalId = body.data?.preapproval_id;
-
-      if (!preapprovalId) {
-        return res.status(200).json({ status: "ignored" });
-      }
-
-      const snapshot = await db
-        .collection("clubvinilos")
-        .where("mercadopago_preapproval_id", "==", preapprovalId)
-        .limit(1)
-        .get();
-
-      if (snapshot.empty) {
-        return res.status(200).json({ status: "ignored" });
-      }
-
-      const doc = snapshot.docs[0];
       const paymentId = body.data?.id;
 
-      const historialRef = doc.ref.collection("historialPagos").doc();
-      await historialRef.set({
-        fecha: new Date().toISOString(),
-        estado: body.data?.status || "unknown",
-        monto: body.data?.transaction_amount || 100,
-        mercadopago_payment_id: paymentId || null,
-        type: "payment",
+      if (!paymentId) {
+        return res.status(200).json({ status: "ignored" });
+      }
+
+      const payment = await fetchPayment(paymentId);
+      let preapprovalId =
+        payment?.metadata?.preapproval_id ||
+        payment?.preapproval_id ||
+        body.data?.preapproval_id;
+
+      let authorizedPayment = null;
+      if (!preapprovalId) {
+        authorizedPayment = await fetchAuthorizedPaymentByPaymentId(paymentId);
+        preapprovalId = authorizedPayment?.preapproval_id;
+      }
+
+      const externalReference =
+        payment?.external_reference ||
+        body.data?.external_reference ||
+        authorizedPayment?.external_reference;
+      const payerEmail = payment?.payer?.email || body.data?.payer_email;
+
+      const doc = await buscarSuscriptor(db, {
+        preapprovalId,
+        externalReference,
+        payerEmail,
       });
 
-      await doc.ref.update({
-        fechaUltimoPago: new Date().toISOString(),
-        fechaProximoCobro: body.data?.next_payment_date || null,
+      if (!doc) {
+        console.warn("Payment webhook for unknown subscriber:", paymentId);
+        return res.status(200).json({ status: "ignored", reason: "unknown_subscriber" });
+      }
+
+      const data = doc.data();
+      const estado = payment?.status || body.data?.status || "unknown";
+      const fechaPago =
+        toIso(payment?.date_approved) ||
+        toIso(payment?.date_created) ||
+        toIso(body.data?.date_created) ||
+        new Date().toISOString();
+      const monto = Number(
+        payment?.transaction_amount ??
+          body.data?.transaction_amount ??
+          authorizedPayment?.transaction_amount ??
+          0
+      );
+
+      await guardarHistorial(doc.ref, `payment_${paymentId}`, {
+        fecha: fechaPago,
+        estado,
+        monto,
+        moneda: payment?.currency_id || body.data?.currency_id || "ARS",
+        mercadopago_payment_id: payment?.id || paymentId,
+        mercadopago_authorized_payment_id: authorizedPayment?.id || null,
+        mercadopago_preapproval_id: preapprovalId || data.mercadopago_preapproval_id || null,
+        type: "payment",
+        actualizadoEn: new Date().toISOString(),
       });
+
+      if (estado === "approved" || estado === "authorized") {
+        const preapproval = preapprovalId
+          ? await fetchPreapprovalStatus(preapprovalId)
+          : null;
+
+        await doc.ref.update({
+          fechaPrimerPago: fechaMasAntigua(data.fechaPrimerPago, fechaPago),
+          fechaUltimoPago: fechaMasReciente(data.fechaUltimoPago, fechaPago),
+          fechaProximoCobro:
+            toIso(preapproval?.next_payment_date) || siguienteMes(fechaPago),
+          mercadopago_status: "authorized",
+          mercadopago_preapproval_id:
+            data.mercadopago_preapproval_id || preapprovalId || null,
+          activo: true,
+          pendiente: false,
+        });
+      }
 
       return res.status(200).json({ status: "processed" });
     }
