@@ -9,7 +9,8 @@ async function fetchMp(path) {
       headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
     });
     if (!res.ok) {
-      console.error(`MercadoPago ${path} returned ${res.status}`);
+      const body = await res.text().catch(() => "");
+      console.error(`MercadoPago ${path} returned ${res.status} ${body}`);
       return null;
     }
     return await res.json();
@@ -33,19 +34,40 @@ function siguienteMes(fecha) {
   return date.toISOString();
 }
 
+async function fetchMpResult(path) {
+  try {
+    const res = await fetch(`${MP_API_URL}${path}`, {
+      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+    });
+    const body = await res.text().catch(() => "");
+
+    if (!res.ok) {
+      console.error(`MercadoPago ${path} returned ${res.status} ${body}`);
+      return { error: `HTTP ${res.status}: ${body}` };
+    }
+
+    return { data: body ? JSON.parse(body) : null };
+  } catch (e) {
+    console.error(`Error fetching MercadoPago ${path}:`, e.message);
+    return { error: e.message };
+  }
+}
+
 async function obtenerFacturas(preapprovalId) {
   const facturas = [];
   let offset = 0;
   const limit = 50;
 
   while (true) {
-    const data = await fetchMp(
+    const { data, error } = await fetchMpResult(
       `/authorized_payments/search?preapproval_id=${encodeURIComponent(preapprovalId)}&limit=${limit}&offset=${offset}`
     );
 
-    if (!data) return null;
+    if (error) {
+      return { facturas, error };
+    }
 
-    const pagina = data.results || [];
+    const pagina = data?.results || [];
     facturas.push(...pagina);
 
     const total = data?.paging?.total ?? facturas.length;
@@ -54,19 +76,39 @@ async function obtenerFacturas(preapprovalId) {
     if (!pagina.length || offset >= total) break;
   }
 
-  return facturas;
+  return { facturas, error: null };
 }
 
 function facturaPagada(factura) {
   const pagoEstado = factura?.payment?.status;
-  if (pagoEstado) return pagoEstado === "approved" || pagoEstado === "authorized";
-  return ["processed", "approved", "authorized"].includes(factura?.status);
+  if (pagoEstado) {
+    return ["approved", "authorized", "processed"].includes(pagoEstado);
+  }
+  if (factura?.status) {
+    return ["approved", "authorized", "processed", "paid", "accredited"].includes(
+      factura.status
+    );
+  }
+  if (factura?._raw_payment?.status) {
+    return ["approved", "authorized", "processed", "paid", "accredited"].includes(
+      factura._raw_payment.status
+    );
+  }
+  return false;
 }
 
 function historialId(factura) {
-  return factura.payment?.id
-    ? `payment_${factura.payment.id}`
-    : `authorized_${factura.id}`;
+  const paymentId = factura.payment?.id || factura?._raw_payment?.id || factura?.id;
+  if (paymentId && String(paymentId).match(/^\d+$/)) {
+    return `payment_${paymentId}`;
+  }
+  if (factura.payment?.id) {
+    return `payment_${factura.payment.id}`;
+  }
+  if (factura?._raw_payment?.id) {
+    return `payment_${factura._raw_payment.id}`;
+  }
+  return factura.id ? `authorized_${factura.id}` : null;
 }
 
 async function sincronizarSuscriptor(db, email) {
@@ -84,7 +126,7 @@ async function sincronizarSuscriptor(db, email) {
     return { email, actualizado: false, motivo: "sin_preapproval" };
   }
 
-  const [preapproval, facturas] = await Promise.all([
+  const [preapproval, resultadoFacturas] = await Promise.all([
     fetchMp(`/preapproval/${preapprovalId}`),
     obtenerFacturas(preapprovalId),
   ]);
@@ -93,30 +135,58 @@ async function sincronizarSuscriptor(db, email) {
     return { email, actualizado: false, motivo: "preapproval_no_encontrado" };
   }
 
-  if (!facturas) {
-    return { email, actualizado: false, motivo: "error_facturas" };
+  if (resultadoFacturas.error) {
+    return {
+      email,
+      actualizado: false,
+      motivo: `error_facturas: ${String(resultadoFacturas.error).slice(0, 180)}`,
+    };
   }
+
+  const facturas = resultadoFacturas.facturas;
 
   const pagadas = facturas.filter(facturaPagada);
   const batch = db.batch();
   const historialRef = docRef.collection("historialPagos");
 
   pagadas.forEach((factura) => {
-    const fecha = toIso(factura.debit_date) || toIso(factura.date_created);
+    const fecha =
+      toIso(factura.debit_date) ||
+      toIso(factura.date_approved) ||
+      toIso(factura.date_created) ||
+      toIso(factura?._raw_payment?.date_approved) ||
+      toIso(factura?._raw_payment?.date_created);
     if (!fecha) return;
 
     const id = historialId(factura);
-    const monto = Number(factura.transaction_amount);
+    if (!id) return;
+
+    const monto = Number(
+      factura.transaction_amount ??
+        factura?._raw_payment?.transaction_amount ??
+        factura?._raw_payment?.transaction_details?.net_received_amount ??
+        0
+    );
+    const estado =
+      factura.payment?.status ||
+      factura.status ||
+      factura?._raw_payment?.status ||
+      "approved";
+    const paymentId = factura.payment?.id || factura?._raw_payment?.id || null;
+    const moneda = factura.currency_id || factura?._raw_payment?.currency_id || "ARS";
 
     batch.set(
       historialRef.doc(id),
       {
         fecha,
-        estado: factura.payment?.status || factura.status || "approved",
+        estado,
         monto: Number.isFinite(monto) ? monto : 0,
-        moneda: factura.currency_id || "ARS",
-        mercadopago_payment_id: factura.payment?.id || null,
-        mercadopago_authorized_payment_id: factura.id || null,
+        moneda,
+        mercadopago_payment_id: paymentId,
+        mercadopago_authorized_payment_id:
+          factura.id && !String(factura.id).startsWith?.("payment_")
+            ? factura.id
+            : null,
         mercadopago_preapproval_id: preapprovalId,
         type: "payment",
         actualizadoEn: new Date().toISOString(),
@@ -126,7 +196,14 @@ async function sincronizarSuscriptor(db, email) {
   });
 
   const fechas = pagadas
-    .map((factura) => toIso(factura.debit_date) || toIso(factura.date_created))
+    .map(
+      (factura) =>
+        toIso(factura.debit_date) ||
+        toIso(factura.date_approved) ||
+        toIso(factura.date_created) ||
+        toIso(factura?._raw_payment?.date_approved) ||
+        toIso(factura?._raw_payment?.date_created)
+    )
     .filter(Boolean)
     .sort();
 
