@@ -70,7 +70,7 @@ function PurchaseModal({ onClose, catalogKey = "drop" }) {
   const isRetiro = isArtlabPickup || metodoEntrega.includes("Retiro");
   const esDropCheckout = catalog.key === "drop";
   const origenCompra = esDropCheckout ? "Drop" : "Tienda fisica";
-  const aliasPago = esDropCheckout ? "E110101" : "E110101";
+  const aliasPago = esDropCheckout ? "E110101" : "BuenosAiresWax";
   const metodoEntregaDetalle = isArtlabPickup
     ? "Punto de retiro Artlab (Rosetti 93, viernes y sabados de 19:00 a 23:59)"
     : metodoEntrega;
@@ -763,9 +763,9 @@ ${
                 </button>
 
 {/*                 <p className="modalText form-footer-text">
-                  Su pedido será armado y aparecerá listo para ser enviado por
-                  WhatsApp.
-                </p> */}
+                   Su pedido será armado y aparecerá listo para ser enviado por
+                   WhatsApp.
+                 </p> */}
               </form>
                 </div>{/* cart-right-panel */}
               </div>{/* cart-columns */}
