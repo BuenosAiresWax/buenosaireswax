@@ -20,7 +20,7 @@ const PEDIDOS_ITEMS = [
         tab: "Pedidos",
         icon: "📬",
         label: "Pedidos",
-        description: "Bandeja general de pedidos del drop",
+        description: "Bandeja general de pedidos",
     },
     {
         tab: "PedidosTienda",
