@@ -9,59 +9,11 @@
     overflow-x: hidden;
 }
 
-.admin-controls {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    overflow-y: hidden;
-}
-
-.tab-btn {
-    background-color: #85858513;
-    color: #9c9a9a;
-    border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    padding: 6px 10px;
+.admin-heading {
     display: flex;
     flex-direction: column;
-    /* Ícono arriba */
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    cursor: pointer;
-    min-width: 110px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.tab-icon {
-    font-size: 26px;
-    /* Emojis más claros y visibles */
-    line-height: 1;
-}
-
-.active-tab {
-    border-color: #92de1839;
-    background-color: #ffffff00;
-}
-
-.tab-btn-realtime {
-    border-color: rgba(95, 214, 255, 0.35);
-    color: #bdefff;
-}
-
-.tab-btn-realtime:hover {
-    background-color: rgba(95, 214, 255, 0.08);
-}
-
-
-.admin-header {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: 100%;
-    margin-bottom: 1.5rem;
+    gap: 0.35rem;
+    margin-bottom: 1.1rem;
 }
 
 .admin-title {
@@ -70,6 +22,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin: 0;
 }
 
 .admin-title::before {
@@ -80,7 +33,300 @@
     background-position: center;
     background-repeat: no-repeat;
     background-size: 90px;
-    opacity: 075;
+    opacity: 0.75;
+    flex-shrink: 0;
+}
+
+.admin-subtitle {
+    margin: 0;
+    padding-left: 108px;
+    color: #9c9a9a;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------
+   Navegación principal
+------------------------------------------------------------------ */
+
+.admin-controls {
+    position: relative;
+    z-index: 30;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-nav {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    min-width: 0;
+}
+
+.admin-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 170px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+    color: #9c9a9a;
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-nav-item:hover {
+    color: #eaeaea;
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.admin-nav-item:focus-visible,
+.admin-nav-dropdown-item:focus-visible,
+.logout-btn:focus-visible {
+    outline: 2px solid #5fd6ff;
+    outline-offset: 2px;
+}
+
+.admin-nav-item.is-active {
+    color: #f4f4f4;
+    border-color: rgba(155, 107, 255, 0.45);
+    background: linear-gradient(180deg, rgba(155, 107, 255, 0.16), rgba(95, 214, 255, 0.06));
+    box-shadow: inset 0 0 0 1px rgba(155, 107, 255, 0.12);
+}
+
+.admin-nav-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 19px;
+    line-height: 1;
+}
+
+.admin-nav-item.is-active .admin-nav-icon {
+    background: rgba(155, 107, 255, 0.16);
+}
+
+.admin-nav-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.admin-nav-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: inherit;
+    line-height: 1.25;
+}
+
+.admin-nav-sub {
+    font-size: 0.73rem;
+    font-weight: 500;
+    color: #858585;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-nav-item.is-active .admin-nav-sub,
+.admin-nav-item.is-open .admin-nav-sub {
+    color: #b8b8b8;
+}
+
+.admin-nav-badge {
+    display: inline-grid;
+    place-items: center;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: rgba(155, 107, 255, 0.2);
+    color: #c9b4ff;
+    font-size: 0.66rem;
+    font-weight: 700;
+}
+
+.admin-nav-group {
+    position: relative;
+}
+
+.admin-nav-item-group {
+    padding-right: 34px;
+}
+
+.admin-nav-chevron {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    font-size: 0.78rem;
+    color: #8d8d8d;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.admin-nav-chevron.is-open {
+    transform: translateY(-50%) rotate(180deg);
+    color: #c9b4ff;
+}
+
+/* ------------------------------------------------------------------
+   Dropdown de pedidos y catálogo
+------------------------------------------------------------------ */
+
+.admin-nav-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 340px;
+    padding: 0.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #181818;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.2);
+    z-index: 60;
+    animation: adminDropdownIn 0.16s ease-out;
+}
+
+@keyframes adminDropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-nav-dropdown-title {
+    margin: 0;
+    padding: 0.45rem 0.6rem 0.55rem;
+    color: #7f7f7f;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.admin-nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.55rem 0.6rem;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #d3d3d3;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.admin-nav-dropdown-item.is-active {
+    background: linear-gradient(90deg, rgba(155, 107, 255, 0.18), rgba(95, 214, 255, 0.06));
+    color: #fff;
+}
+
+.admin-nav-dropdown-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 17px;
+    line-height: 1;
+}
+
+.admin-nav-dropdown-item.is-active .admin-nav-dropdown-icon {
+    background: rgba(155, 107, 255, 0.18);
+}
+
+.admin-nav-dropdown-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.admin-nav-dropdown-label {
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.admin-nav-dropdown-desc {
+    font-size: 0.72rem;
+    color: #8f8f8f;
+    line-height: 1.3;
+}
+
+.admin-nav-dropdown-item.is-active .admin-nav-dropdown-desc {
+    color: #bdbdbd;
+}
+
+.admin-nav-check {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: #a98bff;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* ------------------------------------------------------------------
+   Resto del panel
+------------------------------------------------------------------ */
+
+.tab-icon {
+    font-size: 26px;
+    line-height: 1;
+}
+
+.tab-content {
+    position: relative;
+    z-index: 1;
+}
+
+.tab-content .apc-container {
+    min-height: auto;
+    padding: 0;
+}
+
+.admin-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    margin-bottom: 1.5rem;
 }
 
 .admin-btn {
@@ -113,56 +359,140 @@
 }
 
 .logout-btn {
-    background-color: #8585852c;
-    color: #fff;
-    border-radius: 5px;
-    border: 2px solid rgba(255, 77, 77, 0.315);
-    padding: 10px 15px;
     display: flex;
+    flex-shrink: 0;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    cursor: pointer;
+    gap: 4px;
     min-width: 110px;
     margin-left: auto;
-    transition: .4s;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 77, 77, 0.32);
+    border-radius: 8px;
+    background-color: #8585852c;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .logout-btn .tab-icon {
-    font-size: 26px;
+    font-size: 22px;
     line-height: 1;
 }
 
 .logout-btn:hover {
     background-color: #ff4d4d55;
-    transition: .3s;
+    border-color: rgba(255, 77, 77, 0.6);
 }
 
-@media (max-width: 768px) {
-    .admin-header {
-        align-items: flex-start;
-        gap: 1rem;
-    }
+/* ------------------------------------------------------------------
+   Tablet
+------------------------------------------------------------------ */
 
-    .admin-title {
-        font-size: 1.3rem;
+@media (max-width: 1024px) {
+    .admin-controls {
+        flex-wrap: wrap;
     }
 
     .logout-btn {
-        margin-bottom: 10px;
-        width: 100%;
+        flex-direction: row;
+        min-width: 0;
+        margin-left: 0;
+        padding: 12px 16px;
+        gap: 8px;
+    }
+
+    .logout-btn .tab-icon {
+        font-size: 19px;
+    }
+}
+
+/* ------------------------------------------------------------------
+   Mobile
+------------------------------------------------------------------ */
+
+@media (max-width: 768px) {
+    .admin-container {
+        margin: 0;
+        padding: 0 8px 1.5rem;
+    }
+
+    .admin-heading {
+        margin-bottom: 0.9rem;
+    }
+
+    .admin-title {
+        font-size: 1.35rem;
+    }
+
+    .admin-title::before {
+        width: 54px;
+        height: 54px;
+        background-size: 50px;
+    }
+
+    .admin-subtitle {
+        padding-left: 0;
+        font-size: 0.82rem;
     }
 
     .admin-controls {
-        justify-content: space-between;
-        flex-flow: column-reverse;
-        align-items: center;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.7rem;
+        margin-bottom: 1rem;
     }
 
-    .admin-controls>div {
-        flex-flow: column;
+    .admin-nav {
+        flex-direction: column;
+        flex-wrap: nowrap;
         width: 100%;
+        gap: 0.5rem;
+    }
+
+    .admin-nav-item {
+        width: 100%;
+        min-width: 0;
+        padding: 11px 13px;
+    }
+
+    .admin-nav-sub {
+        white-space: normal;
+    }
+
+    .admin-nav-group {
+        width: 100%;
+    }
+
+    .admin-nav-dropdown {
+        position: static;
+        width: 100%;
+        margin-top: 6px;
+        box-shadow: none;
+        background: #151515;
+        animation: none;
+    }
+
+    .admin-nav-dropdown-item {
+        padding: 0.65rem 0.55rem;
+    }
+
+    .logout-btn {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        margin: 0;
+        padding: 12px;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .logout-btn .tab-icon {
+        font-size: 19px;
     }
 
     .pedidos-container {
@@ -170,49 +500,14 @@
     }
 }
 
-/* --- SOLO MOBILE (≤768px) --- */
-@media (max-width: 768px) {
-
-    .admin-container{
-        padding: 0 5px;
-        margin: 0;
+@media (prefers-reduced-motion: reduce) {
+    .admin-nav-dropdown {
+        animation: none;
     }
 
-    /* Contenedor de pestañas scrolleable */
-    .admin-controls>div {
-        display: flex;
-        flex-direction: row ;
-        overflow-x: auto;
-        /* permite scroll horizontal */
-        gap: 10px;
-        padding-bottom: 10px;
-        width: 100%;
-        scrollbar-width: thin;
-        /* opcional */
-    }
-
-    /* Botones más grandes y contenidos al lado */
-    .tab-btn {
-        flex-direction: row;
-        /* icono y texto al lado */
-        align-items: center;
-        justify-content: center;
-        padding: 12px 20px;
-        min-width: 200px;
-        /* más visibles */
-        font-size: 16px;
-        gap: 12px;
-        white-space: nowrap;
-        /* evita que el texto salte de línea */
-    }
-
-    /* Ícono más visible en mobile */
-    .tab-icon {
-        font-size: 28px;
-    }
-
-    /* Ocultar scroll bar (opcional) */
-    .admin-controls>div::-webkit-scrollbar {
-        height: 6px;
+    .admin-nav-item,
+    .admin-nav-chevron,
+    .logout-btn {
+        transition: none;
     }
 }

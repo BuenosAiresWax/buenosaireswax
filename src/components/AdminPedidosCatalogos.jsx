@@ -264,7 +264,7 @@ function obtenerEtiquetaOrigen(sourceCollection) {
     return "Pedido";
 }
 
-export default function AdminPedidosCatalogos() {
+export default function AdminPedidosCatalogos({ onBack }) {
     const navigate = useNavigate();
     const [pedidosTienda, setPedidosTienda] = useState([]);
     const [pedidosEquipamiento, setPedidosEquipamiento] = useState([]);
@@ -690,7 +690,12 @@ export default function AdminPedidosCatalogos() {
                     </p>
                 </div>
 
-                <button className="apc-back-btn" onClick={() => navigate("/admin")}>Volver al Panel</button>
+                <button
+                    className="apc-back-btn"
+                    onClick={() => (onBack ? onBack() : navigate("/admin"))}
+                >
+                    Volver al Panel
+                </button>
             </div>
 
             <div className="apc-toolbar">
