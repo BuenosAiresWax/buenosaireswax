@@ -15,40 +15,6 @@
     background-clip: auto;
 }
 
-/* 📚 Selector de colecciones */
-.colecciones-selector {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin: 2rem 0;
-    flex-wrap: wrap;
-}
-
-.coleccion-btn {
-    padding: 0.7rem 1.5rem;
-    border-radius: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.05);
-    color: #ddd;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.coleccion-btn:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-}
-
-.coleccion-btn.activa {
-    background: linear-gradient(90deg, #9a6bff45, #5fd7ff4f);
-    border-color: transparent;
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(155, 107, 255, 0.3);
-}
-
 /* 🧱 Contenedor de productos: grid responsive 3x */
 .productos-list {
     display: grid;

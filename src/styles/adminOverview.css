@@ -33,6 +33,12 @@
     flex-wrap: wrap;
 }
 
+.ao-period {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* Source tabs */
 .ao-source-tabs {
     display: flex;
@@ -41,9 +47,13 @@
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 8px;
     padding: 3px;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .ao-source-tab {
+    box-sizing: border-box;
+    min-width: 0;
     background: transparent;
     border: none;
     color: #9aa7bd;
@@ -72,6 +82,8 @@
 }
 
 .ao-select {
+    box-sizing: border-box;
+    max-width: 100%;
     background: #262626d7;
     color: #d7e7fb;
     border: 1px solid #1d2124;
@@ -110,6 +122,12 @@
     font-weight: 700;
     margin-top: 6px;
     color: #f1f8ff;
+    overflow-wrap: anywhere;
+}
+
+.ao-card--top .ao-card-value {
+    font-size: 1.15rem;
+    line-height: 1.3;
 }
 
 .ao-card-sub {
@@ -131,6 +149,9 @@
     min-height: 260px;
     display: flex;
     flex-direction: column;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
 }
 
 
@@ -150,6 +171,21 @@
 .ao-empty {
     color: #8fa2be;
     font-size: 0.95rem;
+}
+
+.ao-chart-info {
+    margin-top: 10px;
+    padding: 0.5rem 0.65rem;
+    border-radius: 8px;
+    background: rgba(96, 165, 250, 0.08);
+    border: 1px solid rgba(96, 165, 250, 0.18);
+    color: #cfe3ff;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.ao-chart-info strong {
+    color: #e8f2ff;
 }
 
 /* Lista de pedidos resumen */
@@ -314,5 +350,146 @@
 
     .ao-cards {
         grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .ao-container {
+        padding: 4px 0;
+        gap: 12px;
+    }
+
+    .ao-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+    }
+
+    .ao-title {
+        margin-top: 0.25rem;
+        font-size: 1.05rem;
+    }
+
+    .ao-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .ao-source-tabs {
+        width: 100%;
+    }
+
+    .ao-source-tab {
+        flex: 1;
+        padding: 7px 10px;
+        text-align: center;
+    }
+
+    .ao-period {
+        justify-content: space-between;
+    }
+
+    .ao-period .ao-select {
+        flex: 1;
+        min-width: 0;
+        padding: 8px 10px;
+        font-size: 0.88rem;
+    }
+
+    .ao-cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0;
+    }
+
+    .ao-card {
+        padding: 10px;
+        min-height: 0;
+        border-radius: 9px;
+    }
+
+    .ao-card-title {
+        font-size: 0.74rem;
+    }
+
+    .ao-card-value {
+        font-size: 1.2rem;
+        margin-top: 4px;
+    }
+
+    .ao-card--top .ao-card-value {
+        font-size: 0.92rem;
+    }
+
+    .ao-card-sub {
+        font-size: 0.7rem;
+        margin-top: 3px;
+    }
+
+    .ao-charts-row {
+        gap: 0.65rem;
+    }
+
+    .ao-chart-card {
+        padding: 10px;
+        min-height: 0;
+        border-radius: 9px;
+    }
+
+    .ao-chart-title {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+    .ao-chart-info {
+        margin-top: 8px;
+        padding: 0.45rem 0.55rem;
+        font-size: 0.74rem;
+    }
+
+    .ao-list-card {
+        margin-top: 0;
+        padding: 10px;
+        border-radius: 9px;
+    }
+
+    .ao-list-title {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .ao-list-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 9px;
+    }
+
+    .ao-row-left,
+    .ao-row-right {
+        width: 100%;
+    }
+
+    .ao-row-right {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .ao-row-name,
+    .ao-row-meta,
+    .ao-row-date {
+        overflow-wrap: anywhere;
+    }
+
+    .ao-row-date {
+        font-size: 0.72rem;
+        text-align: right;
+    }
+
+    .ao-row-total {
+        font-size: 0.95rem;
     }
 }

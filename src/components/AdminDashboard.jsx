@@ -92,9 +92,20 @@ function AdminDashboardContent() {
         <div className="admin-container">
             <div className="admin-heading">
                 <h1 className="admin-title">Panel de Administración</h1>
-                <p className="admin-subtitle">
-                    Gestioná pedidos, catálogo, Vinyl Club y la configuración del sitio desde un solo lugar.
-                </p>
+                <div className="admin-heading-row">
+                    <p className="admin-subtitle">
+                        Gestioná pedidos, catálogo, Vinyl Club y la configuración del sitio desde un solo lugar.
+                    </p>
+                    <button
+                        type="button"
+                        className="logout-btn logout-btn--heading"
+                        onClick={handleLogout}
+                        aria-label="Cerrar sesión"
+                    >
+                        <span className="tab-icon" aria-hidden="true">📤</span>
+                        <span className="logout-label">Cerrar sesión</span>
+                    </button>
+                </div>
             </div>
 
             <div className="admin-controls">
@@ -112,7 +123,7 @@ function AdminDashboardContent() {
                         </span>
                     </button>
 
-                    <div className="admin-nav-group" ref={pedidosGroupRef}>
+                    <div className={`admin-nav-group ${pedidosMenuOpen ? "is-open" : ""}`} ref={pedidosGroupRef}>
                         <button
                             type="button"
                             className={`admin-nav-item admin-nav-item-group ${pedidosGroupActive ? "is-active" : ""} ${pedidosMenuOpen ? "is-open" : ""}`}
@@ -195,9 +206,9 @@ function AdminDashboardContent() {
                     </button>
                 </nav>
 
-                <button type="button" className="logout-btn" onClick={handleLogout}>
+                <button type="button" className="logout-btn logout-btn--top" onClick={handleLogout}>
                     <span className="tab-icon" aria-hidden="true">📤</span>
-                    <span>Cerrar sesión</span>
+                    <span className="logout-label">Cerrar sesión</span>
                 </button>
             </div>
 

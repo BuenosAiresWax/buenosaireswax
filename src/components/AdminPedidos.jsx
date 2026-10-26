@@ -79,7 +79,7 @@ function obtenerDireccionResumida(pedido) {
 }
 
 export default function PedidosAdmin() {
-    const { pedidos, pedidosTienda, pedidosEquipamiento, loading, refetch } = useAdminData();
+    const { pedidos, pedidosTienda, loading, refetch } = useAdminData();
 
     const [pedidosVisibles, setPedidosVisibles] = useState([]);
     const [mesesOrdenados, setMesesOrdenados] = useState([]);
@@ -97,7 +97,7 @@ export default function PedidosAdmin() {
     // Combinar todos los pedidos de todas las colecciones
     // -------------------------------------------------
     const todosPedidosCombinados = useMemo(() => {
-        const combinados = [...pedidos, ...pedidosTienda, ...pedidosEquipamiento];
+        const combinados = [...pedidos, ...pedidosTienda];
         
         return combinados
             .map(p => ({
@@ -107,7 +107,7 @@ export default function PedidosAdmin() {
                 ),
             }))
             .sort((a, b) => b.fechaObj - a.fechaObj);
-    }, [pedidos, pedidosTienda, pedidosEquipamiento]);
+    }, [pedidos, pedidosTienda]);
 
     // -------------------------------------------------
     // Normalizar y ordenar pedidos
@@ -695,32 +695,44 @@ export default function PedidosAdmin() {
             <h2 className="productos-admin-title">Lista de Pedidos</h2>
 
             {/* Selector de Colecciones de Pedidos */}
-            <div className="colecciones-selector">
+            <nav className="admin-nav admin-nav--collections" aria-label="Filtrar pedidos por colección">
                 <button
-                    className={`coleccion-btn ${filtroColeccion === "todos" ? "activa" : ""}`}
+                    type="button"
+                    className={`admin-nav-item ${filtroColeccion === "todos" ? "is-active" : ""}`}
                     onClick={() => setFiltroColeccion("todos")}
+                    aria-current={filtroColeccion === "todos" ? "page" : undefined}
                 >
-                    📋 Todos
+                    <span className="admin-nav-icon" aria-hidden="true">📋</span>
+                    <span className="admin-nav-copy">
+                        <span className="admin-nav-label">Todos</span>
+                        <span className="admin-nav-sub">Drop y tienda</span>
+                    </span>
                 </button>
                 <button
-                    className={`coleccion-btn ${filtroColeccion === "pedidos" ? "activa" : ""}`}
+                    type="button"
+                    className={`admin-nav-item ${filtroColeccion === "pedidos" ? "is-active" : ""}`}
                     onClick={() => setFiltroColeccion("pedidos")}
+                    aria-current={filtroColeccion === "pedidos" ? "page" : undefined}
                 >
-                    🎵 Drops
+                    <span className="admin-nav-icon" aria-hidden="true">🎵</span>
+                    <span className="admin-nav-copy">
+                        <span className="admin-nav-label">Drops</span>
+                        <span className="admin-nav-sub">Pedidos del drop</span>
+                    </span>
                 </button>
                 <button
-                    className={`coleccion-btn ${filtroColeccion === "pedidosTienda" ? "activa" : ""}`}
+                    type="button"
+                    className={`admin-nav-item ${filtroColeccion === "pedidosTienda" ? "is-active" : ""}`}
                     onClick={() => setFiltroColeccion("pedidosTienda")}
+                    aria-current={filtroColeccion === "pedidosTienda" ? "page" : undefined}
                 >
-                    🏪 Tienda
+                    <span className="admin-nav-icon" aria-hidden="true">🏪</span>
+                    <span className="admin-nav-copy">
+                        <span className="admin-nav-label">Tienda</span>
+                        <span className="admin-nav-sub">Pedidos de la tienda</span>
+                    </span>
                 </button>
-                <button
-                    className={`coleccion-btn ${filtroColeccion === "pedidosEquipamiento" ? "activa" : ""}`}
-                    onClick={() => setFiltroColeccion("pedidosEquipamiento")}
-                >
-                    🎛️ Equipamiento
-                </button>
-            </div>
+            </nav>
 
             <div className="pedidos-orden-selector">
                 <input

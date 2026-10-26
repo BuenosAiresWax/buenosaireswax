@@ -269,7 +269,7 @@ export default function AdminOverview() {
                         ))}
                     </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div className="ao-period">
                         <label className="ao-label">Periodo</label>
                         <select
                             className="ao-select"
@@ -305,7 +305,7 @@ export default function AdminOverview() {
                     <div className="ao-card-sub">Activos: {cantidadPedidos} | Cancelados: {cantidadCancelados}</div>
                 </div>
 
-                <div className="ao-card">
+                <div className="ao-card ao-card--top">
                     <div className="ao-card-title">Top producto</div>
                     <div className="ao-card-value">{dataProductos[0]?.nombre || "-"}</div>
                     <div className="ao-card-sub">{dataProductos[0] ? `${dataProductos[0].ventas} uds` : ""}</div>

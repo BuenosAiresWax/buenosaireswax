@@ -9,9 +9,8 @@ import "../styles/adminProductos.css";
 import "../styles/admin.css";
 
 const COLECCIONES = {
-    productos: { label: "🎵 Drops", key: "productos", firebaseCollection: "productos" },
-    productosTienda: { label: "🏪 Tienda", key: "productosTienda", firebaseCollection: "productosTienda" },
-    equipamiento: { label: "🎛️ Equipamiento", key: "equipamiento", firebaseCollection: "equipamiento" },
+    productos: { label: "Drops", icon: "🎵", description: "Catálogo de drops", key: "productos", firebaseCollection: "productos" },
+    productosTienda: { label: "Tienda", icon: "🏪", description: "Productos de la tienda", key: "productosTienda", firebaseCollection: "productosTienda" },
 };
 
 const EDITABLE_NUMERIC_FIELDS = ["precio", "cantidad", "reservados"];
@@ -52,7 +51,7 @@ const getTextOrFallback = (value, fallback = "Sin dato") => {
 };
 
 export default function ProductosAdmin() {
-    const { productos, productosTienda, equipamiento, loading, refetch } = useAdminData();
+    const { productos, productosTienda, loading, refetch } = useAdminData();
 
     const [busqueda, setBusqueda] = useState("");
     const [error, setError] = useState(null);
@@ -83,7 +82,6 @@ export default function ProductosAdmin() {
     const productosMap = {
         productos,
         productosTienda,
-        equipamiento,
     };
 
     /* USE MEMO: Filtrar y ordenar productos */
@@ -339,11 +337,13 @@ export default function ProductosAdmin() {
             <h2 className="productos-admin-title">Inventario de Productos</h2>
 
             {/* Selector de Colecciones */}
-            <div className="colecciones-selector">
+            <nav className="admin-nav admin-nav--collections" aria-label="Filtrar productos por colección">
                 {Object.entries(COLECCIONES).map(([key, coleccion]) => (
                     <button
                         key={key}
-                        className={`coleccion-btn ${coleccionSeleccionada === key ? "activa" : ""}`}
+                        type="button"
+                        className={`admin-nav-item ${coleccionSeleccionada === key ? "is-active" : ""}`}
+                        aria-current={coleccionSeleccionada === key ? "page" : undefined}
                         onClick={() => {
                             setColeccionSeleccionada(key);
                             setBusqueda("");
@@ -352,10 +352,14 @@ export default function ProductosAdmin() {
                             setFiltroEstado("todos");
                         }}
                     >
-                        {coleccion.label}
+                        <span className="admin-nav-icon" aria-hidden="true">{coleccion.icon}</span>
+                        <span className="admin-nav-copy">
+                            <span className="admin-nav-label">{coleccion.label}</span>
+                            <span className="admin-nav-sub">{coleccion.description}</span>
+                        </span>
                     </button>
                 ))}
-            </div>
+            </nav>
 
             <div className="orden-selector">
                 <div className="search-wrapper">
