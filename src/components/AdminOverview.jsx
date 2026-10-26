@@ -116,11 +116,10 @@ function agruparPorMes(pedidos) {
 const FUENTES = [
     { value: "dropActual", label: "Drop Actual" },
     { value: "tienda", label: "Tienda Física" },
-    { value: "equipamiento", label: "Equipamiento" },
 ];
 
 export default function AdminOverview() {
-    const { pedidos, pedidosTienda, pedidosEquipamiento, loading } = useAdminData();
+    const { pedidos, pedidosTienda, loading } = useAdminData();
 
     const [fuenteSeleccionada, setFuenteSeleccionada] = useState("dropActual");
     const [mesesOrdenados, setMesesOrdenados] = useState([]);
@@ -129,12 +128,7 @@ export default function AdminOverview() {
 
     // Seleccionar el array correcto según la fuente
     const pedidosTodos = useMemo(() => {
-        const origen =
-            fuenteSeleccionada === "tienda"
-                ? pedidosTienda
-                : fuenteSeleccionada === "equipamiento"
-                    ? pedidosEquipamiento
-                    : pedidos;
+        const origen = fuenteSeleccionada === "tienda" ? pedidosTienda : pedidos;
 
         return (origen || []).map((p) => ({
             ...p,
@@ -142,7 +136,7 @@ export default function AdminOverview() {
                 p.fechaObj ?? p.fecha ?? p.createdAt ?? p.fechaCreacion ?? p.created_at ?? p.timestamp
             ),
         }));
-    }, [fuenteSeleccionada, pedidos, pedidosTienda, pedidosEquipamiento]);
+    }, [fuenteSeleccionada, pedidos, pedidosTienda]);
 
     useEffect(() => {
         // Resetear mes al cambiar fuente
