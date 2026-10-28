@@ -59,3 +59,30 @@ export async function sincronizarPagos(emails) {
 
   return response.json();
 }
+
+export async function reconciliarSuscripciones({
+  offset = 0,
+  limit = 5,
+  incluirPendientes = false,
+  incluirCancelados = false,
+} = {}) {
+  const response = await fetch(`${API_BASE}/reconciliar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      offset,
+      limit,
+      incluirPendientes,
+      incluirCancelados,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(
+      error.message || `Error al importar suscripciones (HTTP ${response.status})`
+    );
+  }
+
+  return response.json();
+}

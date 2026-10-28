@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { sincronizarPagos } from "../utils/mercadopago";
+import { sincronizarPagos, reconciliarSuscripciones } from "../utils/mercadopago";
 import * as XLSX from "xlsx";
 import "../styles/adminVinylClub.css";
 
@@ -14,6 +14,7 @@ const CATEGORIAS_LABELS = {
 const STATUS_LABELS = {
   authorized: "Activa",
   paused: "Pausada",
+  pending: "Pendiente",
   cancelled: "Cancelada",
 };
 
@@ -26,6 +27,7 @@ const FILTROS = [
   { id: "sin-pago", label: "Sin pago" },
   { id: "pendientes", label: "Pendientes" },
   { id: "abandonados", label: "Abandonados" },
+  { id: "pausados", label: "Pausados" },
   { id: "cancelados", label: "Cancelados" },
 ];
 
@@ -59,7 +61,7 @@ function formatEstadoPago(estado) {
     approved: "Aprobado",
     authorized: "Autorizado",
     processed: "Procesado",
-    pending: "Pendiente",
+  pending: "Sin autorizar",
     in_process: "En proceso",
     rejected: "Rechazado",
     cancelled: "Cancelado",
@@ -100,15 +102,29 @@ function esCancelado(s) {
   return !esActivo(s) && s?.mercadopago_status === "cancelled";
 }
 
+function esPausado(s) {
+  return (
+    !esActivo(s) &&
+    !esCancelado(s) &&
+    s?.mercadopago_status === "paused"
+  );
+}
+
 function esPendiente(s) {
-  return s?.pendiente === true && !esActivo(s) && !esCancelado(s);
+  return (
+    s?.pendiente === true &&
+    !esActivo(s) &&
+    !esCancelado(s) &&
+    !esPausado(s) &&
+    s?.mercadopago_status !== "pending"
+  );
 }
 
 function esAbandonado(s) {
   return (
     !esActivo(s) &&
     !esCancelado(s) &&
-    !esPendiente(s) &&
+    !esPausado(s) &&
     s?.mercadopago_status === "pending"
   );
 }
@@ -125,21 +141,18 @@ function getEstado(s) {
   if (esActivoReal(s)) return { label: "Activo", color: "#22c55e" };
   if (esActivoSinPago(s)) return { label: "Sin pago", color: "#f59e0b" };
   if (esCancelado(s)) return { label: "Cancelado", color: "#ef4444" };
-  if (esPendiente(s)) {
-    if (s?.mercadopago_status === "paused") {
-      return { label: "Pausado", color: "#eab308" };
-    }
-    return { label: "Pendiente", color: "#eab308" };
-  }
+  if (esPausado(s)) return { label: "Pausado", color: "#eab308" };
+  if (esPendiente(s)) return { label: "Pendiente", color: "#eab308" };
   if (esAbandonado(s)) return { label: "Abandonado", color: "#f97316" };
   return { label: "Inactivo", color: "#666" };
 }
 
 function prioridadSuscriptor(s) {
-  if (esActivo(s)) return 4;
+  if (esActivo(s)) return 5;
+  if (esPausado(s)) return 4;
   if (esPendiente(s)) return 3;
-  if (s?.mercadopago_status === "paused") return 2;
-  if (esCancelado(s)) return 1;
+  if (esCancelado(s)) return 2;
+  if (esAbandonado(s)) return 1;
   return 0;
 }
 
@@ -163,7 +176,7 @@ function clavesSuscriptor(s) {
   const dni = normalizarDni(s?.dni);
   if (dni) claves.add(`dni:${dni}`);
 
-  [s?.correo, s?.email, s?.id]
+  [s?.correo, s?.email, s?.mercadopago_email, s?.id]
     .map(normalizarEmail)
     .filter((email) => email.includes("@"))
     .forEach((email) => claves.add(`email:${email}`));
@@ -230,6 +243,8 @@ export default function AdminVinylClub() {
   const [mostrarMenuDescarga, setMostrarMenuDescarga] = useState(false);
   const [sincronizando, setSincronizando] = useState(false);
   const [syncProgreso, setSyncProgreso] = useState("");
+  const [importando, setImportando] = useState(false);
+  const [importProgreso, setImportProgreso] = useState("");
   const [historiales, setHistoriales] = useState({});
   const [cargandoHistorial, setCargandoHistorial] = useState(null);
   const menuDescargaRef = useRef(null);
@@ -311,8 +326,10 @@ export default function AdminVinylClub() {
   const cancelados = suscriptoresUnicos.filter(esCancelado);
   const pendientes = suscriptoresUnicos.filter(esPendiente);
   const abandonados = suscriptoresUnicos.filter(esAbandonado);
+  const pausados = suscriptoresUnicos.filter(esPausado);
   const idsPendientes = new Set(pendientes.map((s) => s.id));
   const idsAbandonados = new Set(abandonados.map((s) => s.id));
+  const idsPausados = new Set(pausados.map((s) => s.id));
 
   const suscriptoresFiltrados = suscriptoresUnicos.filter((s) => {
     if (!s || typeof s !== "object") return false;
@@ -322,16 +339,19 @@ export default function AdminVinylClub() {
     if (filtro === "cancelados" && !esCancelado(s)) return false;
     if (filtro === "pendientes" && !idsPendientes.has(s.id)) return false;
     if (filtro === "abandonados" && !idsAbandonados.has(s.id)) return false;
+    if (filtro === "pausados" && !idsPausados.has(s.id)) return false;
 
     if (busqueda.trim()) {
       const q = busqueda.toLowerCase();
       const nombre = s.nombre || "";
       const correo = s.correo || "";
+      const mpEmail = s.mercadopago_email || "";
       const instagram = s.instagram || "";
       const dni = s.dni || "";
       return (
         nombre.toLowerCase().includes(q) ||
         correo.toLowerCase().includes(q) ||
+        mpEmail.toLowerCase().includes(q) ||
         instagram.toLowerCase().includes(q) ||
         dni.includes(q)
       );
@@ -347,6 +367,7 @@ export default function AdminVinylClub() {
     cancelados: cancelados.length,
     pendientes: pendientes.length,
     abandonados: abandonados.length,
+    pausados: pausados.length,
     ingresos: activos.length * CUOTA_MENSUAL,
   };
 
@@ -355,6 +376,7 @@ export default function AdminVinylClub() {
       "#": i + 1,
       Nombre: s.nombre || "",
       Email: s.correo || "",
+      "Email MercadoPago": s.mercadopago_email || "",
       Instagram: s.instagram || "",
       DNI: s.dni || "",
       Telefono: s.telefono || "",
@@ -371,11 +393,13 @@ export default function AdminVinylClub() {
           ? "Sin pago"
           : esCancelado(s)
             ? "Cancelado"
-            : esPendiente(s)
-              ? "Pendiente"
-              : esAbandonado(s)
-                ? "Abandonado"
-                : "Inactivo",
+            : esPausado(s)
+              ? "Pausado"
+              : esPendiente(s)
+                ? "Pendiente"
+                : esAbandonado(s)
+                  ? "Abandonado"
+                  : "Inactivo",
       "MP Status": STATUS_LABELS[s.mercadopago_status] || s.mercadopago_status || "Sin estado",
       "Fecha Alta": formatDate(s.fechaAlta),
       "Primer Pago": formatDate(s.fechaPrimerPago),
@@ -407,6 +431,7 @@ export default function AdminVinylClub() {
     if (tipo === "sin-pago") exportarExcel(sinPago, "vinyl-club-sin-pago");
     if (tipo === "pendientes") exportarExcel(pendientes, "vinyl-club-pendientes");
     if (tipo === "abandonados") exportarExcel(abandonados, "vinyl-club-abandonados");
+    if (tipo === "pausados") exportarExcel(pausados, "vinyl-club-pausados");
     if (tipo === "cancelados") exportarExcel(cancelados, "vinyl-club-cancelados");
   };
 
@@ -480,6 +505,89 @@ export default function AdminVinylClub() {
     );
   };
 
+  const handleImportarMercadoPago = async () => {
+    if (importando) return;
+
+    const confirmado = window.confirm(
+      "Se van a leer las suscripciones de MercadoPago y se crearán fichas para las que todavía no existan. ¿Continuar?"
+    );
+    if (!confirmado) return;
+
+    setImportando(true);
+    setImportProgreso("Consultando MercadoPago...");
+
+    const totales = {
+      creados: 0,
+      actualizados: 0,
+      conflictos: 0,
+      omitidos: 0,
+      errores: 0,
+      pagos: 0,
+      procesados: 0,
+    };
+    let offset = 0;
+    let total = null;
+    let yaVinculadas = null;
+    let primerDetalle = "";
+
+    try {
+      while (true) {
+        setImportProgreso(
+          total
+            ? `${Math.min(offset, total)}/${total}`
+            : "Consultando MercadoPago..."
+        );
+
+        const resultado = await reconciliarSuscripciones({
+          offset,
+          limit: 3,
+        });
+
+        if (yaVinculadas == null) {
+          yaVinculadas = resultado.totalVinculados || 0;
+        }
+        total = resultado.totalRelevantes ?? total;
+        totales.creados += resultado.creados || 0;
+        totales.actualizados += resultado.actualizados || 0;
+        totales.conflictos += resultado.conflictos || 0;
+        totales.omitidos += resultado.omitidos || 0;
+        totales.errores += resultado.errores || 0;
+        totales.pagos += resultado.pagos || 0;
+        totales.procesados += resultado.procesados || 0;
+
+        if (!primerDetalle) {
+          const detalle = (resultado.resultados || []).find(
+            (item) =>
+              item.accion === "conflicto" ||
+              item.accion === "error" ||
+              item.accion === "omitido"
+          );
+          if (detalle) {
+            primerDetalle = `${detalle.email || detalle.preapprovalId || "sin email"}: ${
+              detalle.motivo || detalle.accion
+            }`;
+          }
+        }
+
+        if (resultado.nextOffset == null) break;
+        offset = resultado.nextOffset;
+      }
+
+      setHistoriales({});
+      alert(
+        `Importación desde MercadoPago finalizada.\nNuevas fichas: ${totales.creados}\nActualizadas: ${totales.actualizados}\nYa vinculadas: ${yaVinculadas ?? 0}\nPagos importados: ${totales.pagos}\nConflictos: ${totales.conflictos}\nOmitidas: ${totales.omitidos}\nCon error: ${totales.errores}${
+          primerDetalle ? `\n\nPrimer detalle: ${primerDetalle}` : ""
+        }`
+      );
+    } catch (err) {
+      console.error("Error importando suscripciones:", err);
+      alert(`No se pudo importar de MercadoPago: ${err.message}`);
+    } finally {
+      setImportando(false);
+      setImportProgreso("");
+    }
+  };
+
   if (loading) {
     return (
       <div className="vc-admin-container">
@@ -522,6 +630,10 @@ export default function AdminVinylClub() {
           <div className="vc-admin-stat-value">{stats.abandonados}</div>
           <div className="vc-admin-stat-label">Abandonados</div>
         </div>
+        <div className="vc-admin-stat-card vc-admin-stat-paused">
+          <div className="vc-admin-stat-value">{stats.pausados}</div>
+          <div className="vc-admin-stat-label">Pausados</div>
+        </div>
         <div className="vc-admin-stat-card vc-admin-stat-cancelled">
           <div className="vc-admin-stat-value">{stats.cancelados}</div>
           <div className="vc-admin-stat-label">Cancelados</div>
@@ -549,7 +661,7 @@ export default function AdminVinylClub() {
         <button
           className="vc-admin-sync-btn"
           onClick={handleSincronizarPagos}
-          disabled={sincronizando}
+          disabled={sincronizando || importando}
         >
           <svg
             className={sincronizando ? "vc-admin-sync-icon spinning" : "vc-admin-sync-icon"}
@@ -566,6 +678,29 @@ export default function AdminVinylClub() {
             <path d="M21 3v6h-6" />
           </svg>
           {sincronizando ? `Actualizando ${syncProgreso}` : "Actualizar pagos"}
+        </button>
+        <button
+          className="vc-admin-sync-btn"
+          onClick={handleImportarMercadoPago}
+          disabled={sincronizando || importando}
+          title="Importar suscripciones hechas por fuera de la web"
+        >
+          <svg
+            className={importando ? "vc-admin-sync-icon spinning" : "vc-admin-sync-icon"}
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 3v12" />
+            <path d="m7 10 5 5 5-5" />
+            <path d="M5 21h14" />
+          </svg>
+          {importando ? `Importando ${importProgreso}` : "Importar de MP"}
         </button>
         <div className="vc-admin-search-wrap">
           <input
@@ -594,6 +729,7 @@ export default function AdminVinylClub() {
                 <button onClick={() => handleDescargarExcel("sin-pago")}>Sin pago</button>
                 <button onClick={() => handleDescargarExcel("pendientes")}>Pendientes</button>
                 <button onClick={() => handleDescargarExcel("abandonados")}>Abandonados</button>
+                <button onClick={() => handleDescargarExcel("pausados")}>Pausados</button>
                 <button onClick={() => handleDescargarExcel("cancelados")}>Cancelados</button>
               </div>
             )}
@@ -688,6 +824,12 @@ export default function AdminVinylClub() {
                             : "—"}
                         </span>
                       </div>
+                      {s.mercadopago_email && s.mercadopago_email !== s.correo && (
+                        <div className="vc-admin-detail-item">
+                          <span className="vc-admin-detail-label">Email MercadoPago</span>
+                          <span>{s.mercadopago_email}</span>
+                        </div>
+                      )}
                       <div className="vc-admin-detail-item">
                         <span className="vc-admin-detail-label">Fecha alta</span>
                         <span>{formatDate(s.fechaAlta)}</span>

@@ -54,6 +54,10 @@
   color: #eab308;
 }
 
+.vc-admin-stat-paused .vc-admin-stat-value {
+  color: #eab308;
+}
+
 .vc-admin-stat-abandoned .vc-admin-stat-value {
   color: #f97316;
 }

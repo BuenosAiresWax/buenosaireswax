@@ -1,4 +1,8 @@
 import { getDb } from "../_lib/firebase-admin.js";
+import {
+  crearOActualizarFichaDesdePreapproval,
+  esDelClub,
+} from "../_lib/mp-suscripciones.js";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API_URL = "https://api.mercadopago.com";
@@ -173,13 +177,22 @@ export default async function handler(req, res) {
       const externalReference = mpData?.external_reference || body.data?.external_reference;
       const payerEmail = mpData?.payer_email || body.data?.payer_email;
 
-      const doc = await buscarSuscriptor(db, {
+      let doc = await buscarSuscriptor(db, {
         preapprovalId,
         externalReference,
         payerEmail,
       });
 
-      if (!doc) {
+      if (!doc && mpData && esDelClub(mpData)) {
+        const creado = await crearOActualizarFichaDesdePreapproval(db, mpData, {
+          requerirNombre: true,
+        });
+        if (creado?.docId) {
+          doc = await db.collection("clubvinilos").doc(creado.docId).get();
+        }
+      }
+
+      if (!doc || !doc.exists) {
         console.warn("Webhook for unknown preapproval:", preapprovalId);
         return res.status(200).json({ status: "ignored", reason: "unknown_preapproval" });
       }
@@ -258,13 +271,27 @@ export default async function handler(req, res) {
       const externalReference =
         authorizedPayment?.external_reference || body.data?.external_reference;
 
-      const doc = await buscarSuscriptor(db, {
+      let doc = await buscarSuscriptor(db, {
         preapprovalId,
         externalReference,
         payerEmail: null,
       });
 
-      if (!doc) {
+      if (!doc && preapprovalId) {
+        const preapproval = await fetchPreapprovalStatus(preapprovalId);
+        if (preapproval && esDelClub(preapproval)) {
+          const creado = await crearOActualizarFichaDesdePreapproval(
+            db,
+            preapproval,
+            { requerirNombre: true }
+          );
+          if (creado?.docId) {
+            doc = await db.collection("clubvinilos").doc(creado.docId).get();
+          }
+        }
+      }
+
+      if (!doc || !doc.exists) {
         console.warn(
           "Authorized payment webhook for unknown subscriber:",
           authorizedPaymentId
@@ -355,13 +382,27 @@ export default async function handler(req, res) {
         authorizedPayment?.external_reference;
       const payerEmail = payment?.payer?.email || body.data?.payer_email;
 
-      const doc = await buscarSuscriptor(db, {
+      let doc = await buscarSuscriptor(db, {
         preapprovalId,
         externalReference,
         payerEmail,
       });
 
-      if (!doc) {
+      if (!doc && preapprovalId) {
+        const preapproval = await fetchPreapprovalStatus(preapprovalId);
+        if (preapproval && esDelClub(preapproval)) {
+          const creado = await crearOActualizarFichaDesdePreapproval(
+            db,
+            preapproval,
+            { requerirNombre: true }
+          );
+          if (creado?.docId) {
+            doc = await db.collection("clubvinilos").doc(creado.docId).get();
+          }
+        }
+      }
+
+      if (!doc || !doc.exists) {
         console.warn("Payment webhook for unknown subscriber:", paymentId);
         return res.status(200).json({ status: "ignored", reason: "unknown_subscriber" });
       }
