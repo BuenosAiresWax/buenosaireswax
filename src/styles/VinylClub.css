@@ -166,6 +166,7 @@
   font-size: 13px;
   line-height: 1.5;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .vc-form-alert-icon {
@@ -649,8 +650,9 @@
   }
 
   .vc-section {
-    width: 92%;
+    width: calc(100% - 1.5rem);
     margin: 1.75rem auto;
+    box-sizing: border-box;
   }
 
   .vc-section-title {
@@ -699,8 +701,12 @@
   }
 
   .vc-form-alert {
+    width: calc(100% - 0.25rem);
+    max-width: none;
     margin-bottom: 1rem;
+    padding: 0.7rem 0.8rem;
     font-size: 12px;
+    box-sizing: border-box;
   }
 
   /* progress */
