@@ -430,6 +430,7 @@ export default function AdminVinylClub() {
     const tamanoLote = 5;
     let actualizados = 0;
     let errores = 0;
+    let sinSuscripcion = 0;
     let pagos = 0;
     let primerError = "";
     let primerMotivo = "";
@@ -439,15 +440,24 @@ export default function AdminVinylClub() {
       try {
         const resultado = await sincronizarPagos(lote);
         actualizados += resultado.actualizados || 0;
-        errores += resultado.errores || 0;
         pagos += resultado.pagos || 0;
 
-        const fallidos = (resultado.resultados || []).filter((r) => !r.actualizado);
-        if (fallidos.length > 0) {
-          console.warn("Sincronización con errores:", fallidos);
+        const resultados = resultado.resultados || [];
+        const sinPreapproval = resultados.filter(
+          (r) => !r.actualizado && r.motivo === "sin_preapproval"
+        );
+        const conError = resultados.filter(
+          (r) => !r.actualizado && r.motivo !== "sin_preapproval"
+        );
+
+        sinSuscripcion += sinPreapproval.length;
+        errores += conError.length;
+
+        if (conError.length > 0) {
+          console.warn("Sincronización con errores:", conError);
           if (!primerMotivo) {
-            primerMotivo = `${fallidos[0].email}: ${
-              fallidos[0].motivo || "sin detalle"
+            primerMotivo = `${conError[0].email}: ${
+              conError[0].motivo || "sin detalle"
             }`;
           }
         }
@@ -464,7 +474,7 @@ export default function AdminVinylClub() {
     setHistoriales({});
     const detalle = primerError || primerMotivo;
     alert(
-      `Sincronización finalizada.\nActualizados: ${actualizados}\nPagos reales: ${pagos}\nCon error: ${errores}${
+      `Sincronización finalizada.\nActualizados: ${actualizados}\nPagos reales: ${pagos}\nSin suscripción en MercadoPago: ${sinSuscripcion}\nCon error: ${errores}${
         detalle ? `\n\nDetalle: ${detalle}` : ""
       }`
     );

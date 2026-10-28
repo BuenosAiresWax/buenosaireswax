@@ -162,7 +162,7 @@ async function obtenerTodasPreapprovals() {
 
   while (true) {
     const data = await fetchMp(
-      `/preapproval/search?preapproval_plan_id=${MP_PREAPPROVAL_PLAN_ID}&limit=50&offset=${offset}`
+      `/preapproval/search?limit=50&offset=${offset}`
     );
 
     const pagina = data?.results || [];
@@ -175,6 +175,15 @@ async function obtenerTodasPreapprovals() {
   }
 
   return resultados;
+}
+
+function emailDeReferencia(preapproval) {
+  const referencia = normalizarEmail(preapproval?.external_reference);
+  return referencia.includes("@") ? referencia : "";
+}
+
+function normalizarEmail(valor) {
+  return String(valor || "").trim().toLowerCase();
 }
 
 async function buscarPreapproval(email, nombre, cargarTodas) {
@@ -194,7 +203,9 @@ async function buscarPreapproval(email, nombre, cargarTodas) {
   if (!todas.length) return null;
 
   const porEmail = todas.filter(
-    (preapproval) => String(preapproval?.payer_email || "").trim().toLowerCase() === email
+    (preapproval) =>
+      normalizarEmail(preapproval?.payer_email) === email ||
+      emailDeReferencia(preapproval) === email
   );
   if (porEmail.length > 0) return elegirPreapproval(porEmail);
 
@@ -203,6 +214,7 @@ async function buscarPreapproval(email, nombre, cargarTodas) {
 
   const porNombre = todas.filter(
     (preapproval) =>
+      preapproval?.preapproval_plan_id === MP_PREAPPROVAL_PLAN_ID &&
       nombrePreapproval(preapproval) === nombreBuscado &&
       ["authorized", "paused"].includes(preapproval?.status)
   );
