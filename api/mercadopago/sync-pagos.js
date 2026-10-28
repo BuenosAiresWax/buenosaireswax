@@ -2,6 +2,7 @@ import { getDb } from "../_lib/firebase-admin.js";
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const MP_API_URL = "https://api.mercadopago.com";
+const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
 async function fetchMp(path) {
   try {
@@ -109,29 +110,145 @@ function historialId(factura) {
   return factura.id ? `authorized_${factura.id}` : null;
 }
 
-async function sincronizarSuscriptor(db, email) {
+async function buscarDocumento(db, email) {
   const docRef = db.collection("clubvinilos").doc(email);
   const docSnap = await docRef.get();
+  if (docSnap.exists) return docSnap;
 
-  if (!docSnap.exists) {
+  const porCorreo = await db
+    .collection("clubvinilos")
+    .where("correo", "==", email)
+    .limit(1)
+    .get();
+
+  if (!porCorreo.empty) return porCorreo.docs[0];
+
+  return null;
+}
+
+function prioridadPreapproval(preapproval) {
+  const prioridades = { authorized: 4, paused: 3, pending: 2, cancelled: 1 };
+  return prioridades[preapproval?.status] || 0;
+}
+
+function elegirPreapproval(lista) {
+  return (
+    [...lista].sort((a, b) => {
+      const prioridad = prioridadPreapproval(b) - prioridadPreapproval(a);
+      if (prioridad !== 0) return prioridad;
+      return new Date(b?.date_created || 0) - new Date(a?.date_created || 0);
+    })[0] || null
+  );
+}
+
+function normalizarNombre(valor) {
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function nombrePreapproval(preapproval) {
+  return normalizarNombre(
+    `${preapproval?.payer_first_name || ""} ${preapproval?.payer_last_name || ""}`
+  );
+}
+
+async function obtenerTodasPreapprovals() {
+  const resultados = [];
+  let offset = 0;
+
+  while (true) {
+    const data = await fetchMp(
+      `/preapproval/search?preapproval_plan_id=${MP_PREAPPROVAL_PLAN_ID}&limit=50&offset=${offset}`
+    );
+
+    const pagina = data?.results || [];
+    resultados.push(...pagina);
+
+    const total = data?.paging?.total ?? resultados.length;
+    offset += pagina.length;
+
+    if (!pagina.length || offset >= total) break;
+  }
+
+  return resultados;
+}
+
+async function buscarPreapproval(email, nombre, cargarTodas) {
+  const conPlan = await fetchMp(
+    `/preapproval/search?payer_email=${encodeURIComponent(email)}&preapproval_plan_id=${MP_PREAPPROVAL_PLAN_ID}&limit=50`
+  );
+  const porEmailConPlan = elegirPreapproval(conPlan?.results || []);
+  if (porEmailConPlan) return porEmailConPlan;
+
+  const sinPlan = await fetchMp(
+    `/preapproval/search?payer_email=${encodeURIComponent(email)}&limit=50`
+  );
+  const porEmailSinPlan = elegirPreapproval(sinPlan?.results || []);
+  if (porEmailSinPlan) return porEmailSinPlan;
+
+  const todas = await cargarTodas();
+  if (!todas.length) return null;
+
+  const porEmail = todas.filter(
+    (preapproval) => String(preapproval?.payer_email || "").trim().toLowerCase() === email
+  );
+  if (porEmail.length > 0) return elegirPreapproval(porEmail);
+
+  const nombreBuscado = normalizarNombre(nombre);
+  if (!nombreBuscado) return null;
+
+  const porNombre = todas.filter(
+    (preapproval) =>
+      nombrePreapproval(preapproval) === nombreBuscado &&
+      ["authorized", "paused"].includes(preapproval?.status)
+  );
+
+  return porNombre.length > 0 ? elegirPreapproval(porNombre) : null;
+}
+
+async function sincronizarSuscriptor(db, email, opciones = {}) {
+  const docSnap = await buscarDocumento(db, email);
+
+  if (!docSnap) {
     return { email, actualizado: false, motivo: "no_existe" };
   }
 
+  const docRef = docSnap.ref;
   const data = docSnap.data();
-  const preapprovalId = data.mercadopago_preapproval_id;
+  const cargarTodas = opciones.cargarTodas || obtenerTodasPreapprovals;
 
-  if (!preapprovalId) {
+  let preapprovalId = data.mercadopago_preapproval_id || null;
+  let preapproval = preapprovalId
+    ? await fetchMp(`/preapproval/${preapprovalId}`)
+    : null;
+
+  if (!preapproval) {
+    const candidato = await buscarPreapproval(email, data.nombre, cargarTodas);
+
+    if (candidato) {
+      const asignado = await db
+        .collection("clubvinilos")
+        .where("mercadopago_preapproval_id", "==", candidato.id)
+        .limit(1)
+        .get();
+
+      const perteneceAOtro = !asignado.empty && asignado.docs[0].id !== docRef.id;
+      if (!perteneceAOtro) {
+        preapproval = candidato;
+        preapprovalId = candidato.id;
+      }
+    }
+  }
+
+  if (!preapprovalId || !preapproval) {
     return { email, actualizado: false, motivo: "sin_preapproval" };
   }
 
-  const [preapproval, resultadoFacturas] = await Promise.all([
-    fetchMp(`/preapproval/${preapprovalId}`),
-    obtenerFacturas(preapprovalId),
-  ]);
-
-  if (!preapproval) {
-    return { email, actualizado: false, motivo: "preapproval_no_encontrado" };
-  }
+  const resultadoFacturas = await obtenerFacturas(preapprovalId);
 
   if (resultadoFacturas.error) {
     return {
@@ -211,8 +328,11 @@ async function sincronizarSuscriptor(db, email) {
     toIso(preapproval?.next_payment_date) ||
     (fechaUltimoPago ? siguienteMes(fechaUltimoPago) : null);
 
+  const estado = preapproval?.status || data.mercadopago_status || "pending";
+
   const updates = {
     mercadopago_preapproval_id: preapprovalId,
+    mercadopago_status: estado,
   };
 
   if (fechas.length > 0) {
@@ -224,10 +344,15 @@ async function sincronizarSuscriptor(db, email) {
     updates.fechaProximoCobro = fechaProximoCobro;
   }
 
-  if (preapproval?.status === "authorized" && fechas.length > 0) {
+  if (estado === "authorized") {
     updates.activo = true;
     updates.pendiente = false;
-    updates.mercadopago_status = "authorized";
+  } else if (estado === "cancelled") {
+    updates.activo = false;
+    updates.pendiente = false;
+  } else if (estado === "paused" || estado === "pending") {
+    updates.activo = false;
+    updates.pendiente = true;
   }
 
   batch.update(docRef, updates);
@@ -277,10 +402,16 @@ export default async function handler(req, res) {
     }
 
     const db = getDb();
+    const cache = {};
+    const cargarTodas = () => {
+      if (!cache.todas) cache.todas = obtenerTodasPreapprovals();
+      return cache.todas;
+    };
+
     const resultados = await Promise.all(
       normalizados.map(async (item) => {
         try {
-          return await sincronizarSuscriptor(db, item);
+          return await sincronizarSuscriptor(db, item, { cargarTodas });
         } catch (error) {
           console.error(`Error sincronizando ${item}:`, error.message);
           return { email: item, actualizado: false, motivo: error.message };

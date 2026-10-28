@@ -414,9 +414,8 @@ export default function AdminVinylClub() {
     const emails = Array.from(
       new Set(
         suscriptoresUnicos
-          .filter((s) => s?.mercadopago_preapproval_id)
           .map((s) => normalizarEmail(s.correo || s.id))
-          .filter(Boolean)
+          .filter((email) => email.includes("@"))
       )
     );
 

@@ -87,6 +87,24 @@ function siguienteMes(fecha) {
   return date.toISOString();
 }
 
+async function buscarPorEmail(db, email) {
+  if (!email) return null;
+  const normalizado = String(email).trim().toLowerCase();
+
+  const ref = await db.collection("clubvinilos").doc(normalizado).get();
+  if (ref.exists) return ref;
+
+  const snapshot = await db
+    .collection("clubvinilos")
+    .where("correo", "==", normalizado)
+    .limit(1)
+    .get();
+
+  if (!snapshot.empty) return snapshot.docs[0];
+
+  return null;
+}
+
 async function buscarSuscriptor(db, { preapprovalId, externalReference, payerEmail }) {
   if (preapprovalId) {
     const snapshot = await db
@@ -98,19 +116,13 @@ async function buscarSuscriptor(db, { preapprovalId, externalReference, payerEma
   }
 
   if (externalReference) {
-    const ref = await db
-      .collection("clubvinilos")
-      .doc(String(externalReference).trim().toLowerCase())
-      .get();
-    if (ref.exists) return ref;
+    const ref = await buscarPorEmail(db, externalReference);
+    if (ref) return ref;
   }
 
   if (payerEmail) {
-    const ref = await db
-      .collection("clubvinilos")
-      .doc(String(payerEmail).trim().toLowerCase())
-      .get();
-    if (ref.exists) return ref;
+    const ref = await buscarPorEmail(db, payerEmail);
+    if (ref) return ref;
   }
 
   return null;
