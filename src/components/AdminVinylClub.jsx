@@ -458,7 +458,7 @@ export default function AdminVinylClub() {
     let sinSuscripcion = 0;
     let pagos = 0;
     let primerError = "";
-    let primerMotivo = "";
+    const fallidos = [];
 
     for (let i = 0; i < emails.length; i += tamanoLote) {
       const lote = emails.slice(i, i + tamanoLote);
@@ -480,28 +480,35 @@ export default function AdminVinylClub() {
 
         if (conError.length > 0) {
           console.warn("Sincronización con errores:", conError);
-          if (!primerMotivo) {
-            primerMotivo = `${conError[0].email}: ${
-              conError[0].motivo || "sin detalle"
-            }`;
-          }
+          conError.forEach((r) => {
+            fallidos.push(`${r.email}: ${r.motivo || "sin detalle"}`);
+          });
         }
       } catch (err) {
         console.error("Error sincronizando lote de pagos:", err);
         errores += lote.length;
         if (!primerError) primerError = err.message;
+        lote.forEach((email) => fallidos.push(`${email}: ${err.message}`));
       }
       setSyncProgreso(`${Math.min(i + tamanoLote, emails.length)}/${emails.length}`);
+
+      if (i + tamanoLote < emails.length) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
     }
 
     setSincronizando(false);
     setSyncProgreso("");
     setHistoriales({});
-    const detalle = primerError || primerMotivo;
+    const detalle = primerError ? `\n\nDetalle: ${primerError}` : "";
+    const detalleFallidos =
+      fallidos.length > 0
+        ? `\n\nErrores (${fallidos.length}):\n${fallidos
+            .slice(0, 8)
+            .join("\n")}${fallidos.length > 8 ? `\n... y ${fallidos.length - 8} más` : ""}`
+        : "";
     alert(
-      `Sincronización finalizada.\nActualizados: ${actualizados}\nPagos reales: ${pagos}\nSin suscripción en MercadoPago: ${sinSuscripcion}\nCon error: ${errores}${
-        detalle ? `\n\nDetalle: ${detalle}` : ""
-      }`
+      `Sincronización finalizada.\nActualizados: ${actualizados}\nPagos reales: ${pagos}\nSin suscripción en MercadoPago: ${sinSuscripcion}\nCon error: ${errores}${detalle}${detalleFallidos}`
     );
   };
 
@@ -571,6 +578,7 @@ export default function AdminVinylClub() {
 
         if (resultado.nextOffset == null) break;
         offset = resultado.nextOffset;
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
       setHistoriales({});

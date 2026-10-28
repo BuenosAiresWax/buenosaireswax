@@ -1,5 +1,5 @@
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const MP_API_URL = "https://api.mercadopago.com";
+import { fetchMpOrThrow, fetchMpResult } from "./mp-http.js";
+
 export const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
 export function normalizarEmail(valor) {
@@ -32,44 +32,6 @@ export function siguienteMes(fecha) {
   const date = new Date(iso);
   date.setMonth(date.getMonth() + 1);
   return date.toISOString();
-}
-
-export async function fetchMp(path) {
-  if (!MP_ACCESS_TOKEN) return null;
-
-  try {
-    const res = await fetch(`${MP_API_URL}${path}`, {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error(`MercadoPago ${path} returned ${res.status} ${body}`);
-      return null;
-    }
-    return await res.json();
-  } catch (e) {
-    console.error(`Error fetching MercadoPago ${path}:`, e.message);
-    return null;
-  }
-}
-
-async function fetchMpResult(path) {
-  try {
-    const res = await fetch(`${MP_API_URL}${path}`, {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-    });
-    const body = await res.text().catch(() => "");
-
-    if (!res.ok) {
-      console.error(`MercadoPago ${path} returned ${res.status} ${body}`);
-      return { error: `HTTP ${res.status}: ${body}` };
-    }
-
-    return { data: body ? JSON.parse(body) : null };
-  } catch (e) {
-    console.error(`Error fetching MercadoPago ${path}:`, e.message);
-    return { error: e.message };
-  }
 }
 
 export async function obtenerFacturas(preapprovalId) {
@@ -154,9 +116,14 @@ export async function obtenerTodasPreapprovals({ force = false } = {}) {
   let offset = 0;
 
   while (true) {
-    const data = await fetchMp(
-      `/preapproval/search?limit=50&offset=${offset}`
-    );
+    let data;
+    try {
+      data = await fetchMpOrThrow(
+        `/preapproval/search?limit=50&offset=${offset}`
+      );
+    } catch (error) {
+      throw new Error(`error_preapproval: ${error.message}`);
+    }
 
     const pagina = data?.results || [];
     resultados.push(...pagina);
@@ -220,6 +187,9 @@ async function obtenerPayer(preapproval) {
   let telefono = "";
 
   const resultadoFacturas = await obtenerFacturas(preapproval.id);
+  if (resultadoFacturas.error) {
+    throw new Error(`error_facturas: ${resultadoFacturas.error}`);
+  }
   const facturas = resultadoFacturas.facturas || [];
 
   const ordenadas = [...facturas].sort((a, b) => {
@@ -236,7 +206,12 @@ async function obtenerPayer(preapproval) {
 
     if (!paymentId) continue;
 
-    const payment = await fetchMp(`/v1/payments/${paymentId}`);
+    let payment;
+    try {
+      payment = await fetchMpOrThrow(`/v1/payments/${paymentId}`);
+    } catch (error) {
+      throw new Error(`error_payment: ${error.message}`);
+    }
     const payer = payment?.payer;
 
     if (!payer) continue;
@@ -257,7 +232,12 @@ async function obtenerPayer(preapproval) {
   }
 
   if (!first && !last && preapproval?.payer_id) {
-    const user = await fetchMp(`/users/${preapproval.payer_id}`);
+    let user;
+    try {
+      user = await fetchMpOrThrow(`/users/${preapproval.payer_id}`);
+    } catch (error) {
+      throw new Error(`error_user: ${error.message}`);
+    }
     if (user) {
       first = String(user.first_name || "").trim();
       last = String(user.last_name || "").trim();
@@ -650,7 +630,15 @@ export async function importarPreapprovalsExternas(db, opciones = {}) {
     resumen.pagos += resultado.pagos || 0;
   }
 
-  const siguiente = offset + lote.length;
+  const removidos = resultados.filter(
+    (resultado) =>
+      resultado.accion === "creado" ||
+      resultado.accion === "actualizado" ||
+      resultado.accion === "sin_cambios"
+  ).length;
+  const restantes = resultados.length - removidos;
+  const siguiente = offset + restantes;
+  const totalRestante = relevantes.length - removidos;
 
   return {
     totalPreapprovals: todas.length,
@@ -660,7 +648,7 @@ export async function importarPreapprovalsExternas(db, opciones = {}) {
     offset,
     limit,
     procesados: lote.length,
-    nextOffset: siguiente < relevantes.length ? siguiente : null,
+    nextOffset: siguiente < totalRestante ? siguiente : null,
     ...resumen,
     resultados,
   };

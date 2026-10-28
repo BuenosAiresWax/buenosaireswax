@@ -1,25 +1,7 @@
 import { getDb } from "../_lib/firebase-admin.js";
+import { fetchMpOrThrow, fetchMpResult } from "../_lib/mp-http.js";
 
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const MP_API_URL = "https://api.mercadopago.com";
 const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
-
-async function fetchMp(path) {
-  try {
-    const res = await fetch(`${MP_API_URL}${path}`, {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error(`MercadoPago ${path} returned ${res.status} ${body}`);
-      return null;
-    }
-    return await res.json();
-  } catch (e) {
-    console.error(`Error fetching MercadoPago ${path}:`, e.message);
-    return null;
-  }
-}
 
 function toIso(value) {
   if (!value) return null;
@@ -33,25 +15,6 @@ function siguienteMes(fecha) {
   const date = new Date(iso);
   date.setMonth(date.getMonth() + 1);
   return date.toISOString();
-}
-
-async function fetchMpResult(path) {
-  try {
-    const res = await fetch(`${MP_API_URL}${path}`, {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-    });
-    const body = await res.text().catch(() => "");
-
-    if (!res.ok) {
-      console.error(`MercadoPago ${path} returned ${res.status} ${body}`);
-      return { error: `HTTP ${res.status}: ${body}` };
-    }
-
-    return { data: body ? JSON.parse(body) : null };
-  } catch (e) {
-    console.error(`Error fetching MercadoPago ${path}:`, e.message);
-    return { error: e.message };
-  }
 }
 
 async function obtenerFacturas(preapprovalId) {
@@ -161,9 +124,14 @@ async function obtenerTodasPreapprovals() {
   let offset = 0;
 
   while (true) {
-    const data = await fetchMp(
-      `/preapproval/search?limit=50&offset=${offset}`
-    );
+    let data;
+    try {
+      data = await fetchMpOrThrow(
+        `/preapproval/search?limit=50&offset=${offset}`
+      );
+    } catch (error) {
+      throw new Error(`error_preapproval: ${error.message}`);
+    }
 
     const pagina = data?.results || [];
     resultados.push(...pagina);
@@ -186,22 +154,7 @@ function normalizarEmail(valor) {
   return String(valor || "").trim().toLowerCase();
 }
 
-async function buscarPreapproval(email, nombre, cargarTodas) {
-  const conPlan = await fetchMp(
-    `/preapproval/search?payer_email=${encodeURIComponent(email)}&preapproval_plan_id=${MP_PREAPPROVAL_PLAN_ID}&limit=50`
-  );
-  const porEmailConPlan = elegirPreapproval(conPlan?.results || []);
-  if (porEmailConPlan) return porEmailConPlan;
-
-  const sinPlan = await fetchMp(
-    `/preapproval/search?payer_email=${encodeURIComponent(email)}&limit=50`
-  );
-  const porEmailSinPlan = elegirPreapproval(sinPlan?.results || []);
-  if (porEmailSinPlan) return porEmailSinPlan;
-
-  const todas = await cargarTodas();
-  if (!todas.length) return null;
-
+function buscarPreapproval(email, nombre, todas) {
   const porEmail = todas.filter(
     (preapproval) =>
       normalizarEmail(preapproval?.payer_email) === email ||
@@ -232,14 +185,23 @@ async function sincronizarSuscriptor(db, email, opciones = {}) {
   const docRef = docSnap.ref;
   const data = docSnap.data();
   const cargarTodas = opciones.cargarTodas || obtenerTodasPreapprovals;
+  const todas = await cargarTodas();
 
   let preapprovalId = data.mercadopago_preapproval_id || null;
   let preapproval = preapprovalId
-    ? await fetchMp(`/preapproval/${preapprovalId}`)
+    ? todas.find((item) => item.id === preapprovalId) || null
     : null;
 
+  if (preapprovalId && !preapproval) {
+    try {
+      preapproval = await fetchMpOrThrow(`/preapproval/${preapprovalId}`);
+    } catch (error) {
+      throw new Error(`error_preapproval: ${error.message}`);
+    }
+  }
+
   if (!preapproval) {
-    const candidato = await buscarPreapproval(email, data.nombre, cargarTodas);
+    const candidato = buscarPreapproval(email, data.nombre, todas);
 
     if (candidato) {
       const asignado = await db
@@ -394,7 +356,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  if (!MP_ACCESS_TOKEN) {
+  if (!process.env.MP_ACCESS_TOKEN) {
     return res.status(500).json({ message: "MercadoPago no configurado." });
   }
 
@@ -420,16 +382,15 @@ export default async function handler(req, res) {
       return cache.todas;
     };
 
-    const resultados = await Promise.all(
-      normalizados.map(async (item) => {
-        try {
-          return await sincronizarSuscriptor(db, item, { cargarTodas });
-        } catch (error) {
-          console.error(`Error sincronizando ${item}:`, error.message);
-          return { email: item, actualizado: false, motivo: error.message };
-        }
-      })
-    );
+    const resultados = [];
+    for (const item of normalizados) {
+      try {
+        resultados.push(await sincronizarSuscriptor(db, item, { cargarTodas }));
+      } catch (error) {
+        console.error(`Error sincronizando ${item}:`, error.message);
+        resultados.push({ email: item, actualizado: false, motivo: error.message });
+      }
+    }
 
     const actualizados = resultados.filter((r) => r.actualizado).length;
     const errores = resultados.filter((r) => !r.actualizado).length;

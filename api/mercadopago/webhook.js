@@ -1,29 +1,9 @@
 import { getDb } from "../_lib/firebase-admin.js";
+import { fetchMp } from "../_lib/mp-http.js";
 import {
   crearOActualizarFichaDesdePreapproval,
   esDelClub,
 } from "../_lib/mp-suscripciones.js";
-
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const MP_API_URL = "https://api.mercadopago.com";
-
-async function fetchMp(path) {
-  if (!MP_ACCESS_TOKEN) return null;
-
-  try {
-    const res = await fetch(`${MP_API_URL}${path}`, {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-    });
-    if (!res.ok) {
-      console.error(`MercadoPago ${path} returned ${res.status}`);
-      return null;
-    }
-    return await res.json();
-  } catch (e) {
-    console.error(`Error fetching MercadoPago ${path}:`, e.message);
-    return null;
-  }
-}
 
 function fetchPreapprovalStatus(preapprovalId) {
   return fetchMp(`/preapproval/${preapprovalId}`);

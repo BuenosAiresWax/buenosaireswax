@@ -33,6 +33,8 @@ export default async function handler(req, res) {
     return res.status(200).json(resultado);
   } catch (error) {
     console.error("Reconciliar suscripciones error:", error);
-    return res.status(500).json({ message: "Error interno del servidor." });
+    return res
+      .status(500)
+      .json({ message: error.message || "Error interno del servidor." });
   }
 }
