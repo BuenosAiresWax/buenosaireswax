@@ -285,6 +285,14 @@ function VinylClubPage() {
       <div className="vc-section vc-form-section" ref={formRef}>
         <h2 className="vc-section-title">Formulario de suscripción</h2>
 
+        <div className="vc-form-alert" role="alert">
+          <span className="vc-form-alert-icon">!</span>
+          <span>
+            <strong>Importante:</strong> para completar la suscripción, usá el mismo DNI y correo
+            electrónico asociados a la cuenta de Mercado Pago que vas a usar para pagar.
+          </span>
+        </div>
+
         {/* Progress bar */}
         <div className="vc-progress" ref={stepRef}>
           <div className="vc-progress-bar">
