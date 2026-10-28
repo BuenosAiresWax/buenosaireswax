@@ -157,12 +157,67 @@ function esMejorCandidato(candidato, actual) {
   return fechaAltaMs(candidato) > fechaAltaMs(actual);
 }
 
-function claveSuscriptor(s) {
+function clavesSuscriptor(s) {
+  const claves = new Set();
+
   const dni = normalizarDni(s?.dni);
-  if (dni) return `dni:${dni}`;
-  const email = normalizarEmail(s?.correo || s?.id);
-  if (email) return `email:${email}`;
-  return `id:${s?.id}`;
+  if (dni) claves.add(`dni:${dni}`);
+
+  [s?.correo, s?.email, s?.id]
+    .map(normalizarEmail)
+    .filter((email) => email.includes("@"))
+    .forEach((email) => claves.add(`email:${email}`));
+
+  if (claves.size === 0) {
+    claves.add(`id:${String(s?.id || "").trim()}`);
+  }
+
+  return Array.from(claves);
+}
+
+function agruparSuscriptores(suscriptores) {
+  const padres = new Map();
+
+  const encontrar = (clave) => {
+    const padre = padres.get(clave);
+    if (padre === undefined || padre === clave) return clave;
+    const raiz = encontrar(padre);
+    padres.set(clave, raiz);
+    return raiz;
+  };
+
+  const unir = (a, b) => {
+    const raizA = encontrar(a);
+    const raizB = encontrar(b);
+    if (raizA !== raizB) padres.set(raizB, raizA);
+  };
+
+  const claveDe = new Map();
+
+  suscriptores.forEach((s) => {
+    if (!s || typeof s !== "object") return;
+    const claves = clavesSuscriptor(s);
+    claves.forEach((clave) => {
+      if (!padres.has(clave)) padres.set(clave, clave);
+    });
+    claves.forEach((clave) => unir(claves[0], clave));
+    claveDe.set(s, claves[0]);
+  });
+
+  const porGrupo = new Map();
+
+  suscriptores.forEach((s) => {
+    if (!s || typeof s !== "object") return;
+    const clave = claveDe.get(s);
+    if (!clave) return;
+    const raiz = encontrar(clave);
+    const actual = porGrupo.get(raiz);
+    if (!actual || esMejorCandidato(s, actual)) {
+      porGrupo.set(raiz, s);
+    }
+  });
+
+  return Array.from(porGrupo.values());
 }
 
 export default function AdminVinylClub() {
@@ -249,18 +304,7 @@ export default function AdminVinylClub() {
     };
   }, [expandido, historiales]);
 
-  const suscriptoresUnicos = (() => {
-    const porIdentidad = new Map();
-    suscriptores.forEach((s) => {
-      if (!s || typeof s !== "object") return;
-      const clave = claveSuscriptor(s);
-      const actual = porIdentidad.get(clave);
-      if (!actual || esMejorCandidato(s, actual)) {
-        porIdentidad.set(clave, s);
-      }
-    });
-    return Array.from(porIdentidad.values());
-  })();
+  const suscriptoresUnicos = agruparSuscriptores(suscriptores);
 
   const activos = suscriptoresUnicos.filter(esActivoReal);
   const sinPago = suscriptoresUnicos.filter(esActivoSinPago);
