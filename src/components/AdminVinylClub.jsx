@@ -31,6 +31,51 @@ const FILTROS = [
   { id: "cancelados", label: "Cancelados" },
 ];
 
+const ESTADOS_INFO = [
+  {
+    id: "activos",
+    label: "Activo",
+    color: "#22c55e",
+    desc: "Suscripción al día, con el último pago dentro de los últimos 31 días.",
+  },
+  {
+    id: "sin-pago",
+    label: "Sin pago",
+    color: "#f59e0b",
+    desc: "Sigue activo en MercadoPago pero el pago mensual venció o no se registró.",
+  },
+  {
+    id: "pendientes",
+    label: "Pendiente",
+    color: "#eab308",
+    desc: "Se registró en la web pero todavía no autorizó el débito automático.",
+  },
+  {
+    id: "abandonados",
+    label: "Abandonado",
+    color: "#f97316",
+    desc: "Inició el checkout de MercadoPago pero nunca completó la suscripción.",
+  },
+  {
+    id: "pausados",
+    label: "Pausado",
+    color: "#eab308",
+    desc: "Suscripción suspendida temporalmente, sin darse de baja.",
+  },
+  {
+    id: "cancelados",
+    label: "Cancelado",
+    color: "#ef4444",
+    desc: "Suscripción dada de baja por el socio o por MercadoPago.",
+  },
+  {
+    id: "inactivo",
+    label: "Inactivo",
+    color: "#6b7280",
+    desc: "Ficha sin estado reconocido o incompleta; conviene revisarla.",
+  },
+];
+
 function formatDate(iso) {
   if (!iso) return "—";
   try {
@@ -237,7 +282,8 @@ export default function AdminVinylClub() {
   const [suscriptores, setSuscriptores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filtro, setFiltro] = useState("todos");
+  const [filtro, setFiltro] = useState("activos");
+  const [mostrarGuia, setMostrarGuia] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [expandido, setExpandido] = useState(null);
   const [mostrarMenuDescarga, setMostrarMenuDescarga] = useState(false);
@@ -618,34 +664,69 @@ export default function AdminVinylClub() {
       <h2 className="vc-admin-title">Vinyl Club - Suscriptores</h2>
 
       <div className="vc-admin-stats">
-        <div className="vc-admin-stat-card">
+        <button
+          type="button"
+          className={`vc-admin-stat-card ${filtro === "todos" ? "is-selected" : ""}`}
+          onClick={() => setFiltro("todos")}
+          aria-pressed={filtro === "todos"}
+        >
           <div className="vc-admin-stat-value">{stats.total}</div>
           <div className="vc-admin-stat-label">Total</div>
-        </div>
-        <div className="vc-admin-stat-card vc-admin-stat-active">
+        </button>
+        <button
+          type="button"
+          className={`vc-admin-stat-card vc-admin-stat-active ${filtro === "activos" ? "is-selected" : ""}`}
+          onClick={() => setFiltro("activos")}
+          aria-pressed={filtro === "activos"}
+        >
           <div className="vc-admin-stat-value">{stats.activos}</div>
           <div className="vc-admin-stat-label">Activos reales</div>
-        </div>
-        <div className="vc-admin-stat-card vc-admin-stat-overdue">
+        </button>
+        <button
+          type="button"
+          className={`vc-admin-stat-card vc-admin-stat-overdue ${filtro === "sin-pago" ? "is-selected" : ""}`}
+          onClick={() => setFiltro("sin-pago")}
+          aria-pressed={filtro === "sin-pago"}
+        >
           <div className="vc-admin-stat-value">{stats.sinPago}</div>
           <div className="vc-admin-stat-label">Sin pago</div>
-        </div>
-        <div className="vc-admin-stat-card vc-admin-stat-pending">
+        </button>
+        <button
+          type="button"
+          className={`vc-admin-stat-card vc-admin-stat-pending ${filtro === "pendientes" ? "is-selected" : ""}`}
+          onClick={() => setFiltro("pendientes")}
+          aria-pressed={filtro === "pendientes"}
+        >
           <div className="vc-admin-stat-value">{stats.pendientes}</div>
           <div className="vc-admin-stat-label">Pendientes</div>
-        </div>
-        <div className="vc-admin-stat-card vc-admin-stat-abandoned">
+        </button>
+        <button
+          type="button"
+          className={`vc-admin-stat-card vc-admin-stat-abandoned ${filtro === "abandonados" ? "is-selected" : ""}`}
+          onClick={() => setFiltro("abandonados")}
+          aria-pressed={filtro === "abandonados"}
+        >
           <div className="vc-admin-stat-value">{stats.abandonados}</div>
           <div className="vc-admin-stat-label">Abandonados</div>
-        </div>
-        <div className="vc-admin-stat-card vc-admin-stat-paused">
+        </button>
+        <button
+          type="button"
+          className={`vc-admin-stat-card vc-admin-stat-paused ${filtro === "pausados" ? "is-selected" : ""}`}
+          onClick={() => setFiltro("pausados")}
+          aria-pressed={filtro === "pausados"}
+        >
           <div className="vc-admin-stat-value">{stats.pausados}</div>
           <div className="vc-admin-stat-label">Pausados</div>
-        </div>
-        <div className="vc-admin-stat-card vc-admin-stat-cancelled">
+        </button>
+        <button
+          type="button"
+          className={`vc-admin-stat-card vc-admin-stat-cancelled ${filtro === "cancelados" ? "is-selected" : ""}`}
+          onClick={() => setFiltro("cancelados")}
+          aria-pressed={filtro === "cancelados"}
+        >
           <div className="vc-admin-stat-value">{stats.cancelados}</div>
           <div className="vc-admin-stat-label">Cancelados</div>
-        </div>
+        </button>
         <div className="vc-admin-stat-card vc-admin-stat-revenue">
           <div className="vc-admin-stat-value">
             ${stats.ingresos.toLocaleString("es-AR")}
@@ -653,6 +734,78 @@ export default function AdminVinylClub() {
           <div className="vc-admin-stat-label">Ingresos mensuales (est.)</div>
         </div>
       </div>
+
+      <section className="vc-admin-guide" aria-label="Guía de estados del Vinyl Club">
+        <button
+          type="button"
+          className="vc-admin-guide-toggle"
+          onClick={() => setMostrarGuia((prev) => !prev)}
+          aria-expanded={mostrarGuia}
+          aria-controls="vc-admin-guide-body"
+        >
+          <span className="vc-admin-guide-heading">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+            ¿Qué significa cada estado?
+          </span>
+          <span className={`vc-admin-guide-chevron ${mostrarGuia ? "open" : ""}`}>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </span>
+        </button>
+        {mostrarGuia && (
+          <div className="vc-admin-guide-body" id="vc-admin-guide-body">
+            {ESTADOS_INFO.map((estado) => (
+              <div className="vc-admin-guide-item" key={estado.id}>
+                <span
+                  className="vc-admin-guide-dot"
+                  style={{ background: estado.color }}
+                  aria-hidden="true"
+                />
+                <div className="vc-admin-guide-text">
+                  <span className="vc-admin-guide-label">{estado.label}</span>
+                  <p className="vc-admin-guide-desc">{estado.desc}</p>
+                </div>
+              </div>
+            ))}
+            <p className="vc-admin-guide-note">
+              Los ingresos estimados se calculan sobre los activos reales
+              ({" "}
+              {CUOTA_MENSUAL.toLocaleString("es-AR", {
+                style: "currency",
+                currency: "ARS",
+                maximumFractionDigits: 0,
+              })}{" "}
+              por mes).
+            </p>
+          </div>
+        )}
+      </section>
+
 
       <div className="vc-admin-controls">
         <div className="vc-admin-filters">

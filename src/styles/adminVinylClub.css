@@ -38,6 +38,35 @@
   border-radius: 10px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
   text-align: center;
+  box-sizing: border-box;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+button.vc-admin-stat-card:hover {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.08), rgba(255, 255, 255, 0.01));
+}
+
+button.vc-admin-stat-card:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+button.vc-admin-stat-card.is-selected {
+  border-color: rgba(96, 165, 250, 0.6);
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.04));
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35), 0 0 14px rgba(96, 165, 250, 0.15);
+}
+
+.vc-admin-stat-revenue {
+  cursor: default;
+  border-color: rgba(96, 165, 250, 0.18);
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.08), rgba(255, 255, 255, 0.01));
 }
 
 .vc-admin-stat-value {
@@ -80,6 +109,125 @@
   margin-top: 4px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* guide */
+.vc-admin-guide {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.vc-admin-guide-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  color: #c8d4e6;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.vc-admin-guide-toggle:hover {
+  background: rgba(96, 165, 250, 0.07);
+  color: #dbeafe;
+}
+
+.vc-admin-guide-toggle:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: -2px;
+}
+
+.vc-admin-guide-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vc-admin-guide-heading svg {
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.vc-admin-guide-chevron {
+  display: inline-flex;
+  align-items: center;
+  color: #9fb0c9;
+  transition: transform 0.2s ease;
+}
+
+.vc-admin-guide-chevron.open {
+  transform: rotate(180deg);
+}
+
+.vc-admin-guide-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 8px 14px;
+  padding: 4px 14px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  animation: vc-guide-in 0.18s ease-out;
+}
+
+@keyframes vc-guide-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.vc-admin-guide-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.vc-admin-guide-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+}
+
+.vc-admin-guide-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vc-admin-guide-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #f1f8ff;
+}
+
+.vc-admin-guide-desc {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: #9fb0c9;
+}
+
+.vc-admin-guide-note {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.72rem;
+  color: #7d8da5;
 }
 
 /* controls */
@@ -512,6 +660,16 @@
 
   .vc-admin-stat-value {
     font-size: 1.35rem;
+  }
+
+  .vc-admin-guide-body {
+    grid-template-columns: 1fr;
+    padding: 4px 12px 12px;
+  }
+
+  .vc-admin-guide-toggle {
+    font-size: 0.8rem;
+    padding: 10px 12px;
   }
 
   .vc-admin-controls {

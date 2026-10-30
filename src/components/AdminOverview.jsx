@@ -121,9 +121,9 @@ const FUENTES = [
 export default function AdminOverview() {
     const { pedidos, pedidosTienda, loading } = useAdminData();
 
-    const [fuenteSeleccionada, setFuenteSeleccionada] = useState("dropActual");
+    const [fuenteSeleccionada, setFuenteSeleccionada] = useState("tienda");
     const [mesesOrdenados, setMesesOrdenados] = useState([]);
-    const [mesSeleccionado, setMesSeleccionado] = useState("general");
+    const [mesSeleccionado, setMesSeleccionado] = useState("ultimoMes");
     const [mostrarTodos, setMostrarTodos] = useState(false);
 
     // Seleccionar el array correcto según la fuente
@@ -140,7 +140,7 @@ export default function AdminOverview() {
 
     useEffect(() => {
         // Resetear mes al cambiar fuente
-        setMesSeleccionado("general");
+        setMesSeleccionado("ultimoMes");
         setMesesOrdenados([]);
     }, [fuenteSeleccionada]);
 
@@ -156,7 +156,7 @@ export default function AdminOverview() {
         );
 
         setMesesOrdenados(keysOrdenadas);
-        setMesSeleccionado("general");
+        setMesSeleccionado("ultimoMes");
     }, [pedidosTodos]);
 
 
