@@ -1,4 +1,5 @@
 import { fetchMpOrThrow, fetchMpResult } from "./mp-http.js";
+import { enviarBienvenidaSiCorresponde } from "./welcome-email.js";
 
 export const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
@@ -554,6 +555,8 @@ export async function crearOActualizarFichaDesdePreapproval(
       updates.nombre || existente.nombre || payer.nombre || "",
     estado,
     pagos: pagadas.length,
+    activoAnterior: existente.activo === true,
+    activoNuevo: updates.activo === true,
   };
 }
 
@@ -618,6 +621,8 @@ export async function importarPreapprovalsExternas(db, opciones = {}) {
     omitidos: 0,
     errores: 0,
     pagos: 0,
+    bienvenidas: 0,
+    bienvenidasError: 0,
   };
 
   for (const resultado of resultados) {
@@ -628,6 +633,29 @@ export async function importarPreapprovalsExternas(db, opciones = {}) {
     else if (resultado.accion === "omitido") resumen.omitidos += 1;
     else if (resultado.accion === "error") resumen.errores += 1;
     resumen.pagos += resultado.pagos || 0;
+  }
+
+  if (opciones.enviarBienvenidas !== false) {
+    const pendientes = resultados.filter(
+      (resultado) =>
+        resultado.docId &&
+        resultado.activoNuevo === true &&
+        resultado.activoAnterior !== true &&
+        (resultado.accion === "creado" || resultado.accion === "actualizado")
+    );
+
+    for (let i = 0; i < pendientes.length; i += 1) {
+      const envio = await enviarBienvenidaSiCorresponde(
+        db.collection("clubvinilos").doc(pendientes[i].docId)
+      );
+
+      if (envio.enviado) resumen.bienvenidas += 1;
+      else if (envio.motivo === "error_envio") resumen.bienvenidasError += 1;
+
+      if (i < pendientes.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      }
+    }
   }
 
   const removidos = resultados.filter(

@@ -4,6 +4,7 @@ import {
   crearOActualizarFichaDesdePreapproval,
   esDelClub,
 } from "../_lib/mp-suscripciones.js";
+import { enviarBienvenidaSiCorresponde } from "../_lib/welcome-email.js";
 
 function fetchPreapprovalStatus(preapprovalId) {
   return fetchMp(`/preapproval/${preapprovalId}`);
@@ -163,8 +164,10 @@ export default async function handler(req, res) {
         payerEmail,
       });
 
+      let creado = null;
+
       if (!doc && mpData && esDelClub(mpData)) {
-        const creado = await crearOActualizarFichaDesdePreapproval(db, mpData, {
+        creado = await crearOActualizarFichaDesdePreapproval(db, mpData, {
           requerirNombre: true,
         });
         if (creado?.docId) {
@@ -178,6 +181,7 @@ export default async function handler(req, res) {
       }
 
       const data = doc.data();
+      const yaEstabaActivo = data.activo === true;
       const status = body.data?.status || mpData?.status || data.mercadopago_status;
 
       const statusMap = {
@@ -231,6 +235,16 @@ export default async function handler(req, res) {
 
       await doc.ref.update(updates);
 
+      const seActivoAhora =
+        status === "authorized" &&
+        (!yaEstabaActivo ||
+          creado?.accion === "creado" ||
+          Boolean(data.bienvenidaEmailError));
+
+      if (seActivoAhora) {
+        await enviarBienvenidaSiCorresponde(doc.ref);
+      }
+
       return res.status(200).json({ status: "processed" });
     }
 
@@ -257,10 +271,12 @@ export default async function handler(req, res) {
         payerEmail: null,
       });
 
+      let creado = null;
+
       if (!doc && preapprovalId) {
         const preapproval = await fetchPreapprovalStatus(preapprovalId);
         if (preapproval && esDelClub(preapproval)) {
-          const creado = await crearOActualizarFichaDesdePreapproval(
+          creado = await crearOActualizarFichaDesdePreapproval(
             db,
             preapproval,
             { requerirNombre: true }
@@ -280,6 +296,7 @@ export default async function handler(req, res) {
       }
 
       const data = doc.data();
+      const yaEstabaActivo = data.activo === true;
       const paymentId = authorizedPayment?.payment?.id;
       const estado =
         authorizedPayment?.payment?.status ||
@@ -331,6 +348,14 @@ export default async function handler(req, res) {
           activo: true,
           pendiente: false,
         });
+
+        if (
+          !yaEstabaActivo ||
+          creado?.accion === "creado" ||
+          Boolean(data.bienvenidaEmailError)
+        ) {
+          await enviarBienvenidaSiCorresponde(doc.ref);
+        }
       }
 
       return res.status(200).json({ status: "processed" });
@@ -368,10 +393,12 @@ export default async function handler(req, res) {
         payerEmail,
       });
 
+      let creado = null;
+
       if (!doc && preapprovalId) {
         const preapproval = await fetchPreapprovalStatus(preapprovalId);
         if (preapproval && esDelClub(preapproval)) {
-          const creado = await crearOActualizarFichaDesdePreapproval(
+          creado = await crearOActualizarFichaDesdePreapproval(
             db,
             preapproval,
             { requerirNombre: true }
@@ -388,6 +415,7 @@ export default async function handler(req, res) {
       }
 
       const data = doc.data();
+      const yaEstabaActivo = data.activo === true;
       const estado = payment?.status || body.data?.status || "unknown";
       const fechaPago =
         toIso(payment?.date_approved) ||
@@ -429,6 +457,14 @@ export default async function handler(req, res) {
           activo: true,
           pendiente: false,
         });
+
+        if (
+          !yaEstabaActivo ||
+          creado?.accion === "creado" ||
+          Boolean(data.bienvenidaEmailError)
+        ) {
+          await enviarBienvenidaSiCorresponde(doc.ref);
+        }
       }
 
       return res.status(200).json({ status: "processed" });

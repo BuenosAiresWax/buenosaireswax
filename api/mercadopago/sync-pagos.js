@@ -1,5 +1,6 @@
 import { getDb } from "../_lib/firebase-admin.js";
 import { fetchMpOrThrow, fetchMpResult } from "../_lib/mp-http.js";
+import { enviarBienvenidaSiCorresponde } from "../_lib/welcome-email.js";
 
 const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
@@ -184,6 +185,7 @@ async function sincronizarSuscriptor(db, email, opciones = {}) {
 
   const docRef = docSnap.ref;
   const data = docSnap.data();
+  const yaEstabaActivo = data.activo === true;
   const cargarTodas = opciones.cargarTodas || obtenerTodasPreapprovals;
   const todas = await cargarTodas();
 
@@ -331,6 +333,13 @@ async function sincronizarSuscriptor(db, email, opciones = {}) {
 
   batch.update(docRef, updates);
   await batch.commit();
+
+  const debeEnviarBienvenida =
+    !yaEstabaActivo || Boolean(data.bienvenidaEmailError);
+
+  if (estado === "authorized" && debeEnviarBienvenida) {
+    await enviarBienvenidaSiCorresponde(docRef);
+  }
 
   return {
     email,

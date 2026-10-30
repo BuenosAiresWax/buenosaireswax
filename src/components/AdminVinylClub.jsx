@@ -562,7 +562,7 @@ export default function AdminVinylClub() {
     if (importando) return;
 
     const confirmado = window.confirm(
-      "Se van a leer las suscripciones de MercadoPago y se crearán fichas para las que todavía no existan. ¿Continuar?"
+      "Se van a leer las suscripciones de MercadoPago y se crearán fichas para las que todavía no existan. A los socios activos que se importen por primera vez se les enviará el correo de bienvenida. ¿Continuar?"
     );
     if (!confirmado) return;
 
@@ -577,6 +577,8 @@ export default function AdminVinylClub() {
       errores: 0,
       pagos: 0,
       procesados: 0,
+      bienvenidas: 0,
+      bienvenidasError: 0,
     };
     let offset = 0;
     let total = null;
@@ -607,6 +609,8 @@ export default function AdminVinylClub() {
         totales.errores += resultado.errores || 0;
         totales.pagos += resultado.pagos || 0;
         totales.procesados += resultado.procesados || 0;
+        totales.bienvenidas += resultado.bienvenidas || 0;
+        totales.bienvenidasError += resultado.bienvenidasError || 0;
 
         if (!primerDetalle) {
           const detalle = (resultado.resultados || []).find(
@@ -629,7 +633,7 @@ export default function AdminVinylClub() {
 
       setHistoriales({});
       alert(
-        `Importación desde MercadoPago finalizada.\nNuevas fichas: ${totales.creados}\nActualizadas: ${totales.actualizados}\nYa vinculadas: ${yaVinculadas ?? 0}\nPagos importados: ${totales.pagos}\nConflictos: ${totales.conflictos}\nOmitidas: ${totales.omitidos}\nCon error: ${totales.errores}${
+        `Importación desde MercadoPago finalizada.\nNuevas fichas: ${totales.creados}\nActualizadas: ${totales.actualizados}\nYa vinculadas: ${yaVinculadas ?? 0}\nPagos importados: ${totales.pagos}\nBienvenidas enviadas: ${totales.bienvenidas}\nErrores de bienvenida: ${totales.bienvenidasError}\nConflictos: ${totales.conflictos}\nOmitidas: ${totales.omitidos}\nCon error: ${totales.errores}${
           primerDetalle ? `\n\nPrimer detalle: ${primerDetalle}` : ""
         }`
       );
@@ -1013,6 +1017,16 @@ export default function AdminVinylClub() {
                           {s.mercadopago_preapproval_id || "—"}
                         </span>
                       </div>
+                      {(s.bienvenidaEmailEnviadaEn || s.bienvenidaEmailError) && (
+                        <div className="vc-admin-detail-item">
+                          <span className="vc-admin-detail-label">Email bienvenida</span>
+                          <span>
+                            {s.bienvenidaEmailEnviadaEn
+                              ? `Enviada el ${formatDate(s.bienvenidaEmailEnviadaEn)}`
+                              : `Error: ${s.bienvenidaEmailError}`}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="vc-admin-history">
