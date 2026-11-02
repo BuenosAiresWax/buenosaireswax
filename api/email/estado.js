@@ -21,17 +21,25 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const admin = await requireAdmin(req, res);
-  if (!admin) return;
+  try {
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
 
-  const { fromEmail, fromName, replyTo } = obtenerRemitente();
+    const { fromEmail, fromName, replyTo } = obtenerRemitente();
 
-  return res.status(200).json({
-    proveedor: "resend",
-    configurado: resendConfigurado(),
-    fromEmail,
-    fromName,
-    replyTo,
-    tipos: tiposEmailDisponibles(),
-  });
+    return res.status(200).json({
+      proveedor: "resend",
+      configurado: resendConfigurado(),
+      fromEmail,
+      fromName,
+      replyTo,
+      tipos: tiposEmailDisponibles(),
+    });
+  } catch (error) {
+    console.error("No se pudo obtener el estado de Email Marketing:", error);
+    return res.status(500).json({
+      message: "No se pudo obtener el estado de Email Marketing.",
+      detail: error.message,
+    });
+  }
 }

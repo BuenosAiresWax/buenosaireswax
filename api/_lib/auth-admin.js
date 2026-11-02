@@ -1,5 +1,8 @@
 import { getAuth } from "firebase-admin/auth";
-import { getFirebaseAdmin } from "./firebase-admin.js";
+import {
+  firebaseAdminConfigurado,
+  getFirebaseAdmin,
+} from "./firebase-admin.js";
 
 function emailsPermitidos() {
   return String(process.env.ADMIN_EMAILS || "")
@@ -16,6 +19,14 @@ export async function requireAdmin(req, res) {
 
   if (!token) {
     res.status(401).json({ message: "Sesión no válida. Volvé a iniciar sesión." });
+    return null;
+  }
+
+  if (!firebaseAdminConfigurado()) {
+    console.error("Firebase Admin no configurado en el servidor.");
+    res.status(500).json({
+      message: "Firebase Admin no está configurado en el servidor.",
+    });
     return null;
   }
 

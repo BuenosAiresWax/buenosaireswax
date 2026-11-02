@@ -15,32 +15,39 @@ function formatPrivateKey(key) {
 }
 
 let firebaseAdminApp;
+
+export function firebaseAdminConfigurado() {
+  return Boolean(
+    process.env.FIREBASE_PROJECT_ID &&
+      process.env.FIREBASE_CLIENT_EMAIL &&
+      process.env.FIREBASE_PRIVATE_KEY
+  );
+}
+
 export function getFirebaseAdmin() {
   if (!firebaseAdminApp) {
+    const existentes = getApps();
+
+    if (existentes.length > 0) {
+      firebaseAdminApp = existentes[0];
+      return firebaseAdminApp;
+    }
+
     const projectId = process.env.FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const privateKey = formatPrivateKey(process.env.FIREBASE_PRIVATE_KEY);
 
     if (!projectId || !clientEmail || !privateKey) {
-      console.error("Firebase Admin env vars missing:", {
-        projectId: !!projectId,
-        clientEmail: !!clientEmail,
-        privateKey: !!privateKey,
-      });
-    } else {
-      console.log("Firebase Admin env vars loaded:", {
-        projectId,
-        clientEmail,
-        privateKeyLength: privateKey.length,
-        privateKeyStarts: privateKey.substring(0, 30),
-        privateKeyHasNewlines: privateKey.includes("\n"),
-      });
+      throw new Error(
+        "Firebase Admin no está configurado. Faltan FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL o FIREBASE_PRIVATE_KEY."
+      );
     }
 
     firebaseAdminApp = initializeApp({
       credential: cert({ projectId, clientEmail, privateKey }),
     });
   }
+
   return firebaseAdminApp;
 }
 

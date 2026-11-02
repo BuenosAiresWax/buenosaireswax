@@ -22,8 +22,9 @@ async function pedirAdmin(ruta, opciones = {}) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    const detalle = data.detail ? ` (${data.detail})` : "";
     throw new Error(
-      data.message || `Error de Email Marketing (HTTP ${response.status})`
+      `${data.message || `Error de Email Marketing (HTTP ${response.status})`}${detalle}`
     );
   }
 
@@ -32,6 +33,10 @@ async function pedirAdmin(ruta, opciones = {}) {
 
 export function obtenerEstadoEmailMarketing() {
   return pedirAdmin("/estado");
+}
+
+export function obtenerEnviosEmailMarketing() {
+  return pedirAdmin("/envios");
 }
 
 export function enviarEmailsMarketing({

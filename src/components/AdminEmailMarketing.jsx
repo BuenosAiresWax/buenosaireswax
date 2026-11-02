@@ -1,14 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  collection,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import {
   enviarEmailsMarketing,
+  obtenerEnviosEmailMarketing,
   obtenerEstadoEmailMarketing,
 } from "../utils/emailMarketing";
 import "../styles/adminEmailMarketing.css";
@@ -170,6 +165,7 @@ export default function AdminEmailMarketing() {
   const [envios, setEnvios] = useState([]);
   const [cargandoEnvios, setCargandoEnvios] = useState(true);
   const [errorEnvios, setErrorEnvios] = useState(null);
+  const [recargaEnvios, setRecargaEnvios] = useState(0);
   const [suscriptores, setSuscriptores] = useState([]);
   const [cargandoSuscriptores, setCargandoSuscriptores] = useState(true);
   const [errorSuscriptores, setErrorSuscriptores] = useState(null);
@@ -208,45 +204,36 @@ export default function AdminEmailMarketing() {
   }, []);
 
   useEffect(() => {
-    let unsub;
+    let activo = true;
 
-    try {
-      const consulta = query(
-        collection(db, "email_envios"),
-        orderBy("creadoEn", "desc"),
-        limit(500)
-      );
+    const cargarEnvios = async () => {
+      try {
+        const data = await obtenerEnviosEmailMarketing();
 
-      unsub = onSnapshot(
-        consulta,
-        (snap) => {
-          setEnvios(
-            snap.docs.map((d) => ({
-              id: d.id,
-              ...d.data(),
-            }))
-          );
-          setCargandoEnvios(false);
-          setErrorEnvios(null);
-        },
-        (error) => {
-          console.error("Error cargando email_envios:", error);
-          setErrorEnvios(
-            "No se pudo cargar el registro de envíos. Verificá los permisos de Firestore para email_envios."
-          );
-          setCargandoEnvios(false);
-        }
-      );
-    } catch (error) {
-      console.error("Error inicializando email_envios:", error);
-      setErrorEnvios("No se pudo conectar con el registro de envíos.");
-      setCargandoEnvios(false);
-    }
+        if (!activo) return;
+
+        setEnvios(Array.isArray(data.envios) ? data.envios : []);
+        setErrorEnvios(null);
+        setCargandoEnvios(false);
+      } catch (error) {
+        if (!activo) return;
+
+        console.error("Error cargando email_envios:", error);
+        setErrorEnvios(
+          error.message || "No se pudo cargar el registro de envíos."
+        );
+        setCargandoEnvios(false);
+      }
+    };
+
+    cargarEnvios();
+    const intervalo = setInterval(cargarEnvios, 60000);
 
     return () => {
-      if (typeof unsub === "function") unsub();
+      activo = false;
+      clearInterval(intervalo);
     };
-  }, []);
+  }, [recargaEnvios]);
 
   useEffect(() => {
     let unsub;
@@ -545,6 +532,7 @@ export default function AdminEmailMarketing() {
     } finally {
       setEnviando(false);
       setProgresoEnvio("");
+      setRecargaEnvios((prev) => prev + 1);
     }
   };
 
