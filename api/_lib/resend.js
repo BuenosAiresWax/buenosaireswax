@@ -69,7 +69,7 @@ function construirHtml({ nombre }) {
                   </tr>
                 </table>
                 <p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#333333;">
-                  Nos ponemos en contacto con los próximos pasos para preparar tu primera caja. Si tenés alguna duda, respondé este correo o escribinos a
+                  Nos ponemos en contacto con los próximos pasos para preparar tu primera caja. Si tenés alguna duda, escribinos a
                   <a href="mailto:${CONTACT_EMAIL}" style="color:#111111;font-weight:700;">${CONTACT_EMAIL}</a>.
                 </p>
                 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
@@ -119,7 +119,7 @@ Esto es lo que te espera:
 - Accesos exclusivos: entradas y beneficios en los eventos de BAWAX.
 
 Nos ponemos en contacto con los próximos pasos para preparar tu primera caja.
-Si tenés alguna duda, respondé este correo o escribinos a ${CONTACT_EMAIL}.
+Si tenés alguna duda, escribinos a ${CONTACT_EMAIL}.
 
 Visitanos: ${TIENDA_URL}
 Contacto: ${CONTACT_EMAIL}
