@@ -1,5 +1,5 @@
 const RESEND_API_URL = "https://api.resend.com/emails";
-const CLUB_URL = "https://www.buenosaireswax.com/club";
+const TIENDA_URL = "https://www.buenosaireswax.com/#/tienda";
 const CONTACT_EMAIL = "buenosaireswax@gmail.com";
 const INSTAGRAM_URL = "https://www.instagram.com/buenosaireswax/";
 
@@ -76,8 +76,8 @@ function construirHtml({ nombre }) {
                 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
                   <tr>
                     <td style="border-radius:999px;background:#111111;">
-                      <a href="${CLUB_URL}" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:700;letter-spacing:1px;color:#ffffff;text-decoration:none;text-transform:uppercase;">
-                        Visitar el club
+                      <a href="${TIENDA_URL}" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:700;letter-spacing:1px;color:#ffffff;text-decoration:none;text-transform:uppercase;">
+                        Ir a la tienda
                       </a>
                     </td>
                   </tr>
@@ -122,7 +122,7 @@ Esto es lo que te espera:
 Nos ponemos en contacto con los próximos pasos para preparar tu primera caja.
 Si tenés alguna duda, respondé este correo o escribinos a ${CONTACT_EMAIL}.
 
-Visitanos: ${CLUB_URL}
+Visitanos: ${TIENDA_URL}
 Instagram: ${INSTAGRAM_URL}
 
 Recibís este correo porque te suscribiste al Club de Vinilos de BAWAX.`;
