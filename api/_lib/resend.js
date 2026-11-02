@@ -1,7 +1,6 @@
 const RESEND_API_URL = "https://api.resend.com/emails";
 const TIENDA_URL = "https://www.buenosaireswax.com/#/tienda";
 const CONTACT_EMAIL = "buenosaireswax@gmail.com";
-const INSTAGRAM_URL = "https://www.instagram.com/buenosaireswax/";
 
 function escapeHtml(valor) {
   return String(valor || "")
@@ -86,8 +85,8 @@ function construirHtml({ nombre }) {
             </tr>
             <tr>
               <td style="padding:8px 32px 32px;text-align:center;">
-                <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#777777;">
-                  Seguinos en <a href="${INSTAGRAM_URL}" style="color:#111111;text-decoration:underline;">Instagram</a> para ver los drops y novedades.
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#777777;">
+                  Contacto: <a href="mailto:${CONTACT_EMAIL}" style="color:#111111;text-decoration:underline;">${CONTACT_EMAIL}</a>
                 </p>
               </td>
             </tr>
@@ -123,7 +122,7 @@ Nos ponemos en contacto con los próximos pasos para preparar tu primera caja.
 Si tenés alguna duda, respondé este correo o escribinos a ${CONTACT_EMAIL}.
 
 Visitanos: ${TIENDA_URL}
-Instagram: ${INSTAGRAM_URL}
+Contacto: ${CONTACT_EMAIL}
 
 Recibís este correo porque te suscribiste al Club de Vinilos de BAWAX.`;
 }
