@@ -11,6 +11,7 @@ import AdminProductos from "./AdminProductos";
 import AdminProductoNuevo from "./AdminProductoNuevo";
 import AdminOverview from "./AdminOverview";
 import AdminVinylClub from "./AdminVinylClub";
+import AdminEmailMarketing from "./AdminEmailMarketing";
 import AdminSiteFeatures from "./AdminSiteFeatures";
 
 import "../styles/adminDashboard.css";
@@ -44,6 +45,23 @@ const PEDIDOS_ITEMS = [
 
 const PEDIDOS_TABS = PEDIDOS_ITEMS.map((item) => item.tab);
 
+const VINYL_CLUB_ITEMS = [
+    {
+        tab: "VinylClub",
+        icon: "🎧",
+        label: "Suscriptores",
+        description: "Socios, altas y estado de membresías",
+    },
+    {
+        tab: "EmailMarketing",
+        icon: "✉️",
+        label: "Email marketing",
+        description: "Registro de envíos y bienvenidas",
+    },
+];
+
+const VINYL_CLUB_TABS = VINYL_CLUB_ITEMS.map((item) => item.tab);
+
 // Wrapper para poder usar el contexto dentro de AdminProductoNuevo
 function AdminDashboardContent() {
     const { refetch } = useAdminData();
@@ -51,10 +69,14 @@ function AdminDashboardContent() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("Overview");
     const [pedidosMenuOpen, setPedidosMenuOpen] = useState(false);
+    const [vinylMenuOpen, setVinylMenuOpen] = useState(false);
     const pedidosGroupRef = useRef(null);
+    const vinylGroupRef = useRef(null);
 
     const pedidosGroupActive = PEDIDOS_TABS.includes(activeTab);
     const activePedidosItem = PEDIDOS_ITEMS.find((item) => item.tab === activeTab);
+    const vinylGroupActive = VINYL_CLUB_TABS.includes(activeTab);
+    const activeVinylItem = VINYL_CLUB_ITEMS.find((item) => item.tab === activeTab);
 
     useEffect(() => {
         if (!pedidosMenuOpen) return;
@@ -78,9 +100,46 @@ function AdminDashboardContent() {
         };
     }, [pedidosMenuOpen]);
 
+    useEffect(() => {
+        if (!vinylMenuOpen) return;
+
+        const handleClickOutside = (event) => {
+            if (vinylGroupRef.current && !vinylGroupRef.current.contains(event.target)) {
+                setVinylMenuOpen(false);
+            }
+        };
+
+        const handleKeyDown = (event) => {
+            if (event.key === "Escape") setVinylMenuOpen(false);
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [vinylMenuOpen]);
+
     const selectTab = (tab) => {
         setActiveTab(tab);
         setPedidosMenuOpen(false);
+        setVinylMenuOpen(false);
+    };
+
+    const togglePedidosMenu = () => {
+        setPedidosMenuOpen((prev) => {
+            if (!prev) setVinylMenuOpen(false);
+            return !prev;
+        });
+    };
+
+    const toggleVinylMenu = () => {
+        setVinylMenuOpen((prev) => {
+            if (!prev) setPedidosMenuOpen(false);
+            return !prev;
+        });
     };
 
     const handleLogout = async () => {
@@ -127,7 +186,7 @@ function AdminDashboardContent() {
                         <button
                             type="button"
                             className={`admin-nav-item admin-nav-item-group ${pedidosGroupActive ? "is-active" : ""} ${pedidosMenuOpen ? "is-open" : ""}`}
-                            onClick={() => setPedidosMenuOpen((prev) => !prev)}
+                            onClick={togglePedidosMenu}
                             aria-haspopup="menu"
                             aria-expanded={pedidosMenuOpen}
                             aria-current={pedidosGroupActive ? "page" : undefined}
@@ -179,18 +238,61 @@ function AdminDashboardContent() {
                         )}
                     </div>
 
-                    <button
-                        type="button"
-                        className={`admin-nav-item ${activeTab === "VinylClub" ? "is-active" : ""}`}
-                        onClick={() => selectTab("VinylClub")}
-                        aria-current={activeTab === "VinylClub" ? "page" : undefined}
-                    >
-                        <span className="admin-nav-icon" aria-hidden="true">🎧</span>
-                        <span className="admin-nav-copy">
-                            <span className="admin-nav-label">Vinyl Club</span>
-                            <span className="admin-nav-sub">Suscriptores</span>
-                        </span>
-                    </button>
+                    <div className={`admin-nav-group ${vinylMenuOpen ? "is-open" : ""}`} ref={vinylGroupRef}>
+                        <button
+                            type="button"
+                            className={`admin-nav-item admin-nav-item-group ${vinylGroupActive ? "is-active" : ""} ${vinylMenuOpen ? "is-open" : ""}`}
+                            onClick={toggleVinylMenu}
+                            aria-haspopup="menu"
+                            aria-expanded={vinylMenuOpen}
+                            aria-current={vinylGroupActive ? "page" : undefined}
+                        >
+                            <span className="admin-nav-icon" aria-hidden="true">🎧</span>
+                            <span className="admin-nav-copy">
+                                <span className="admin-nav-label">
+                                    Vinyl Club
+                                    <span className="admin-nav-badge">2</span>
+                                </span>
+                                <span className="admin-nav-sub">
+                                    {activeVinylItem ? activeVinylItem.label : "Suscriptores y emails"}
+                                </span>
+                            </span>
+                            <span className={`admin-nav-chevron ${vinylMenuOpen ? "is-open" : ""}`} aria-hidden="true">
+                                ▾
+                            </span>
+                        </button>
+
+                        {vinylMenuOpen && (
+                            <div className="admin-nav-dropdown" role="menu" aria-label="Vinyl Club">
+                                <p className="admin-nav-dropdown-title">Vinyl Club</p>
+
+                                {VINYL_CLUB_ITEMS.map((item) => {
+                                    const isActive = activeTab === item.tab;
+
+                                    return (
+                                        <button
+                                            key={item.tab}
+                                            type="button"
+                                            role="menuitem"
+                                            className={`admin-nav-dropdown-item ${isActive ? "is-active" : ""}`}
+                                            onClick={() => selectTab(item.tab)}
+                                        >
+                                            <span className="admin-nav-dropdown-icon" aria-hidden="true">
+                                                {item.icon}
+                                            </span>
+                                            <span className="admin-nav-dropdown-copy">
+                                                <span className="admin-nav-dropdown-label">{item.label}</span>
+                                                <span className="admin-nav-dropdown-desc">{item.description}</span>
+                                            </span>
+                                            {isActive && (
+                                                <span className="admin-nav-check" aria-hidden="true">✓</span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
 
                     <button
                         type="button"
@@ -221,6 +323,7 @@ function AdminDashboardContent() {
                 {activeTab === "Productos" && <AdminProductos />}
                 {activeTab === "CrearProducto" && <AdminProductoNuevo onNuevo={refetch} />}
                 {activeTab === "VinylClub" && <AdminVinylClub />}
+                {activeTab === "EmailMarketing" && <AdminEmailMarketing />}
                 {activeTab === "Sitio" && <AdminSiteFeatures />}
             </div>
         </div>

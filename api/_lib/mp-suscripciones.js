@@ -646,7 +646,8 @@ export async function importarPreapprovalsExternas(db, opciones = {}) {
 
     for (let i = 0; i < pendientes.length; i += 1) {
       const envio = await enviarBienvenidaSiCorresponde(
-        db.collection("clubvinilos").doc(pendientes[i].docId)
+        db.collection("clubvinilos").doc(pendientes[i].docId),
+        { disparo: "importacion" }
       );
 
       if (envio.enviado) resumen.bienvenidas += 1;

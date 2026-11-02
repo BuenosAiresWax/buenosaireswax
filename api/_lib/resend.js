@@ -128,23 +128,61 @@ Instagram: ${INSTAGRAM_URL}
 Recibís este correo porque te suscribiste al Club de Vinilos de BAWAX.`;
 }
 
+const PLANTILLAS = {
+  bienvenida: {
+    id: "bienvenida",
+    label: "Bienvenida",
+    asuntoEnv: "RESEND_WELCOME_SUBJECT",
+    asuntoDefault: "Bienvenido al Club de Vinilos de BAWAX",
+    html: construirHtml,
+    texto: construirTexto,
+  },
+};
+
 export function resendConfigurado() {
   return Boolean(process.env.RESEND_API_KEY);
 }
 
-export async function enviarEmailBienvenida({ to, nombre, idempotencyKey }) {
+export function obtenerRemitente() {
+  return {
+    fromEmail: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+    fromName: process.env.RESEND_FROM_NAME || "BAWAX Club de Vinilos",
+    replyTo: process.env.RESEND_REPLY_TO || CONTACT_EMAIL,
+  };
+}
+
+export function obtenerPlantillaEmail(tipo) {
+  return PLANTILLAS[tipo] || null;
+}
+
+export function tiposEmailDisponibles() {
+  return Object.values(PLANTILLAS).map((plantilla) => ({
+    id: plantilla.id,
+    label: plantilla.label,
+  }));
+}
+
+export function asuntoEmailPlantilla(tipo) {
+  const plantilla = obtenerPlantillaEmail(tipo);
+  if (!plantilla) return null;
+  return process.env[plantilla.asuntoEnv] || plantilla.asuntoDefault;
+}
+
+export async function enviarEmail({ tipo, to, nombre, idempotencyKey }) {
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
     throw new Error("RESEND_API_KEY no configurada");
   }
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
-  const fromName = process.env.RESEND_FROM_NAME || "BAWAX Club de Vinilos";
-  const replyTo = process.env.RESEND_REPLY_TO || CONTACT_EMAIL;
-  const asunto =
-    process.env.RESEND_WELCOME_SUBJECT ||
-    "Bienvenido al Club de Vinilos de BAWAX";
+  const plantilla = obtenerPlantillaEmail(tipo);
+
+  if (!plantilla) {
+    throw new Error(`Plantilla de email no soportada: ${tipo}`);
+  }
+
+  const { fromEmail, fromName, replyTo } = obtenerRemitente();
+  const asunto = asuntoEmailPlantilla(tipo);
 
   const headers = {
     Authorization: `Bearer ${apiKey}`,
@@ -164,8 +202,8 @@ export async function enviarEmailBienvenida({ to, nombre, idempotencyKey }) {
       to: [to],
       reply_to: replyTo,
       subject: asunto,
-      html: construirHtml({ nombre }),
-      text: construirTexto({ nombre }),
+      html: plantilla.html({ nombre }),
+      text: plantilla.texto({ nombre }),
     }),
   });
 
@@ -177,5 +215,14 @@ export async function enviarEmailBienvenida({ to, nombre, idempotencyKey }) {
     throw new Error(mensaje);
   }
 
-  return data;
+  return { ...data, tipo, asunto };
+}
+
+export async function enviarEmailBienvenida({ to, nombre, idempotencyKey }) {
+  return enviarEmail({
+    tipo: "bienvenida",
+    to,
+    nombre,
+    idempotencyKey,
+  });
 }

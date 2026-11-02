@@ -1,4 +1,5 @@
 import { enviarEmailBienvenida, resendConfigurado } from "./resend.js";
+import { registrarEnvioEmail } from "./email-log.js";
 
 const RECLAMO_VALIDO_MS = 15 * 60 * 1000;
 
@@ -22,9 +23,10 @@ function emailDeFicha(data, docId) {
   return null;
 }
 
-async function reclamarEnvio(docRef) {
+async function reclamarEnvio(docRef, opciones = {}) {
   const db = docRef.firestore;
   const ahora = Date.now();
+  const forzar = opciones.forzar === true;
 
   return db.runTransaction(async (tx) => {
     const snap = await tx.get(docRef);
@@ -35,7 +37,7 @@ async function reclamarEnvio(docRef) {
 
     const data = snap.data() || {};
 
-    if (data.bienvenidaEmailEnviadaEn) {
+    if (!forzar && data.bienvenidaEmailEnviadaEn) {
       return { omitir: "ya_enviada" };
     }
 
@@ -62,11 +64,12 @@ async function reclamarEnvio(docRef) {
     return {
       email,
       nombre: data.nombre || "",
+      forzado: forzar,
     };
   });
 }
 
-export async function enviarBienvenidaSiCorresponde(docRef) {
+export async function enviarBienvenidaSiCorresponde(docRef, opciones = {}) {
   if (!docRef) {
     return { enviado: false, motivo: "sin_documento" };
   }
@@ -79,7 +82,7 @@ export async function enviarBienvenidaSiCorresponde(docRef) {
   let reclamo;
 
   try {
-    reclamo = await reclamarEnvio(docRef);
+    reclamo = await reclamarEnvio(docRef, opciones);
   } catch (error) {
     console.error("No se pudo reclamar el envío de bienvenida:", error.message);
     return { enviado: false, motivo: "error_reclamo" };
@@ -89,11 +92,19 @@ export async function enviarBienvenidaSiCorresponde(docRef) {
     return { enviado: false, motivo: reclamo.omitir };
   }
 
+  const disparo = opciones.disparo || "automatico";
+  const actor = opciones.actor || null;
+  const idempotencyKey =
+    opciones.idempotencyKey ||
+    (reclamo.forzado
+      ? `welcome-club/${docRef.id}/${Date.now()}`
+      : `welcome-club/${docRef.id}`);
+
   try {
     const resultado = await enviarEmailBienvenida({
       to: reclamo.email,
       nombre: reclamo.nombre,
-      idempotencyKey: `welcome-club/${docRef.id}`,
+      idempotencyKey,
     });
 
     await docRef.set(
@@ -105,6 +116,19 @@ export async function enviarBienvenidaSiCorresponde(docRef) {
       },
       { merge: true }
     );
+
+    await registrarEnvioEmail(docRef.firestore, {
+      tipo: "bienvenida",
+      estado: "enviado",
+      email: reclamo.email,
+      nombre: reclamo.nombre,
+      suscriptorId: docRef.id,
+      asunto: resultado?.asunto || null,
+      resendId: resultado?.id || null,
+      disparo,
+      actor,
+      idempotencyKey,
+    });
 
     return { enviado: true, id: resultado?.id || null, email: reclamo.email };
   } catch (error) {
@@ -127,6 +151,18 @@ export async function enviarBienvenidaSiCorresponde(docRef) {
         updateError.message
       );
     }
+
+    await registrarEnvioEmail(docRef.firestore, {
+      tipo: "bienvenida",
+      estado: "error",
+      email: reclamo.email,
+      nombre: reclamo.nombre,
+      suscriptorId: docRef.id,
+      disparo,
+      actor,
+      idempotencyKey,
+      error: error.message || error,
+    });
 
     return { enviado: false, motivo: "error_envio", error: error.message };
   }

@@ -338,7 +338,7 @@ async function sincronizarSuscriptor(db, email, opciones = {}) {
     !yaEstabaActivo || Boolean(data.bienvenidaEmailError);
 
   if (estado === "authorized" && debeEnviarBienvenida) {
-    await enviarBienvenidaSiCorresponde(docRef);
+    await enviarBienvenidaSiCorresponde(docRef, { disparo: "sincronizacion" });
   }
 
   return {

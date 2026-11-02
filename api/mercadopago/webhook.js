@@ -242,7 +242,7 @@ export default async function handler(req, res) {
           Boolean(data.bienvenidaEmailError));
 
       if (seActivoAhora) {
-        await enviarBienvenidaSiCorresponde(doc.ref);
+        await enviarBienvenidaSiCorresponde(doc.ref, { disparo: "webhook" });
       }
 
       return res.status(200).json({ status: "processed" });
@@ -354,7 +354,7 @@ export default async function handler(req, res) {
           creado?.accion === "creado" ||
           Boolean(data.bienvenidaEmailError)
         ) {
-          await enviarBienvenidaSiCorresponde(doc.ref);
+          await enviarBienvenidaSiCorresponde(doc.ref, { disparo: "webhook" });
         }
       }
 
@@ -463,7 +463,7 @@ export default async function handler(req, res) {
           creado?.accion === "creado" ||
           Boolean(data.bienvenidaEmailError)
         ) {
-          await enviarBienvenidaSiCorresponde(doc.ref);
+          await enviarBienvenidaSiCorresponde(doc.ref, { disparo: "webhook" });
         }
       }
 
