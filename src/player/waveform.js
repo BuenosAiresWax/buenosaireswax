@@ -110,6 +110,7 @@ export async function computePeaksFromFile(file) {
   return {
     peaks: createPeaksFromBuffer(audioBuffer),
     duration: audioBuffer.duration,
+    sampleRate: audioBuffer.sampleRate,
   };
 }
 

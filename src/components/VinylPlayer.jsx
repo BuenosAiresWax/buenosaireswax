@@ -14,6 +14,7 @@ const normalizeTracks = (trackList) => {
             bpm: Number(track?.bpm),
             audioUrl: track?.audioUrl || "",
             peaks: track?.peaks || [],
+            peaksUrl: track?.peaksUrl || "",
         }))
         .filter((track) => track.titulo);
 };

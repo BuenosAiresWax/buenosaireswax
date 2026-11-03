@@ -24,6 +24,7 @@ const normalizeTrackList = (value) => {
         duracion: Number(track?.duracion) || 0,
         audioUrl: track?.audioUrl || "",
         peaks: Array.isArray(track?.peaks) ? track.peaks : [],
+        peaksUrl: track?.peaksUrl || "",
         autor: track?.autor || "",
     }));
 };
@@ -66,6 +67,7 @@ export default function TrackUploader({ value, onChange, disabled = false }) {
                           ...track,
                           audioUrl,
                           peaks,
+                          peaksUrl: "",
                           duracion: duration,
                           titulo: track.titulo || stripExtension(file.name),
                       }
@@ -99,7 +101,7 @@ export default function TrackUploader({ value, onChange, disabled = false }) {
     const addTrack = () => {
         setItems([
             ...items,
-            { titulo: "", bpm: null, duracion: 0, audioUrl: "", peaks: [], autor: "" },
+            { titulo: "", bpm: null, duracion: 0, audioUrl: "", peaks: [], peaksUrl: "", autor: "" },
         ]);
     };
 

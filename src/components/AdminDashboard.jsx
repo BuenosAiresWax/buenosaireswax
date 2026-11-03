@@ -8,6 +8,7 @@ import { AdminDataProvider, useAdminData } from "../context/AdminDataContext";
 import AdminPedidos from "./AdminPedidos";
 import AdminProductos from "./AdminProductos";
 import AdminProductoNuevo from "./AdminProductoNuevo";
+import AdminCargaMasiva from "./AdminCargaMasiva";
 import AdminOverview from "./AdminOverview";
 import AdminVinylClub from "./AdminVinylClub";
 
@@ -73,6 +74,14 @@ function AdminDashboardContent() {
                     </button>
 
                     <button
+                        className={`tab-btn ${activeTab === "CargaMasiva" ? "active-tab" : ""}`}
+                        onClick={() => setActiveTab("CargaMasiva")}
+                    >
+                        <span className="tab-icon">📥</span>
+                        <span>Carga masiva</span>
+                    </button>
+
+                    <button
                         className="tab-btn tab-btn-realtime"
                         onClick={() => navigate("/admin/pedidos-catalogos")}
                     >
@@ -93,6 +102,7 @@ function AdminDashboardContent() {
                 {activeTab === "Productos" && <AdminProductos />}
                 {activeTab === "CrearProducto" && <AdminProductoNuevo onNuevo={refetch} />}
                 {activeTab === "VinylClub" && <AdminVinylClub />}
+                {activeTab === "CargaMasiva" && <AdminCargaMasiva onDone={refetch} />}
             </div>
         </div>
     );
