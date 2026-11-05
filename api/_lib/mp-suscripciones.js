@@ -1,5 +1,6 @@
 import { fetchMpOrThrow, fetchMpResult } from "./mp-http.js";
 import { enviarBienvenidaSiCorresponde } from "./welcome-email.js";
+import { calcularCamposAbandono } from "./abandoned-email.js";
 
 export const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
@@ -450,6 +451,8 @@ export async function crearOActualizarFichaDesdePreapproval(
   if (fechaPrimerPago) updates.fechaPrimerPago = fechaPrimerPago;
   if (fechaUltimoPago) updates.fechaUltimoPago = fechaUltimoPago;
   if (fechaProximoCobro) updates.fechaProximoCobro = fechaProximoCobro;
+
+  Object.assign(updates, calcularCamposAbandono(estado, existente));
 
   if (estado === "authorized") {
     updates.activo = true;

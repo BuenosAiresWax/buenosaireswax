@@ -1,6 +1,7 @@
 import { getDb } from "../_lib/firebase-admin.js";
 import { fetchMpOrThrow, fetchMpResult } from "../_lib/mp-http.js";
 import { enviarBienvenidaSiCorresponde } from "../_lib/welcome-email.js";
+import { calcularCamposAbandono } from "../_lib/abandoned-email.js";
 
 const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
@@ -319,6 +320,8 @@ async function sincronizarSuscriptor(db, email, opciones = {}) {
   if (fechaProximoCobro) {
     updates.fechaProximoCobro = fechaProximoCobro;
   }
+
+  Object.assign(updates, calcularCamposAbandono(estado, data));
 
   if (estado === "authorized") {
     updates.activo = true;

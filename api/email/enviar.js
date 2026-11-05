@@ -2,9 +2,26 @@ import { getDb } from "../_lib/firebase-admin.js";
 import { requireAdmin } from "../_lib/auth-admin.js";
 import { resendConfigurado } from "../_lib/resend.js";
 import { enviarBienvenidaSiCorresponde } from "../_lib/welcome-email.js";
+import { enviarAbandonadoSiCorresponde } from "../_lib/abandoned-email.js";
 
 const MAX_POR_LOTE = 25;
 const PAUSA_ENTRE_ENVIOS_MS = 350;
+
+const ENVIADORES = {
+  bienvenida: enviarBienvenidaSiCorresponde,
+  abandonados: enviarAbandonadoSiCorresponde,
+};
+
+const MOTIVOS_OMITIDOS = new Set([
+  "ya_enviada",
+  "suscripcion_inactiva",
+  "envio_en_proceso",
+  "sin_email",
+  "no_abandonado",
+  "suscripcion_activa",
+  "ya_contactado_mes",
+  "esperando_antiguedad",
+]);
 
 function dormir(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -28,13 +45,7 @@ function normalizarIds(body) {
 
 function clasificarResultado(resultado) {
   if (resultado?.enviado) return "enviados";
-  if (
-    ["ya_enviada", "suscripcion_inactiva", "envio_en_proceso", "sin_email"].includes(
-      resultado?.motivo
-    )
-  ) {
-    return "omitidos";
-  }
+  if (MOTIVOS_OMITIDOS.has(resultado?.motivo)) return "omitidos";
   return "errores";
 }
 
@@ -67,7 +78,9 @@ export default async function handler(req, res) {
     const reenviar = body.reenviar === true;
     const ids = normalizarIds(body);
 
-    if (tipo !== "bienvenida") {
+    const enviador = ENVIADORES[tipo];
+
+    if (!enviador) {
       return res
         .status(400)
         .json({ message: `Tipo de email no soportado: ${tipo}` });
@@ -87,8 +100,8 @@ export default async function handler(req, res) {
       const docRef = db.collection("clubvinilos").doc(suscriptorId);
 
       try {
-        const resultado = await enviarBienvenidaSiCorresponde(docRef, {
-          forzar: reenviar,
+        const resultado = await enviador(docRef, {
+          forzar: tipo === "bienvenida" && reenviar,
           disparo: reenviar ? "reenvio_manual" : "manual",
           actor: admin.email || null,
         });

@@ -1,4 +1,5 @@
 import { getDb } from "../_lib/firebase-admin.js";
+import { calcularCamposAbandono } from "../_lib/abandoned-email.js";
 
 const MP_PREAPPROVAL_PLAN_ID = "b9a00d38781c426a86372c2105819cf7";
 
@@ -31,10 +32,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "Ya tenés una suscripción activa." });
     }
 
+    const existente = docSnap.exists ? docSnap.data() || {} : {};
+
     await docRef.set({
       mercadopago_plan_id: MP_PREAPPROVAL_PLAN_ID,
       mercadopago_preapproval_id: null,
       mercadopago_status: "pending",
+      ...calcularCamposAbandono("pending", existente),
     }, { merge: true });
 
     const checkoutUrl = `https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=${MP_PREAPPROVAL_PLAN_ID}`;

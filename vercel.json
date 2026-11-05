@@ -9,8 +9,17 @@
         },
         "api/email/envios.js": {
             "maxDuration": 30
+        },
+        "api/email/abandonados.js": {
+            "maxDuration": 60
         }
     },
+    "crons": [
+        {
+            "path": "/api/email/abandonados",
+            "schedule": "0 14 * * *"
+        }
+    ],
     "rewrites": [
         {
             "source": "/((?!api/).*)",

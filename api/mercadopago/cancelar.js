@@ -69,6 +69,7 @@ export default async function handler(req, res) {
       pendiente: false,
       mercadopago_status: "cancelled",
       fechaCancelacion: new Date().toISOString(),
+      abandonadoDesde: null,
     });
 
     return res.status(200).json({ status: "cancelled" });

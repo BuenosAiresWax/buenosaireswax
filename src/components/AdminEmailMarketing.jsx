@@ -10,6 +10,7 @@ import "../styles/adminEmailMarketing.css";
 
 const TIPOS_EMAIL = [
   { id: "bienvenida", label: "Bienvenida" },
+  { id: "abandonados", label: "Abandonados" },
 ];
 
 const TIPO_LABELS = TIPOS_EMAIL.reduce((acc, tipo) => {
@@ -45,6 +46,29 @@ const ESTADOS_BIENVENIDA = {
   pendiente: { id: "pendiente", label: "Pendiente", color: "#f59e0b" },
   sinEmail: { id: "sin-email", label: "Sin email", color: "#6b7280" },
 };
+
+const FILTROS_ABANDONADOS = [
+  { id: "pendientes", label: "Listos para enviar" },
+  { id: "enviadas", label: "Contactados este mes" },
+  { id: "esperando", label: "Esperando 3 días" },
+  { id: "errores", label: "Con error" },
+  { id: "todas", label: "Todos" },
+];
+
+const ESTADOS_ABANDONADO = {
+  contactado: {
+    id: "contactado",
+    label: "Contactado este mes",
+    color: "#22c55e",
+  },
+  error: { id: "error", label: "Con error", color: "#ef4444" },
+  proceso: { id: "proceso", label: "En proceso", color: "#eab308" },
+  esperando: { id: "esperando", label: "Esperando 3 días", color: "#f59e0b" },
+  pendiente: { id: "pendiente", label: "Listo para enviar", color: "#f97316" },
+};
+
+const DIAS_ESPERA_ABANDONO = 3;
+const MS_POR_DIA = 24 * 60 * 60 * 1000;
 
 function normalizarEmail(valor) {
   return String(valor || "").trim().toLowerCase();
@@ -156,6 +180,78 @@ function cumpleFiltroBienvenida(s, filtro) {
   return true;
 }
 
+function esAbandonado(s) {
+  return s?.activo !== true && s?.mercadopago_status === "pending";
+}
+
+function fechaAbandono(s) {
+  return (
+    aFecha(s?.abandonadoDesde) ||
+    aFecha(s?.actualizadoEn) ||
+    aFecha(s?.fechaAlta)
+  );
+}
+
+function contactadoEsteMes(s) {
+  const enviado = aFecha(s?.abandonadoEmailEnviadoEn);
+  if (!enviado) return false;
+  const ahora = new Date();
+  return (
+    enviado.getFullYear() === ahora.getFullYear() &&
+    enviado.getMonth() === ahora.getMonth()
+  );
+}
+
+function esperandoAntiguedad(s) {
+  const desde = fechaAbandono(s);
+  if (!desde) return true;
+  return Date.now() - desde.getTime() < DIAS_ESPERA_ABANDONO * MS_POR_DIA;
+}
+
+function fechaDisponibleAbandono(s) {
+  const desde = fechaAbandono(s);
+  if (!desde) return null;
+  return new Date(desde.getTime() + DIAS_ESPERA_ABANDONO * MS_POR_DIA);
+}
+
+function procesoAbandonadoVigente(s) {
+  if (!s?.abandonadoEmailEnProceso) return false;
+  const intento = aFecha(s?.abandonadoEmailIntentoEn);
+  if (!intento) return true;
+  return Date.now() - intento.getTime() < 15 * 60 * 1000;
+}
+
+function estadoAbandonado(s) {
+  if (contactadoEsteMes(s)) return ESTADOS_ABANDONADO.contactado;
+  if (procesoAbandonadoVigente(s)) return ESTADOS_ABANDONADO.proceso;
+  if (s?.abandonadoEmailError) return ESTADOS_ABANDONADO.error;
+  if (esperandoAntiguedad(s)) return ESTADOS_ABANDONADO.esperando;
+  return ESTADOS_ABANDONADO.pendiente;
+}
+
+function puedeEnviarAbandonado(s) {
+  const email = emailDeSuscriptor(s);
+  const estado = estadoAbandonado(s).id;
+
+  return (
+    Boolean(email) &&
+    estado !== "contactado" &&
+    estado !== "proceso" &&
+    estado !== "esperando"
+  );
+}
+
+function cumpleFiltroAbandonado(s, filtro) {
+  if (filtro === "todas") return true;
+  const estado = estadoAbandonado(s).id;
+
+  if (filtro === "pendientes") return estado === "pendiente";
+  if (filtro === "enviadas") return estado === "contactado";
+  if (filtro === "esperando") return estado === "esperando";
+  if (filtro === "errores") return estado === "error";
+  return true;
+}
+
 function dormir(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -176,7 +272,12 @@ export default function AdminEmailMarketing() {
   const [busquedaRegistro, setBusquedaRegistro] = useState("");
   const [filtroBienvenida, setFiltroBienvenida] = useState("pendientes");
   const [busquedaBienvenida, setBusquedaBienvenida] = useState("");
+  const [filtroAbandonados, setFiltroAbandonados] = useState("pendientes");
+  const [busquedaAbandonados, setBusquedaAbandonados] = useState("");
   const [seleccionados, setSeleccionados] = useState(() => new Set());
+  const [seleccionadosAbandonados, setSeleccionadosAbandonados] = useState(
+    () => new Set()
+  );
   const [enviando, setEnviando] = useState(false);
   const [progresoEnvio, setProgresoEnvio] = useState("");
   const [resultadoEnvio, setResultadoEnvio] = useState(null);
@@ -419,9 +520,88 @@ export default function AdminEmailMarketing() {
       });
   }, [sociosActivos, filtroBienvenida, busquedaBienvenida]);
 
+  const abandonadosUnicos = useMemo(
+    () =>
+      suscriptoresUnicos.filter(
+        (s) => esAbandonado(s) && Boolean(emailDeSuscriptor(s))
+      ),
+    [suscriptoresUnicos]
+  );
+
+  const statsAbandonados = useMemo(() => {
+    let contactados = 0;
+    let pendientes = 0;
+    let errores = 0;
+    let esperando = 0;
+    let proceso = 0;
+
+    abandonadosUnicos.forEach((s) => {
+      const estado = estadoAbandonado(s).id;
+      if (estado === "contactado") contactados += 1;
+      else if (estado === "error") errores += 1;
+      else if (estado === "esperando") esperando += 1;
+      else if (estado === "proceso") proceso += 1;
+      else pendientes += 1;
+    });
+
+    return {
+      abandonados: abandonadosUnicos.length,
+      contactados,
+      pendientes,
+      errores,
+      esperando,
+      proceso,
+    };
+  }, [abandonadosUnicos]);
+
+  const abandonadosFiltrados = useMemo(() => {
+    const q = busquedaAbandonados.trim().toLowerCase();
+
+    return abandonadosUnicos
+      .filter((s) => cumpleFiltroAbandonado(s, filtroAbandonados))
+      .filter((s) => {
+        if (!q) return true;
+
+        return [
+          s.nombre,
+          s.correo,
+          s.email,
+          s.mercadopago_email,
+          s.instagram,
+          s.dni,
+        ]
+          .map((valor) => String(valor || "").toLowerCase())
+          .some((valor) => valor.includes(q));
+      })
+      .sort((a, b) => {
+        const prioridades = {
+          error: 0,
+          pendiente: 1,
+          esperando: 2,
+          proceso: 3,
+          contactado: 4,
+        };
+        const diferencia =
+          prioridades[estadoAbandonado(a).id] -
+          prioridades[estadoAbandonado(b).id];
+        if (diferencia !== 0) return diferencia;
+        return String(a.nombre || "").localeCompare(String(b.nombre || ""));
+      });
+  }, [abandonadosUnicos, filtroAbandonados, busquedaAbandonados]);
+
+  const abandonadosEnviablesFiltrados = abandonadosFiltrados.filter(
+    puedeEnviarAbandonado
+  );
+
   const todosVisiblesSeleccionados =
     sociosFiltrados.length > 0 &&
     sociosFiltrados.every((s) => seleccionados.has(s.id));
+
+  const todosAbandonadosSeleccionados =
+    abandonadosEnviablesFiltrados.length > 0 &&
+    abandonadosEnviablesFiltrados.every((s) =>
+      seleccionadosAbandonados.has(s.id)
+    );
 
   const puedeEnviar = config?.configurado === true && !enviando;
 
@@ -448,8 +628,34 @@ export default function AdminEmailMarketing() {
     });
   };
 
+  const alternarSeleccionAbandonado = (id) => {
+    setSeleccionadosAbandonados((prev) => {
+      const siguiente = new Set(prev);
+      if (siguiente.has(id)) siguiente.delete(id);
+      else siguiente.add(id);
+      return siguiente;
+    });
+  };
+
+  const alternarTodosAbandonados = () => {
+    setSeleccionadosAbandonados((prev) => {
+      const siguiente = new Set(prev);
+
+      if (todosAbandonadosSeleccionados) {
+        abandonadosFiltrados.forEach((s) => siguiente.delete(s.id));
+      } else {
+        abandonadosEnviablesFiltrados.forEach((s) => siguiente.add(s.id));
+      }
+
+      return siguiente;
+    });
+  };
+
   const ejecutarEnvio = async (ids, opciones = {}) => {
     const lista = Array.from(new Set(ids.filter(Boolean)));
+    const tipo = opciones.tipo || "bienvenida";
+    const etiquetaTipo =
+      tipo === "abandonados" ? "abandonados" : "bienvenida";
 
     if (lista.length === 0) {
       setResultadoEnvio({
@@ -461,7 +667,7 @@ export default function AdminEmailMarketing() {
     }
 
     const confirmado = window.confirm(
-      `Se enviarán ${lista.length} correo(s) de bienvenida con Resend${
+      `Se enviarán ${lista.length} correo(s) de ${etiquetaTipo} con Resend${
         opciones.reenviar ? " (incluye reenvíos)" : ""
       }. ¿Continuar?`
     );
@@ -488,7 +694,7 @@ export default function AdminEmailMarketing() {
         try {
           const respuesta = await enviarEmailsMarketing({
             ids: lote,
-            tipo: "bienvenida",
+            tipo,
             reenviar: opciones.reenviar === true,
           });
 
@@ -528,7 +734,11 @@ export default function AdminEmailMarketing() {
         mensaje: `Envío finalizado · Enviados: ${totales.enviados} · Omitidos: ${totales.omitidos} · Errores: ${totales.errores}`,
         detalles: totales.detalles,
       });
-      setSeleccionados(new Set());
+      if (tipo === "abandonados") {
+        setSeleccionadosAbandonados(new Set());
+      } else {
+        setSeleccionados(new Set());
+      }
     } finally {
       setEnviando(false);
       setProgresoEnvio("");
@@ -565,6 +775,32 @@ export default function AdminEmailMarketing() {
     ejecutarEnvio([socio.id], {
       reenviar: Boolean(socio.bienvenidaEmailEnviadaEn),
     });
+  };
+
+  const enviarPendientesAbandonados = () => {
+    const ids = abandonadosUnicos
+      .filter((s) => estadoAbandonado(s).id === "pendiente")
+      .map((s) => s.id);
+
+    ejecutarEnvio(ids, { tipo: "abandonados" });
+  };
+
+  const reenviarErroresAbandonados = () => {
+    const ids = abandonadosUnicos
+      .filter((s) => estadoAbandonado(s).id === "error")
+      .map((s) => s.id);
+
+    ejecutarEnvio(ids, { tipo: "abandonados" });
+  };
+
+  const enviarSeleccionadosAbandonados = () => {
+    ejecutarEnvio(Array.from(seleccionadosAbandonados), {
+      tipo: "abandonados",
+    });
+  };
+
+  const enviarUnoAbandonado = (socio) => {
+    ejecutarEnvio([socio.id], { tipo: "abandonados" });
   };
 
   return (
@@ -630,6 +866,18 @@ export default function AdminEmailMarketing() {
         >
           Bienvenidas
           <span className="em-tab-badge">{statsBienvenidas.pendientes}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={vista === "abandonados"}
+          className={`em-tab ${vista === "abandonados" ? "is-active" : ""}`}
+          onClick={() => setVista("abandonados")}
+        >
+          Abandonados
+          <span className="em-tab-badge">
+            {statsAbandonados.pendientes + statsAbandonados.errores}
+          </span>
         </button>
       </div>
 
@@ -920,7 +1168,7 @@ export default function AdminEmailMarketing() {
             </p>
           )}
         </>
-      ) : (
+      ) : vista === "bienvenidas" ? (
         <>
           <div className="em-stats">
             <div className="em-stat-card em-stat-card--info">
@@ -1096,6 +1344,206 @@ export default function AdminEmailMarketing() {
                         disabled={!puedeEnviar || estado.id === "proceso"}
                       >
                         {estado.id === "enviada" ? "Reenviar" : "Enviar"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="em-stats">
+            <div className="em-stat-card em-stat-card--info">
+              <div className="em-stat-value">{statsAbandonados.abandonados}</div>
+              <div className="em-stat-label">Abandonados</div>
+            </div>
+            <div className="em-stat-card em-stat-card--ok">
+              <div className="em-stat-value">{statsAbandonados.contactados}</div>
+              <div className="em-stat-label">Contactados este mes</div>
+            </div>
+            <div className="em-stat-card em-stat-card--pending">
+              <div className="em-stat-value">{statsAbandonados.pendientes}</div>
+              <div className="em-stat-label">Listos para enviar</div>
+            </div>
+            <div className="em-stat-card em-stat-card--pending">
+              <div className="em-stat-value">{statsAbandonados.esperando}</div>
+              <div className="em-stat-label">Esperando 3 días</div>
+            </div>
+            <div className="em-stat-card em-stat-card--error">
+              <div className="em-stat-value">{statsAbandonados.errores}</div>
+              <div className="em-stat-label">Con error</div>
+            </div>
+            {statsAbandonados.proceso > 0 && (
+              <div className="em-stat-card em-stat-card--pending">
+                <div className="em-stat-value">{statsAbandonados.proceso}</div>
+                <div className="em-stat-label">En proceso</div>
+              </div>
+            )}
+          </div>
+
+          <div className="em-alert em-alert--info">
+            Se contacta a los usuarios abandonados 3 días después de actualizarse
+            el estado, una sola vez por mes. El envío automático corre una vez al
+            día y también podés enviarlo manualmente desde acá. Nunca se repite
+            el contacto dentro del mismo mes.
+          </div>
+
+          <div className="em-toolbar">
+            <div className="em-filters" aria-label="Filtrar abandonados">
+              {FILTROS_ABANDONADOS.map((filtro) => (
+                <button
+                  key={filtro.id}
+                  type="button"
+                  className={`em-filter-btn ${
+                    filtroAbandonados === filtro.id ? "is-active" : ""
+                  }`}
+                  onClick={() => setFiltroAbandonados(filtro.id)}
+                >
+                  {filtro.label}
+                </button>
+              ))}
+            </div>
+
+            <input
+              className="em-search"
+              type="search"
+              placeholder="Buscar por nombre, email, Instagram o DNI..."
+              value={busquedaAbandonados}
+              onChange={(e) => setBusquedaAbandonados(e.target.value)}
+            />
+          </div>
+
+          <div className="em-bulk-actions">
+            <button
+              type="button"
+              className="em-action-btn em-action-btn--primary"
+              onClick={enviarPendientesAbandonados}
+              disabled={
+                !puedeEnviar ||
+                statsAbandonados.pendientes === 0 ||
+                cargandoSuscriptores
+              }
+            >
+              {enviando
+                ? `Enviando ${progresoEnvio}`
+                : `Enviar pendientes (${statsAbandonados.pendientes})`}
+            </button>
+            <button
+              type="button"
+              className="em-action-btn"
+              onClick={reenviarErroresAbandonados}
+              disabled={
+                !puedeEnviar ||
+                statsAbandonados.errores === 0 ||
+                cargandoSuscriptores
+              }
+            >
+              Reintentar errores ({statsAbandonados.errores})
+            </button>
+            <button
+              type="button"
+              className="em-action-btn"
+              onClick={enviarSeleccionadosAbandonados}
+              disabled={!puedeEnviar || seleccionadosAbandonados.size === 0}
+            >
+              Enviar seleccionados ({seleccionadosAbandonados.size})
+            </button>
+          </div>
+
+          <div className="em-list">
+            {cargandoSuscriptores ? (
+              <div className="em-loading">Cargando socios...</div>
+            ) : errorSuscriptores ? (
+              <div className="em-error">{errorSuscriptores}</div>
+            ) : abandonadosFiltrados.length === 0 ? (
+              <div className="em-empty">
+                {abandonadosUnicos.length === 0
+                  ? "No hay usuarios abandonados con email para contactar."
+                  : "No hay abandonados con estos filtros."}
+              </div>
+            ) : (
+              <>
+                <label className="em-select-all">
+                  <input
+                    type="checkbox"
+                    checked={todosAbandonadosSeleccionados}
+                    onChange={alternarTodosAbandonados}
+                    disabled={abandonadosEnviablesFiltrados.length === 0}
+                  />
+                  <span>
+                    Seleccionar los {abandonadosEnviablesFiltrados.length}{" "}
+                    contactables visibles
+                  </span>
+                </label>
+
+                {abandonadosFiltrados.map((socio) => {
+                  const estado = estadoAbandonado(socio);
+                  const email = emailDeSuscriptor(socio);
+                  const seleccionado = seleccionadosAbandonados.has(socio.id);
+                  const enviable = puedeEnviarAbandonado(socio);
+                  const disponible = fechaDisponibleAbandono(socio);
+
+                  return (
+                    <div
+                      className={`em-subscriber-row ${
+                        seleccionado ? "is-selected" : ""
+                      }`}
+                      key={socio.id}
+                    >
+                      <input
+                        className="em-checkbox"
+                        type="checkbox"
+                        checked={seleccionado}
+                        onChange={() => alternarSeleccionAbandonado(socio.id)}
+                        disabled={!enviable}
+                        aria-label={`Seleccionar ${socio.nombre || email}`}
+                      />
+
+                      <div className="em-subscriber-info">
+                        <div className="em-subscriber-name">
+                          {socio.nombre || "Sin nombre"}
+                        </div>
+                        <div className="em-subscriber-meta">
+                          {email} | @{socio.instagram || "sin ig"} | Alta:{" "}
+                          {formatFecha(socio.fechaAlta)}
+                        </div>
+                        {estado.id === "contactado" && (
+                          <div className="em-subscriber-note">
+                            Contactado{" "}
+                            {formatFechaHora(socio.abandonadoEmailEnviadoEn)}
+                            {socio.abandonadoEmailId
+                              ? ` · ${socio.abandonadoEmailId}`
+                              : ""}
+                          </div>
+                        )}
+                        {estado.id === "esperando" && disponible && (
+                          <div className="em-subscriber-note">
+                            Disponible desde {formatFecha(disponible)}
+                          </div>
+                        )}
+                        {estado.id === "error" && (
+                          <div className="em-subscriber-error">
+                            {socio.abandonadoEmailError}
+                          </div>
+                        )}
+                      </div>
+
+                      <span
+                        className="em-status-badge em-status-badge--compact"
+                        style={{ background: estado.color }}
+                      >
+                        {estado.label}
+                      </span>
+
+                      <button
+                        type="button"
+                        className="em-row-btn"
+                        onClick={() => enviarUnoAbandonado(socio)}
+                        disabled={!puedeEnviar || !enviable}
+                      >
+                        {estado.id === "contactado" ? "Contactado" : "Enviar"}
                       </button>
                     </div>
                   );

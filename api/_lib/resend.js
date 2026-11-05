@@ -1,5 +1,6 @@
 const RESEND_API_URL = "https://api.resend.com/emails";
 const TIENDA_URL = "https://www.buenosaireswax.com/#/tienda";
+const CLUB_URL = "https://www.buenosaireswax.com/#/club";
 const CONTACT_EMAIL = "buenosaireswax@gmail.com";
 
 function escapeHtml(valor) {
@@ -127,6 +128,119 @@ Contacto: ${CONTACT_EMAIL}
 Recibís este correo porque te suscribiste al Club de Vinilos de BAWAX.`;
 }
 
+function construirHtmlAbandonado({ nombre }) {
+  const saludo = nombrePila(nombre);
+  const titulo = saludo
+    ? `Tu lugar sigue reservado, ${escapeHtml(saludo)}`
+    : "Tu lugar en el Club sigue reservado";
+
+  return `<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Completá tu suscripción al Club de Vinilos de BAWAX</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f4f2;font-family:Helvetica,Arial,sans-serif;color:#111111;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f2;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;">
+            <tr>
+              <td style="background:#111111;padding:36px 32px;text-align:center;">
+                <div style="font-size:30px;line-height:1;letter-spacing:10px;color:#ffffff;font-weight:700;">BAWAX</div>
+                <div style="margin-top:12px;font-size:11px;letter-spacing:4px;color:#bdbdbd;text-transform:uppercase;">Club de Vinilos</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:40px 32px 24px;">
+                <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25;color:#111111;">${titulo}</h1>
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#333333;">
+                  Vimos que empezaste a sumarte al Club de Vinilos de BAWAX, pero el proceso quedó pendiente. Tu lugar todavía está disponible.
+                </p>
+                <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#333333;">
+                  Si completás la suscripción, esto es lo que te espera:
+                </p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                  <tr>
+                    <td style="padding:12px 0;border-bottom:1px solid #eeeeee;font-size:15px;line-height:1.5;color:#333333;">
+                      <strong style="color:#111111;">Vinilo curado</strong><br />
+                      Deep house, house y techno elegidos especialmente para cada miembro.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 0;border-bottom:1px solid #eeeeee;font-size:15px;line-height:1.5;color:#333333;">
+                      <strong style="color:#111111;">Regalos especiales</strong><br />
+                      Slipmats, kits de limpieza y accesorios personalizados.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 0;font-size:15px;line-height:1.5;color:#333333;">
+                      <strong style="color:#111111;">Accesos exclusivos</strong><br />
+                      Entradas y beneficios en los eventos de BAWAX.
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#333333;">
+                  Completá tu suscripción en pocos minutos. Si tenés alguna duda, escribinos a
+                  <a href="mailto:${CONTACT_EMAIL}" style="color:#111111;font-weight:700;">${CONTACT_EMAIL}</a>.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                  <tr>
+                    <td style="border-radius:999px;background:#111111;">
+                      <a href="${CLUB_URL}" style="display:inline-block;padding:14px 28px;font-size:14px;font-weight:700;letter-spacing:1px;color:#ffffff;text-decoration:none;text-transform:uppercase;">
+                        Completar suscripción
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 32px 32px;text-align:center;">
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#777777;">
+                  Contacto: <a href="mailto:${CONTACT_EMAIL}" style="color:#111111;text-decoration:underline;">${CONTACT_EMAIL}</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#111111;padding:20px 32px;text-align:center;">
+                <p style="margin:0;font-size:11px;line-height:1.5;color:#9a9a9a;">
+                  Recibís este correo porque iniciaste la suscripción al Club de Vinilos de BAWAX.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+function construirTextoAbandonado({ nombre }) {
+  const saludo = nombrePila(nombre);
+  const titulo = saludo
+    ? `Tu lugar sigue reservado, ${saludo}`
+    : "Tu lugar en el Club sigue reservado";
+
+  return `${titulo}
+
+Vimos que empezaste a sumarte al Club de Vinilos de BAWAX, pero el proceso quedó pendiente. Tu lugar todavía está disponible.
+
+Si completás la suscripción, esto es lo que te espera:
+- Vinilo curado: deep house, house y techno elegidos especialmente para cada miembro.
+- Regalos especiales: slipmats, kits de limpieza y accesorios personalizados.
+- Accesos exclusivos: entradas y beneficios en los eventos de BAWAX.
+
+Completá tu suscripción en pocos minutos: ${CLUB_URL}
+Si tenés alguna duda, escribinos a ${CONTACT_EMAIL}.
+
+Contacto: ${CONTACT_EMAIL}
+
+Recibís este correo porque iniciaste la suscripción al Club de Vinilos de BAWAX.`;
+}
+
 const PLANTILLAS = {
   bienvenida: {
     id: "bienvenida",
@@ -135,6 +249,14 @@ const PLANTILLAS = {
     asuntoDefault: "Bienvenido al Club de Vinilos de BAWAX",
     html: construirHtml,
     texto: construirTexto,
+  },
+  abandonados: {
+    id: "abandonados",
+    label: "Abandonados",
+    asuntoEnv: "RESEND_ABANDONED_SUBJECT",
+    asuntoDefault: "Completá tu suscripción al Club de Vinilos de BAWAX",
+    html: construirHtmlAbandonado,
+    texto: construirTextoAbandonado,
   },
 };
 
@@ -220,6 +342,15 @@ export async function enviarEmail({ tipo, to, nombre, idempotencyKey }) {
 export async function enviarEmailBienvenida({ to, nombre, idempotencyKey }) {
   return enviarEmail({
     tipo: "bienvenida",
+    to,
+    nombre,
+    idempotencyKey,
+  });
+}
+
+export async function enviarEmailAbandonados({ to, nombre, idempotencyKey }) {
+  return enviarEmail({
+    tipo: "abandonados",
     to,
     nombre,
     idempotencyKey,

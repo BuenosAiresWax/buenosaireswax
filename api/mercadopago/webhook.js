@@ -5,6 +5,7 @@ import {
   esDelClub,
 } from "../_lib/mp-suscripciones.js";
 import { enviarBienvenidaSiCorresponde } from "../_lib/welcome-email.js";
+import { calcularCamposAbandono } from "../_lib/abandoned-email.js";
 
 function fetchPreapprovalStatus(preapprovalId) {
   return fetchMp(`/preapproval/${preapprovalId}`);
@@ -194,6 +195,7 @@ export default async function handler(req, res) {
         mercadopago_status: status,
         mercadopago_preapproval_id: data.mercadopago_preapproval_id || preapprovalId,
         ...(statusMap[status] || {}),
+        ...calcularCamposAbandono(status, data),
       };
 
       if (status === "authorized") {
@@ -347,6 +349,7 @@ export default async function handler(req, res) {
             data.mercadopago_preapproval_id || preapprovalId || null,
           activo: true,
           pendiente: false,
+          ...calcularCamposAbandono("authorized", data),
         });
 
         if (
@@ -456,6 +459,7 @@ export default async function handler(req, res) {
             data.mercadopago_preapproval_id || preapprovalId || null,
           activo: true,
           pendiente: false,
+          ...calcularCamposAbandono("authorized", data),
         });
 
         if (
