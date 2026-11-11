@@ -2,6 +2,7 @@ const RESEND_API_URL = "https://api.resend.com/emails";
 const TIENDA_URL = "https://www.buenosaireswax.com/#/tienda";
 const CLUB_URL = "https://www.buenosaireswax.com/#/club";
 const CONTACT_EMAIL = "buenosaireswax@gmail.com";
+const LOGO_URL = "https://www.buenosaireswax.com/email-club-logo.png";
 
 function escapeHtml(valor) {
   return String(valor || "")
@@ -36,8 +37,7 @@ function construirHtml({ nombre }) {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;">
             <tr>
               <td style="background:#111111;padding:36px 32px;text-align:center;">
-                <div style="font-size:30px;line-height:1;letter-spacing:10px;color:#ffffff;font-weight:700;">BAWAX</div>
-                <div style="margin-top:12px;font-size:11px;letter-spacing:4px;color:#bdbdbd;text-transform:uppercase;">Club de Vinilos</div>
+                <img src="${LOGO_URL}" alt="BAWAX" width="126" height="24" style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;width:126px;max-width:100%;height:auto;" />
               </td>
             </tr>
             <tr>
@@ -148,8 +148,7 @@ function construirHtmlAbandonado({ nombre }) {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;">
             <tr>
               <td style="background:#111111;padding:36px 32px;text-align:center;">
-                <div style="font-size:30px;line-height:1;letter-spacing:10px;color:#ffffff;font-weight:700;">BAWAX</div>
-                <div style="margin-top:12px;font-size:11px;letter-spacing:4px;color:#bdbdbd;text-transform:uppercase;">Club de Vinilos</div>
+                <img src="${LOGO_URL}" alt="BAWAX" width="126" height="24" style="display:block;margin:0 auto;border:0;outline:none;text-decoration:none;width:126px;max-width:100%;height:auto;" />
               </td>
             </tr>
             <tr>
