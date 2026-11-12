@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { crearSuscripcion } from "../utils/mercadopago";
+import logo from "../../assets/hero/bawax-club-logo.png";
 import "../styles/VinylClub.css";
 
 const CATEGORIAS = [
@@ -16,6 +17,19 @@ const STEPS = [
   { id: 2, label: "Envío" },
   { id: 3, label: "Géneros" },
 ];
+
+function ClubHero({ subtitle }) {
+  return (
+    <section className="vc-hero">
+      <div className="vc-hero-overlay">
+        <img src={logo} alt="BAWAX Club" className="vc-hero-logo" />
+        <div className="vc-hero-content">
+          <h2>{subtitle}</h2>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function VinylClubPage() {
   const [step, setStep] = useState(0);
@@ -191,14 +205,7 @@ function VinylClubPage() {
   if (exito && yaSuscrito) {
     return (
       <div className="vc-container">
-        <section className="vc-hero">
-          <div className="vc-hero-overlay">
-            <div className="vc-hero-content">
-              <h1>Club de Vinilos</h1>
-              <h2>Suscripción activa</h2>
-            </div>
-          </div>
-        </section>
+        <ClubHero subtitle="Suscripción activa" />
         <div className="vc-section">
           <div className="vc-success-card">
             <div className="vc-success-icon">🎶</div>
@@ -213,14 +220,7 @@ function VinylClubPage() {
   if (exito) {
     return (
       <div className="vc-container">
-        <section className="vc-hero">
-          <div className="vc-hero-overlay">
-            <div className="vc-hero-content">
-              <h1>Club de Vinilos</h1>
-              <h2>Suscripción</h2>
-            </div>
-          </div>
-        </section>
+        <ClubHero subtitle="Suscripción" />
         <div className="vc-section">
           <div className="vc-success-card">
             <div className="vc-success-icon">✓</div>
@@ -240,14 +240,7 @@ function VinylClubPage() {
 
   return (
     <div className="vc-container">
-      <section className="vc-hero">
-        <div className="vc-hero-overlay">
-          <div className="vc-hero-content">
-            <h1>Club de Vinilos</h1>
-            <h2>Suscribite al primer club de vinilos de musica electronica de Argentina</h2>
-          </div>
-        </div>
-      </section>
+      <ClubHero subtitle="Suscribite al primer club de vinilos de musica electronica de Argentina" />
 
       {/* Benefits */}
       <div className="vc-section">

@@ -101,8 +101,8 @@ body.checkout-modal-open {
 
 /* header */
 .headerContainer {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     padding: 0 5%;
     padding-top: 2rem;
@@ -112,6 +112,7 @@ body.checkout-modal-open {
 .logoLink {
     display: inline-flex;
     align-items: center;
+    justify-self: start;
     text-decoration: none;
 }
 
@@ -119,8 +120,8 @@ body.checkout-modal-open {
     display: flex;
     align-items: center;
     justify-content: center;
+    justify-self: center;
     gap: 0.9rem;
-    flex: 1;
 }
 
 .centerNavLink {
@@ -162,6 +163,7 @@ body.checkout-modal-open {
     flex-flow: row;
     align-items: center;
     justify-content: center;
+    justify-self: end;
 }
 
 .contactoNav {
@@ -293,6 +295,7 @@ body.checkout-modal-open {
     .centerNav {
         grid-column: 1 / -1;
         justify-content: center;
+        justify-self: stretch;
         align-items: center;
         gap: 0.4rem;
         order: 3;
