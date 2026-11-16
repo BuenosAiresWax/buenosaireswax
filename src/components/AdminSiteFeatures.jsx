@@ -3,6 +3,13 @@ import { useSiteFeatures } from "../context/SiteFeaturesContext";
 
 import "../styles/adminSiteFeatures.css";
 
+const listToText = (arr) => (Array.isArray(arr) ? arr.join("\n") : "");
+const textToList = (text) =>
+  String(text || "")
+    .split(/\r?\n|,/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const FEATURES = [
   {
     key: "drop",
@@ -35,6 +42,10 @@ export default function AdminSiteFeatures() {
   const [localFeatures, setLocalFeatures] = useState(features);
   const [savingKey, setSavingKey] = useState(null);
   const [savedKey, setSavedKey] = useState(null);
+  const [clubGenerosText, setClubGenerosText] = useState("");
+  const [clubNivelesText, setClubNivelesText] = useState("");
+  const [clubFormatosText, setClubFormatosText] = useState("");
+  const [clubNotasPlaceholder, setClubNotasPlaceholder] = useState("");
 
   const setFeatures = setLocalFeatures;
 
@@ -85,7 +96,31 @@ export default function AdminSiteFeatures() {
 
   useEffect(() => {
     setLocalFeatures(features);
+    setClubGenerosText(listToText(features.clubGeneros));
+    setClubNivelesText(listToText(features.clubNiveles));
+    setClubFormatosText(listToText(features.clubFormatos));
+    setClubNotasPlaceholder(features.clubNotasPlaceholder || "");
   }, [features]);
+
+  const handleSaveClubStep4 = async () => {
+    setSavingKey("clubStep4");
+    setSavedKey(null);
+    clearSaveError();
+    const generos = textToList(clubGenerosText);
+    const niveles = textToList(clubNivelesText);
+    const formatos = textToList(clubFormatosText);
+    const ok1 = await setFeature("clubGeneros", generos.length ? generos : features.clubGeneros);
+    const ok2 = await setFeature("clubNiveles", niveles.length ? niveles : features.clubNiveles);
+    const ok3 = await setFeature("clubFormatos", formatos.length ? formatos : features.clubFormatos);
+    const ok4 = await setFeature("clubNotasPlaceholder", clubNotasPlaceholder.trim() || features.clubNotasPlaceholder);
+    setSavingKey(null);
+    if (ok1 && ok2 && ok3 && ok4) {
+      setSavedKey("clubStep4");
+      window.setTimeout(() => {
+        setSavedKey((prev) => (prev === "clubStep4" ? null : prev));
+      }, 2000);
+    }
+  };
 
   if (!initialized) {
     return (
@@ -300,6 +335,86 @@ export default function AdminSiteFeatures() {
             </div>
           );
         })}
+      </div>
+
+      <div className="sf-section">
+        <div className="sf-section-header">
+          <h3 className="sf-section-title">
+            <span className="sf-item-icon">♪</span>
+            Vinyl Club - Step 4 (Gustos musicales)
+          </h3>
+          <p className="sf-section-desc">
+            Configura las opciones que se muestran en el paso 4 del formulario de suscripcion al club.
+          </p>
+          <span
+            className={`sf-item-status ${
+              savingKey === "clubStep4"
+                ? "sf-item-status--saving"
+                : savedKey === "clubStep4"
+                  ? "sf-item-status--saved"
+                  : ""
+            }`}
+          >
+            {savingKey === "clubStep4" ? "Guardando..." : savedKey === "clubStep4" ? "Guardado ✓" : ""}
+          </span>
+        </div>
+
+        <div className="sf-extra">
+          <div className="sf-extra-row">
+            <label className="sf-label">
+              Estilos musicales (uno por linea)
+              <textarea
+                className="sf-input sf-textarea"
+                rows={8}
+                value={clubGenerosText}
+                onChange={(e) => setClubGenerosText(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className="sf-extra-row">
+            <label className="sf-label">
+              Niveles de coleccion (uno por linea)
+              <textarea
+                className="sf-input sf-textarea"
+                rows={3}
+                value={clubNivelesText}
+                onChange={(e) => setClubNivelesText(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className="sf-extra-row">
+            <label className="sf-label">
+              Tipo de seleccion (uno por linea)
+              <textarea
+                className="sf-input sf-textarea"
+                rows={3}
+                value={clubFormatosText}
+                onChange={(e) => setClubFormatosText(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className="sf-extra-row">
+            <label className="sf-label">
+              Placeholder del campo de notas
+              <input
+                className="sf-input"
+                type="text"
+                value={clubNotasPlaceholder}
+                onChange={(e) => setClubNotasPlaceholder(e.target.value)}
+              />
+            </label>
+          </div>
+          <div className="sf-extra-actions">
+            <button
+              type="button"
+              className="sf-save-btn"
+              disabled={savingKey === "clubStep4"}
+              onClick={handleSaveClubStep4}
+            >
+              {savingKey === "clubStep4" ? "Guardando..." : savedKey === "clubStep4" ? "Guardado" : "Guardar"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

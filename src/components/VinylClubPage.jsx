@@ -1,14 +1,42 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { crearSuscripcion } from "../utils/mercadopago";
+import { useSiteFeatures } from "../context/SiteFeaturesContext";
 import logo from "../../assets/hero/bawax-club-logo.png";
 import "../styles/VinylClub.css";
 
-const CATEGORIAS = [
-  { id: "house", label: "House", icon: "🏠" },
-  { id: "techno", label: "Techno", icon: "⚡" },
-  { id: "deep", label: "Deep", icon: "🌊" },
+const toSlug = (str) =>
+  String(str || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const GENEROS_DEFAULT = [
+  { id: "chicago-house", label: "Chicago House" },
+  { id: "deep", label: "Deep" },
+  { id: "deep-house", label: "Deep House" },
+  { id: "detroit", label: "Detroit" },
+  { id: "funky", label: "Funky" },
+  { id: "hardgroove", label: "Hardgroove" },
+  { id: "house", label: "House" },
+  { id: "jazzy", label: "Jazzy" },
+  { id: "rave", label: "Rave" },
+  { id: "techno", label: "Techno" },
+];
+
+const NIVELES_DEFAULT = [
+  { id: "iniciando", label: "Estoy empezando" },
+  { id: "intermedio", label: "Coleccion intermedia" },
+  { id: "avanzado", label: "Coleccion avanzada" },
+];
+
+const FORMATOS_DEFAULT = [
+  { id: "sorpresa", label: "Sorprendeme" },
+  { id: "bailables", label: "Mas bailables" },
+  { id: "calmos", label: "Mas calmos" },
 ];
 
 const STEPS = [
@@ -32,6 +60,27 @@ function ClubHero({ subtitle }) {
 }
 
 function VinylClubPage() {
+  const { features } = useSiteFeatures();
+  const generos = useMemo(() => {
+    const list = Array.isArray(features?.clubGeneros) && features.clubGeneros.length
+      ? features.clubGeneros
+      : GENEROS_DEFAULT.map((g) => g.label);
+    return list.map((label) => ({ id: toSlug(label) || label, label }));
+  }, [features?.clubGeneros]);
+  const niveles = useMemo(() => {
+    const list = Array.isArray(features?.clubNiveles) && features.clubNiveles.length
+      ? features.clubNiveles
+      : NIVELES_DEFAULT.map((n) => n.label);
+    return list.map((label, i) => ({ id: toSlug(label) || `nivel-${i}`, label }));
+  }, [features?.clubNiveles]);
+  const formatos = useMemo(() => {
+    const list = Array.isArray(features?.clubFormatos) && features.clubFormatos.length
+      ? features.clubFormatos
+      : FORMATOS_DEFAULT.map((f) => f.label);
+    return list.map((label, i) => ({ id: toSlug(label) || `formato-${i}`, label }));
+  }, [features?.clubFormatos]);
+  const notasPlaceholder = features?.clubNotasPlaceholder || "Sellos, artistas o estilos que te gusten o prefieras evitar";
+
   const [step, setStep] = useState(0);
   const [nombre, setNombre] = useState("");
   const [nombreInstagram, setNombreInstagram] = useState("");
@@ -43,6 +92,9 @@ function VinylClubPage() {
   const [ciudad, setCiudad] = useState("");
   const [codigoPostal, setCodigoPostal] = useState("");
   const [preferencias, setPreferencias] = useState([]);
+  const [nivelColeccion, setNivelColeccion] = useState("");
+  const [formatoPreferido, setFormatoPreferido] = useState("");
+  const [notas, setNotas] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -105,12 +157,12 @@ function VinylClubPage() {
         if (!codigoPostal.trim()) return "Ingresá tu código postal";
         return null;
       case 3:
-        if (preferencias.length === 0) return "Elegí al menos un género";
+        if (preferencias.length === 0) return "Eleg� al menos un estilo";
         return null;
       default:
         return null;
     }
-  }, [step, nombre, dni, correo, telefono, direccion, ciudad, codigoPostal, preferencias]);
+  }, [step, nombre, dni, correo, telefono, direccion, ciudad, codigoPostal, preferencias, nivelColeccion, formatoPreferido]);
 
   const nextStep = () => {
     const err = validate();
@@ -163,6 +215,9 @@ function VinylClubPage() {
         ciudad: ciudad.trim(),
         codigoPostal: codigoPostal.trim(),
         preferencias,
+        nivelColeccion: nivelColeccion || null,
+        formatoPreferido: formatoPreferido || null,
+        notas: notas.trim() || "",
         activo: false,
         pendiente: true,
         fechaAlta: new Date().toISOString(),
@@ -494,33 +549,79 @@ function VinylClubPage() {
             {step === 3 && (
               <div className="vc-step-content">
                 <div className="vc-step-header">
-                  <span className="vc-step-icon">🎵</span>
+                  <span className="vc-step-icon">♪</span>
                   <div>
-                    <h3>Géneros musicales</h3>
-                    <p>¿Qué te gusta escuchar?</p>
+                    <h3>Tus gustos musicales</h3>
+                    <p>Personalizamos tu caja mensual</p>
                   </div>
                 </div>
 
-                <p className="vc-preferencias-subtitle">
-                  Elegí uno o más géneros. Los usaremos para personalizar tu caja mensual.
-                </p>
+                <div className="vc-subsection">
+                  <label className="vc-label">Estilos que te interesan *</label>
+                  <p className="vc-preferencias-subtitle">Elegi uno o mas. Nos ayudan a curar tu seleccion.</p>
+                  <div className="vc-preferencias-grid">
+                    {generos.map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        className={`vc-preferencia-card ${preferencias.includes(g.id) ? "selected" : ""}`}
+                        onClick={() => togglePreferencia(g.id)}
+                        disabled={loading}
+                      >
+                        <span className="vc-pref-card-label">{g.label}</span>
+                        {preferencias.includes(g.id) && <span className="vc-pref-card-check">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                <div className="vc-preferencias-grid">
-                  {CATEGORIAS.map((cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      className={`vc-preferencia-card ${preferencias.includes(cat.id) ? "selected" : ""}`}
-                      onClick={() => togglePreferencia(cat.id)}
-                      disabled={loading}
-                    >
-                      <span className="vc-pref-card-icon">{cat.icon}</span>
-                      <span className="vc-pref-card-label">{cat.label}</span>
-                      {preferencias.includes(cat.id) && (
-                        <span className="vc-pref-card-check">✓</span>
-                      )}
-                    </button>
-                  ))}
+                <div className="vc-subsection">
+                  <label className="vc-label">Tu coleccion</label>
+                  <div className="vc-choice-row">
+                    {niveles.map((n) => (
+                      <button
+                        key={n.id}
+                        type="button"
+                        className={`vc-choice-chip ${nivelColeccion === n.id ? "selected" : ""}`}
+                        onClick={() => setNivelColeccion(n.id === nivelColeccion ? "" : n.id)}
+                        disabled={loading}
+                      >
+                        {n.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="vc-subsection">
+                  <label className="vc-label">Como te gustaria la seleccion</label>
+                  <div className="vc-choice-row">
+                    {formatos.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        className={`vc-choice-chip ${formatoPreferido === f.id ? "selected" : ""}`}
+                        onClick={() => setFormatoPreferido(f.id === formatoPreferido ? "" : f.id)}
+                        disabled={loading}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="vc-field-group">
+                  <label className="vc-label" htmlFor="vc-notas">Algo mas que debamos saber <span className="vc-label-optional">(opcional, max 180)</span></label>
+                  <textarea
+                    id="vc-notas"
+                    className="vc-field vc-textarea"
+                    placeholder={notasPlaceholder}
+                    value={notas}
+                    onChange={(e) => setNotas(e.target.value.slice(0, 180))}
+                    maxLength={180}
+                    rows={3}
+                    disabled={loading}
+                  />
+                  <span className="vc-char-count">{notas.length}/180</span>
                 </div>
               </div>
             )}
