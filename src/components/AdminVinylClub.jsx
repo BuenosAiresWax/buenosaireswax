@@ -452,6 +452,9 @@ export default function AdminVinylClub() {
       Preferencias: Array.isArray(s.preferencias)
         ? s.preferencias.map((p) => CATEGORIAS_LABELS[p] || p).join(", ")
         : "",
+      "Nivel coleccion": NIVEL_LABELS[s.nivelColeccion] || s.nivelColeccion || "",
+      "Tipo de seleccion": FORMATO_LABELS[s.formatoPreferido] || s.formatoPreferido || "",
+      Notas: s.notas || "",
       Estado: esActivoReal(s)
         ? "Activo"
         : esActivoSinPago(s)
@@ -1005,9 +1008,31 @@ export default function AdminVinylClub() {
                         <span>
                           {Array.isArray(s.preferencias) && s.preferencias.length > 0
                             ? s.preferencias.map((p) => CATEGORIAS_LABELS[p] || p).join(", ")
-                            : "—"}
+                            : "-"}
                         </span>
                       </div>
+                      {(s.nivelColeccion || s.formatoPreferido || s.notas) && (
+                        <>
+                          {s.nivelColeccion && (
+                            <div className="vc-admin-detail-item">
+                              <span className="vc-admin-detail-label">Nivel coleccion</span>
+                              <span>{NIVEL_LABELS[s.nivelColeccion] || s.nivelColeccion}</span>
+                            </div>
+                          )}
+                          {s.formatoPreferido && (
+                            <div className="vc-admin-detail-item">
+                              <span className="vc-admin-detail-label">Tipo de seleccion</span>
+                              <span>{FORMATO_LABELS[s.formatoPreferido] || s.formatoPreferido}</span>
+                            </div>
+                          )}
+                          {s.notas && (
+                            <div className="vc-admin-detail-item">
+                              <span className="vc-admin-detail-label">Notas</span>
+                              <span>{s.notas}</span>
+                            </div>
+                          )}
+                        </>
+                      )}
                       {s.mercadopago_email && s.mercadopago_email !== s.correo && (
                         <div className="vc-admin-detail-item">
                           <span className="vc-admin-detail-label">Email MercadoPago</span>
