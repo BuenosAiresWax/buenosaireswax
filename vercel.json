@@ -12,12 +12,35 @@
         },
         "api/email/abandonados.js": {
             "maxDuration": 60
+        },
+        "api/mercadopago/mantenimiento.js": {
+            "maxDuration": 300
         }
     },
     "crons": [
         {
+            "path": "/api/mercadopago/mantenimiento?accion=importar",
+            "schedule": "0 12 * * *"
+        },
+        {
+            "path": "/api/mercadopago/mantenimiento?accion=sync",
+            "schedule": "20 12 * * *"
+        },
+        {
+            "path": "/api/mercadopago/mantenimiento?accion=sync",
+            "schedule": "40 12 * * *"
+        },
+        {
+            "path": "/api/mercadopago/mantenimiento?accion=sync",
+            "schedule": "0 13 * * *"
+        },
+        {
+            "path": "/api/mercadopago/mantenimiento?accion=sync",
+            "schedule": "20 13 * * *"
+        },
+        {
             "path": "/api/email/abandonados",
-            "schedule": "0 14 * * *"
+            "schedule": "45 13 * * *"
         }
     ],
     "rewrites": [

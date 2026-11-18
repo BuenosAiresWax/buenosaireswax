@@ -121,7 +121,7 @@ function nombrePreapproval(preapproval) {
   );
 }
 
-async function obtenerTodasPreapprovals() {
+export async function obtenerTodasPreapprovals() {
   const resultados = [];
   let offset = 0;
 
@@ -177,7 +177,7 @@ function buscarPreapproval(email, nombre, todas) {
   return porNombre.length > 0 ? elegirPreapproval(porNombre) : null;
 }
 
-async function sincronizarSuscriptor(db, email, opciones = {}) {
+export async function sincronizarSuscriptor(db, email, opciones = {}) {
   const docSnap = await buscarDocumento(db, email);
 
   if (!docSnap) {
@@ -339,8 +339,9 @@ async function sincronizarSuscriptor(db, email, opciones = {}) {
 
   const debeEnviarBienvenida =
     !yaEstabaActivo || Boolean(data.bienvenidaEmailError);
+  const enviarBienvenida = opciones.enviarBienvenida !== false;
 
-  if (estado === "authorized" && debeEnviarBienvenida) {
+  if (enviarBienvenida && estado === "authorized" && debeEnviarBienvenida) {
     await enviarBienvenidaSiCorresponde(docRef, { disparo: "sincronizacion" });
   }
 

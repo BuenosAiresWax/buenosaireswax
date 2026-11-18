@@ -320,11 +320,13 @@ export default function AdminVinylClub() {
       unsub = onSnapshot(
         collection(db, "clubvinilos"),
         (snap) => {
-          const docs = snap.docs.map((d) => ({
-            id: d.id,
-            ...d.data(),
-          }));
-          setSuscriptores(docs);
+            const docs = snap.docs
+              .filter((d) => !d.id.startsWith("_"))
+              .map((d) => ({
+                id: d.id,
+                ...d.data(),
+              }));
+            setSuscriptores(docs);
           setLoading(false);
           setError(null);
         },
