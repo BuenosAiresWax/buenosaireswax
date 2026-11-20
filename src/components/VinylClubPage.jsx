@@ -323,7 +323,7 @@ function VinylClubPage() {
 
         <div className="vc-price-box" translate="no">
           <span className="vc-price-amount">{CLUB_PRICE}</span>
-          <span className="vc-price-period">ARS / mes</span>
+          <span className="vc-price-period">/ mes</span>
         </div>
 
         <button className="vc-cta-btn" onClick={scrollToForm}>
