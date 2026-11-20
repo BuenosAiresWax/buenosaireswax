@@ -54,11 +54,11 @@ export function SiteFeaturesProvider({ children }) {
         if (!Array.isArray(rawData.clubGeneros) || rawData.clubGeneros.length === 0) {
           missing.clubGeneros = DEFAULT_SITE_FEATURES.clubGeneros;
         }
+        if (!Array.isArray(rawData.clubEstilos) || rawData.clubEstilos.length === 0) {
+          missing.clubEstilos = DEFAULT_SITE_FEATURES.clubEstilos;
+        }
         if (!Array.isArray(rawData.clubNiveles) || rawData.clubNiveles.length === 0) {
           missing.clubNiveles = DEFAULT_SITE_FEATURES.clubNiveles;
-        }
-        if (!Array.isArray(rawData.clubFormatos) || rawData.clubFormatos.length === 0) {
-          missing.clubFormatos = DEFAULT_SITE_FEATURES.clubFormatos;
         }
         if (typeof rawData.clubNotasPlaceholder !== "string" || !rawData.clubNotasPlaceholder.trim()) {
           missing.clubNotasPlaceholder = DEFAULT_SITE_FEATURES.clubNotasPlaceholder;

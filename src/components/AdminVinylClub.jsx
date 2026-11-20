@@ -6,16 +6,24 @@ import * as XLSX from "xlsx";
 import "../styles/adminVinylClub.css";
 
 const CATEGORIAS_LABELS = {
-  "chicago-house": "Chicago House",
-  deep: "Deep",
-  "deep-house": "Deep House",
-  detroit: "Detroit",
-  funky: "Funky",
-  hardgroove: "Hardgroove",
-  house: "House",
-  jazzy: "Jazzy",
-  rave: "Rave",
   techno: "Techno",
+  house: "House",
+  electro: "Electro",
+  ambient: "Ambient",
+  classics: "Classics",
+  dub: "Dub",
+  jazzy: "Jazzy",
+  funky: "Funky",
+  deep: "Deep",
+  detroit: "Detroit",
+  chicago: "Chicago",
+  "new-york": "New York",
+  break: "Break",
+  rave: "Rave",
+  tribal: "Tribal",
+  "chicago-house": "Chicago House",
+  "deep-house": "Deep House",
+  hardgroove: "Hardgroove",
 };
 
 const NIVEL_LABELS = {

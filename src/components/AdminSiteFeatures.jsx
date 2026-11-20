@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSiteFeatures } from "../context/SiteFeaturesContext";
+import { DEFAULT_SITE_FEATURES } from "../utils/siteFeatures";
 
 import "../styles/adminSiteFeatures.css";
 
@@ -43,11 +44,9 @@ export default function AdminSiteFeatures() {
   const [savingKey, setSavingKey] = useState(null);
   const [savedKey, setSavedKey] = useState(null);
   const [clubGenerosText, setClubGenerosText] = useState("");
+  const [clubEstilosText, setClubEstilosText] = useState("");
   const [clubNivelesText, setClubNivelesText] = useState("");
-  const [clubFormatosText, setClubFormatosText] = useState("");
   const [clubNotasPlaceholder, setClubNotasPlaceholder] = useState("");
-
-  const setFeatures = setLocalFeatures;
 
   const handleToggle = async (key, value) => {
     setSavingKey(key);
@@ -66,39 +65,15 @@ export default function AdminSiteFeatures() {
     }
   };
 
-  const handleChange = async (key, value) => {
-    setSavingKey(key);
-    setSavedKey(null);
-    clearSaveError();
-    const ok = await setFeature(key, value);
-    setSavingKey(null);
-    if (ok) {
-      setSavedKey(key);
-      window.setTimeout(() => {
-        setSavedKey((prev) => (prev === key ? null : prev));
-      }, 2000);
-    }
-  };
-
-  const handleSaveExtra = async (key) => {
-    setSavingKey(key);
-    setSavedKey(null);
-    clearSaveError();
-    const ok = await setFeature(key, features[key]);
-    setSavingKey(null);
-    if (ok) {
-      setSavedKey(key);
-      window.setTimeout(() => {
-        setSavedKey((prev) => (prev === key ? null : prev));
-      }, 2000);
-    }
-  };
-
   useEffect(() => {
     setLocalFeatures(features);
-    setClubGenerosText(listToText(features.clubGeneros));
+    const generosGuardados = features.clubGeneros || [];
+    const generosViejos = generosGuardados.some((g) =>
+      ["Chicago House", "Deep House", "Hardgroove"].includes(g)
+    );
+    setClubGenerosText(listToText(generosViejos ? DEFAULT_SITE_FEATURES.clubGeneros : generosGuardados));
+    setClubEstilosText(listToText(features.clubEstilos));
     setClubNivelesText(listToText(features.clubNiveles));
-    setClubFormatosText(listToText(features.clubFormatos));
     setClubNotasPlaceholder(features.clubNotasPlaceholder || "");
   }, [features]);
 
@@ -107,11 +82,11 @@ export default function AdminSiteFeatures() {
     setSavedKey(null);
     clearSaveError();
     const generos = textToList(clubGenerosText);
+    const estilos = textToList(clubEstilosText);
     const niveles = textToList(clubNivelesText);
-    const formatos = textToList(clubFormatosText);
     const ok1 = await setFeature("clubGeneros", generos.length ? generos : features.clubGeneros);
-    const ok2 = await setFeature("clubNiveles", niveles.length ? niveles : features.clubNiveles);
-    const ok3 = await setFeature("clubFormatos", formatos.length ? formatos : features.clubFormatos);
+    const ok2 = await setFeature("clubEstilos", estilos.length ? estilos : features.clubEstilos);
+    const ok3 = await setFeature("clubNiveles", niveles.length ? niveles : features.clubNiveles);
     const ok4 = await setFeature("clubNotasPlaceholder", clubNotasPlaceholder.trim() || features.clubNotasPlaceholder);
     setSavingKey(null);
     if (ok1 && ok2 && ok3 && ok4) {
@@ -345,6 +320,7 @@ export default function AdminSiteFeatures() {
           </h3>
           <p className="sf-section-desc">
             Configura las opciones que se muestran en el paso 4 del formulario de suscripcion al club.
+            Los socios pueden elegir hasta 6 opciones en total entre generos y estilos.
           </p>
           <span
             className={`sf-item-status ${
@@ -362,10 +338,10 @@ export default function AdminSiteFeatures() {
         <div className="sf-extra">
           <div className="sf-extra-row">
             <label className="sf-label">
-              Estilos musicales (uno por linea)
+              Generos que te gustan (uno por linea)
               <textarea
                 className="sf-input sf-textarea"
-                rows={8}
+                rows={4}
                 value={clubGenerosText}
                 onChange={(e) => setClubGenerosText(e.target.value)}
               />
@@ -373,23 +349,23 @@ export default function AdminSiteFeatures() {
           </div>
           <div className="sf-extra-row">
             <label className="sf-label">
-              Niveles de coleccion (uno por linea)
+              Estilos que te gustan (uno por linea)
               <textarea
                 className="sf-input sf-textarea"
-                rows={3}
-                value={clubNivelesText}
-                onChange={(e) => setClubNivelesText(e.target.value)}
+                rows={11}
+                value={clubEstilosText}
+                onChange={(e) => setClubEstilosText(e.target.value)}
               />
             </label>
           </div>
           <div className="sf-extra-row">
             <label className="sf-label">
-              Tipo de seleccion (uno por linea)
+              Tu coleccion (uno por linea)
               <textarea
                 className="sf-input sf-textarea"
                 rows={3}
-                value={clubFormatosText}
-                onChange={(e) => setClubFormatosText(e.target.value)}
+                value={clubNivelesText}
+                onChange={(e) => setClubNivelesText(e.target.value)}
               />
             </label>
           </div>

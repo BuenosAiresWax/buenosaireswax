@@ -14,17 +14,20 @@ const toSlug = (str) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const GENEROS_DEFAULT = [
-  { id: "chicago-house", label: "Chicago House" },
-  { id: "deep", label: "Deep" },
-  { id: "deep-house", label: "Deep House" },
-  { id: "detroit", label: "Detroit" },
-  { id: "funky", label: "Funky" },
-  { id: "hardgroove", label: "Hardgroove" },
-  { id: "house", label: "House" },
-  { id: "jazzy", label: "Jazzy" },
-  { id: "rave", label: "Rave" },
-  { id: "techno", label: "Techno" },
+const GENEROS_DEFAULT = ["Techno", "House", "Electro", "Ambient"];
+
+const ESTILOS_DEFAULT = [
+  "Classics",
+  "Dub",
+  "Jazzy",
+  "Funky",
+  "Deep",
+  "Detroit",
+  "Chicago",
+  "New York",
+  "Break",
+  "Rave",
+  "Tribal",
 ];
 
 const NIVELES_DEFAULT = [
@@ -33,19 +36,14 @@ const NIVELES_DEFAULT = [
   { id: "avanzado", label: "Coleccion avanzada" },
 ];
 
-const FORMATOS_DEFAULT = [
-  { id: "sorpresa", label: "Sorprendeme" },
-  { id: "bailables", label: "Mas bailables" },
-  { id: "calmos", label: "Mas calmos" },
-];
-
+const MAX_PREFERENCIAS = 6;
 const CLUB_PRICE = "$70.000";
 
 const STEPS = [
   { id: 0, label: "Datos personales" },
   { id: 1, label: "Contacto" },
   { id: 2, label: "Envío" },
-  { id: 3, label: "Géneros" },
+  { id: 3, label: "Gustos" },
 ];
 
 function ClubHero({ subtitle }) {
@@ -66,21 +64,21 @@ function VinylClubPage() {
   const generos = useMemo(() => {
     const list = Array.isArray(features?.clubGeneros) && features.clubGeneros.length
       ? features.clubGeneros
-      : GENEROS_DEFAULT.map((g) => g.label);
+      : GENEROS_DEFAULT;
     return list.map((label) => ({ id: toSlug(label) || label, label }));
   }, [features?.clubGeneros]);
+  const estilos = useMemo(() => {
+    const list = Array.isArray(features?.clubEstilos) && features.clubEstilos.length
+      ? features.clubEstilos
+      : ESTILOS_DEFAULT;
+    return list.map((label) => ({ id: toSlug(label) || label, label }));
+  }, [features?.clubEstilos]);
   const niveles = useMemo(() => {
     const list = Array.isArray(features?.clubNiveles) && features.clubNiveles.length
       ? features.clubNiveles
       : NIVELES_DEFAULT.map((n) => n.label);
     return list.map((label, i) => ({ id: toSlug(label) || `nivel-${i}`, label }));
   }, [features?.clubNiveles]);
-  const formatos = useMemo(() => {
-    const list = Array.isArray(features?.clubFormatos) && features.clubFormatos.length
-      ? features.clubFormatos
-      : FORMATOS_DEFAULT.map((f) => f.label);
-    return list.map((label, i) => ({ id: toSlug(label) || `formato-${i}`, label }));
-  }, [features?.clubFormatos]);
   const notasPlaceholder = features?.clubNotasPlaceholder || "Sellos, artistas o estilos que te gusten o prefieras evitar";
 
   const [step, setStep] = useState(0);
@@ -95,7 +93,6 @@ function VinylClubPage() {
   const [codigoPostal, setCodigoPostal] = useState("");
   const [preferencias, setPreferencias] = useState([]);
   const [nivelColeccion, setNivelColeccion] = useState("");
-  const [formatoPreferido, setFormatoPreferido] = useState("");
   const [notas, setNotas] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -128,9 +125,16 @@ function VinylClubPage() {
   };
 
   const togglePreferencia = (id) => {
-    setPreferencias((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
+    if (preferencias.includes(id)) {
+      setPreferencias((prev) => prev.filter((p) => p !== id));
+      setError(null);
+      return;
+    }
+    if (preferencias.length >= MAX_PREFERENCIAS) {
+      setError(`Podés elegir hasta ${MAX_PREFERENCIAS} opciones entre géneros y estilos.`);
+      return;
+    }
+    setPreferencias((prev) => [...prev, id]);
     setError(null);
   };
 
@@ -159,12 +163,15 @@ function VinylClubPage() {
         if (!codigoPostal.trim()) return "Ingresá tu código postal";
         return null;
       case 3:
-        if (preferencias.length === 0) return "Eleg� al menos un estilo";
+        if (preferencias.length === 0) return "Elegí al menos 1 opción entre géneros y estilos";
+        if (preferencias.length > MAX_PREFERENCIAS) {
+          return `Elegí como máximo ${MAX_PREFERENCIAS} opciones entre géneros y estilos`;
+        }
         return null;
       default:
         return null;
     }
-  }, [step, nombre, dni, correo, telefono, direccion, ciudad, codigoPostal, preferencias, nivelColeccion, formatoPreferido]);
+  }, [step, nombre, dni, correo, telefono, direccion, ciudad, codigoPostal, preferencias]);
 
   const nextStep = () => {
     const err = validate();
@@ -218,7 +225,6 @@ function VinylClubPage() {
         codigoPostal: codigoPostal.trim(),
         preferencias,
         nivelColeccion: nivelColeccion || null,
-        formatoPreferido: formatoPreferido || null,
         notas: notas.trim() || "",
         activo: false,
         pendiente: true,
@@ -554,65 +560,78 @@ function VinylClubPage() {
                   <span className="vc-step-icon">♪</span>
                   <div>
                     <h3>Tus gustos musicales</h3>
-                    <p>Personalizamos tu caja mensual</p>
+                    <p>Elegí hasta {MAX_PREFERENCIAS} opciones entre géneros y estilos</p>
                   </div>
                 </div>
 
+                <div className="vc-seleccion-resumen">
+                  <span className="vc-seleccion-contador">
+                    {preferencias.length}/{MAX_PREFERENCIAS} seleccionadas
+                  </span>
+                </div>
+
                 <div className="vc-subsection">
-                  <label className="vc-label">Estilos que te interesan *</label>
-                  <p className="vc-preferencias-subtitle">Elegi uno o mas. Nos ayudan a curar tu seleccion.</p>
+                  <label className="vc-label">Géneros que te gustan *</label>
                   <div className="vc-preferencias-grid">
-                    {generos.map((g) => (
-                      <button
-                        key={g.id}
-                        type="button"
-                        className={`vc-preferencia-card ${preferencias.includes(g.id) ? "selected" : ""}`}
-                        onClick={() => togglePreferencia(g.id)}
-                        disabled={loading}
-                      >
-                        <span className="vc-pref-card-label">{g.label}</span>
-                        {preferencias.includes(g.id) && <span className="vc-pref-card-check">✓</span>}
-                      </button>
-                    ))}
+                    {generos.map((g) => {
+                      const selected = preferencias.includes(g.id);
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          className={`vc-preferencia-card ${selected ? "selected" : ""}`}
+                          onClick={() => togglePreferencia(g.id)}
+                          disabled={loading || (!selected && preferencias.length >= MAX_PREFERENCIAS)}
+                        >
+                          <span className="vc-pref-card-label">{g.label}</span>
+                          {selected && <span className="vc-pref-card-check">✓</span>}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div className="vc-subsection">
-                  <label className="vc-label">Tu coleccion</label>
-                  <div className="vc-choice-row">
+                  <label className="vc-label">Estilos que te gustan *</label>
+                  <div className="vc-preferencias-grid">
+                    {estilos.map((e) => {
+                      const selected = preferencias.includes(e.id);
+                      return (
+                        <button
+                          key={e.id}
+                          type="button"
+                          className={`vc-preferencia-card ${selected ? "selected" : ""}`}
+                          onClick={() => togglePreferencia(e.id)}
+                          disabled={loading || (!selected && preferencias.length >= MAX_PREFERENCIAS)}
+                        >
+                          <span className="vc-pref-card-label">{e.label}</span>
+                          {selected && <span className="vc-pref-card-check">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="vc-subsection">
+                  <label className="vc-label">Tu colección</label>
+                  <div className="vc-preferencias-grid vc-niveles-grid">
                     {niveles.map((n) => (
                       <button
                         key={n.id}
                         type="button"
-                        className={`vc-choice-chip ${nivelColeccion === n.id ? "selected" : ""}`}
+                        className={`vc-preferencia-card ${nivelColeccion === n.id ? "selected" : ""}`}
                         onClick={() => setNivelColeccion(n.id === nivelColeccion ? "" : n.id)}
                         disabled={loading}
                       >
-                        {n.label}
+                        <span className="vc-pref-card-label">{n.label}</span>
+                        {nivelColeccion === n.id && <span className="vc-pref-card-check">✓</span>}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="vc-subsection">
-                  <label className="vc-label">Como te gustaria la seleccion</label>
-                  <div className="vc-choice-row">
-                    {formatos.map((f) => (
-                      <button
-                        key={f.id}
-                        type="button"
-                        className={`vc-choice-chip ${formatoPreferido === f.id ? "selected" : ""}`}
-                        onClick={() => setFormatoPreferido(f.id === formatoPreferido ? "" : f.id)}
-                        disabled={loading}
-                      >
-                        {f.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="vc-field-group">
-                  <label className="vc-label" htmlFor="vc-notas">Algo mas que debamos saber <span className="vc-label-optional">(opcional, max 180)</span></label>
+                <div className="vc-field-group vc-comentarios">
+                  <label className="vc-label" htmlFor="vc-notas">Comentarios <span className="vc-label-optional">(opcional, máx 180)</span></label>
                   <textarea
                     id="vc-notas"
                     className="vc-field vc-textarea"
