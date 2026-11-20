@@ -39,6 +39,8 @@ const FORMATOS_DEFAULT = [
   { id: "calmos", label: "Mas calmos" },
 ];
 
+const CLUB_PRICE = "$70.000";
+
 const STEPS = [
   { id: 0, label: "Datos personales" },
   { id: 1, label: "Contacto" },
@@ -319,9 +321,9 @@ function VinylClubPage() {
           </div>
         </div>
 
-        <div className="vc-price-box">
-          <span className="vc-price-amount">$70.000</span>
-          <span className="vc-price-period">/ mes</span>
+        <div className="vc-price-box" translate="no">
+          <span className="vc-price-amount">{CLUB_PRICE}</span>
+          <span className="vc-price-period">ARS / mes</span>
         </div>
 
         <button className="vc-cta-btn" onClick={scrollToForm}>
@@ -667,7 +669,7 @@ function VinylClubPage() {
                     Procesando...
                   </span>
                 ) : (
-                  "Suscribirme - $70.000/mes"
+                  <>Suscribirme - <span translate="no">{CLUB_PRICE} ARS/mes</span></>
                 )}
               </button>
             )}
